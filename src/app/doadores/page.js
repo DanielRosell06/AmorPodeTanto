@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <div className="text-center">
         <div className="flex mt-6 h-[60px]">
-            <button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto"><i class="fas fa-arrow-left"></i></button>
+            <button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto"><i className="fas fa-arrow-left"></i></button>
             <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Doadores</h1>
         </div>
 
@@ -86,7 +86,6 @@ export default function Home() {
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
               <h1 className="text-xl font-bold mb-4">Adicionar Doador</h1>
-              <p className="text-gray-700 mb-6 text-left">
 
 
                 <div className="flex text-left">
@@ -132,7 +131,6 @@ export default function Home() {
 
                 <hr className="mt-4"></hr>
 
-              </p>
               <div className="flex justify-end">
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
