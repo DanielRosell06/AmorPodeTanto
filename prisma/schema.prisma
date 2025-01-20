@@ -12,3 +12,22 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Doador {
+  IdDoador   Int    @id @default(autoincrement()) // Primary Key, auto increment, unique
+  CPFCNPJ    String @unique                      // Not null, unique
+  Nome       String                              // Not null
+  CEP        String                              // Not null
+  Rua        String                              // Not null
+  Numero     String                              // Not null
+  Bairro     String                              // Not null
+  Complemento String?                            // Opcional (nullable)
+}
+
+model Contato {
+  IdContato Int    @id @default(autoincrement()) // Primary Key, auto increment, unique
+  IdDoador  Int                          // Foreign Key, único
+  Contato   String?                             // Opcional
+  Telefone  String?                             // Opcional
+  Email     String?                             // Opcional
+}

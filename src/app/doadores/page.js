@@ -11,59 +11,57 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input"
-
-const invoices = [
-  {
-    invoice: "482.826.758-14",
-    paymentStatus: "Daniel Aniceto Rosell",
-    totalAmount: "(11) 99380-9760",
-    paymentMethod: "Rua Helena Maria, 122, Jardin Santa Mena",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-]
-
 
 
 export default function Home() {
 
+  const [doador, setDoador] = useState([]);
   const [popupAdicionarDoador, setPopupAdicionarDoador] = useState(false)
+  const [popupEditarDoador, setPopupEditarDoador] = useState(false)
+  const [novoDoador, setNovoDoador] = useState({
+    CPFCNPJ: "",
+    Nome: "",
+    CEP: "",
+    Numero: "",
+    Contato: "",
+    Telefone: "",
+    Email: ""
+  })
+
+  const fetchLoadDoadores = async () => {
+    try {
+      const response = await fetch('/api/doador', {
+        method: 'GET',
+      });
+      const data = await response.json(); // Converta a resposta para JSON
+      setDoador(data); // Atualize o estado com os dados
+    } catch (error) {
+      console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
+    }
+  }
+
+
+  const fetchAdicionarDoador = async () => {
+    try {
+      const response = await fetch('/api/doador', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(novoDoador) // Envia os dados do novo doador
+      })
+      setPopupAdicionarDoador(false) // Fecha o popup após adicionar
+    } catch (error) {
+      console.error('Erro ao adicionar doador:', error)
+    }
+  }
+
+
+  useEffect(() => {
+    fetchLoadDoadores()
+  }, [])
 
   return (
     <div className="text-center">
@@ -90,12 +88,12 @@ export default function Home() {
 
                 <div className="flex text-left">
                   <div>
-                    <h1>CPF</h1>
-                    <Input type="CPF" placeholder="CPF" className="w-[130px]"/>
+                    <h1>CPF/CNPJ</h1>
+                    <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setNovoDoador({ ...novoDoador, CPFCNPJ: e.target.value })}/>
                   </div>
                   <div>
                     <h1 className="ml-2">Nome</h1>
-                    <Input type="Name" placeholder="Nome" className="w-[263px] ml-2"/>
+                    <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })}/>
                   </div>
                 </div>
 
@@ -103,38 +101,38 @@ export default function Home() {
 
                 <div className="flex mt-4">
                   <div>
-                    <h1>CPF</h1>
-                    <Input type="CEP" placeholder="CEP" className="w-[110px]"/>
+                    <h1 className="text-left">CEP</h1>
+                    <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setNovoDoador({ ...novoDoador, CEP: e.target.value })}/>
                   </div>
                   <div>
-                    <h1 className="ml-2">Número</h1>
-                    <Input type="Numero" placeholder="Número" className="w-[90px] ml-2"/>
+                    <h1 className="ml-2 text-left">Número</h1>
+                    <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Numero: e.target.value })}/>
                   </div>
                 </div>
-                <h1 className="mt-5">Complemento</h1>
-                <Input type="Complemento" placeholder="Complemento" className="w-[400px]"/>
+                <h1 className="mt-5 text-left">Complemento</h1>
+                <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Complemento: e.target.value })}/>
 
                 <hr className="mt-4"></hr>
 
                 <div className="flex mt-4">
                   <div>
-                    <h1>Nome do Contato</h1>
-                    <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[110px]"/>
+                    <h1 className="text-left">Nome do Contato</h1>
+                    <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setNovoDoador({ ...novoDoador, Contato: e.target.value })}/>
                   </div>
-                  <div>
-                    <h1 className="ml-2">Telefone</h1>
-                    <Input type="Telefone" placeholder="Telefone" className="w-[90px] ml-2"/>
+                  <div className="ml-5">
+                    <h1 className="ml-2 text-left">Telefone</h1>
+                    <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Telefone: e.target.value })}/>
                   </div>
                 </div>
-                <h1 className="mt-5">E-mail</h1>
-                <Input type="email" placeholder="E-mail" className="w-[400px]"/>
+                <h1 className="mt-5 text-left">E-mail</h1>
+                <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Email: e.target.value })}/>
 
                 <hr className="mt-4"></hr>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-3">
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                  onClick={() => setPopupAdicionarDoador(false)}
+                  onClick={fetchAdicionarDoador}
                 >
                   Confirmar
                 </button>
@@ -150,25 +148,97 @@ export default function Home() {
           </div>
         )}
         
+        {popupEditarDoador && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+              <h1 className="text-xl font-bold mb-4">Editar Doador</h1>
+
+
+                <div className="flex text-left">
+                  <div>
+                    <h1>CPF/CNPJ</h1>
+                    <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setNovoDoador({ ...novoDoador, CPFCNPJ: e.target.value })}/>
+                  </div>
+                  <div>
+                    <h1 className="ml-2">Nome</h1>
+                    <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })}/>
+                  </div>
+                </div>
+
+                <hr className="mt-4"></hr>
+
+                <div className="flex mt-4">
+                  <div>
+                    <h1 className="text-left">CEP</h1>
+                    <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setNovoDoador({ ...novoDoador, CEP: e.target.value })}/>
+                  </div>
+                  <div>
+                    <h1 className="ml-2 text-left">Número</h1>
+                    <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Numero: e.target.value })}/>
+                  </div>
+                </div>
+                <h1 className="mt-5 text-left">Complemento</h1>
+                <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Complemento: e.target.value })}/>
+
+                <hr className="mt-4"></hr>
+
+                <div className="flex mt-4">
+                  <div>
+                    <h1 className="text-left">Nome do Contato</h1>
+                    <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setNovoDoador({ ...novoDoador, Contato: e.target.value })}/>
+                  </div>
+                  <div className="ml-5">
+                    <h1 className="ml-2 text-left">Telefone</h1>
+                    <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Telefone: e.target.value })}/>
+                  </div>
+                </div>
+                <h1 className="mt-5 text-left">E-mail</h1>
+                <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Email: e.target.value })}/>
+
+                <hr className="mt-4"></hr>
+
+              <div className="flex justify-end mt-3">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                  onClick={fetchAdicionarDoador}
+                >
+                  Confirmar
+                </button>
+                
+                <button
+                  className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                  onClick={() => setPopupEditarDoador(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Table className="ml-auto mr-auto w-[95%] mt-3">
             <TableHeader className="bg-sky-400 ">
                 <TableRow>
-                    <TableHead className="border-slut-100 border text-white">CPF / CNPJ</TableHead>
-                    <TableHead className="border-slut-100 border text-white">Nome</TableHead>
-                    <TableHead className="border-slut-100 border text-white">Endereço</TableHead>
-                    <TableHead className="border-slut-100 border text-white">Telefone</TableHead>
-                    <TableHead className="border-slut-100 border text-white">Opções</TableHead>
+                    <TableHead className="border-slut-100 border text-white text-center">CPF / CNPJ</TableHead>
+                    <TableHead className="border-slut-100 border text-white text-center">Nome</TableHead>
+                    <TableHead className="border-slut-100 border text-white text-center">Endereço</TableHead>
+                    <TableHead className="border-slut-100 border text-white text-center">Telefone</TableHead>
+                    <TableHead className="border-slut-100 border text-white text-center w-0">Opções</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-            {invoices.map((invoice) => (
-                <TableRow key={invoice.invoice}>
-                    <TableCell className="font-medium border-slut-100 border">{invoice.invoice}</TableCell>
-                    <TableCell className="border-slut-100 border">{invoice.paymentStatus}</TableCell>
-                    <TableCell className="border-slut-100 border">{invoice.paymentMethod}</TableCell>
-                    <TableCell className="border-slut-100 border">{invoice.totalAmount}</TableCell>
-                    <TableCell className="border-slut-100 border">{invoice.totalAmount}</TableCell>
+            {doador.map((doador) => (
+                <TableRow key={doador.IdDoador}>
+                    <TableCell className="font-medium border-slut-100 border">{doador.CPFCNPJ}</TableCell>
+                    <TableCell className="border-slut-100 border">{doador.Nome}</TableCell>
+                    <TableCell className="border-slut-100 border">{doador.Rua}, {doador.Numero}, {doador.Bairro}</TableCell>
+                    <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
+                    <TableCell className="border-slut-100 border flex">
+                      <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
+                      <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"><i className="fas fa-info-circle"></i></Button>
+                      <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1" onClick={() => setPopupEditarDoador(true)}><i className="fas fa-edit"></i></Button>
+                      <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"><i className="fas fa-ban"></i></Button>
+                    </TableCell>
                 </TableRow>
             ))}
             </TableBody>
