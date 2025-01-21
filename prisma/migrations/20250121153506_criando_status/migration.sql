@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Doador" ADD COLUMN     "Status" SMALLINT NOT NULL DEFAULT 1;

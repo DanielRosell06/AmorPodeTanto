@@ -11,20 +11,101 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, setOpen } from "react";
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton";
 
 
+//Combobox
+import { Check, ChevronsUpDown } from "lucide-react"
+ 
+import { cn } from "@/lib/utils"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+ 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+import { Switch } from "@/components/ui/switch"
+
+const frameworks = [
+  {
+    value: "CPF / CNPJ",
+    label: "CPF / CNPJ",
+  },
+  {
+    value: "Nome",
+    label: "Nome",
+  },
+  {
+    value: "Endereço",
+    label: "Endereço",
+  },
+  {
+    value: "Telefone",
+    label: "Telefone",
+  },
+]
+
+
+
+
 export default function Home() {
 
-  const isFirstRender = useRef(true);
+  const [open, setOpen] = React.useState(false)
+  const [value, setValue] = React.useState("")
 
-  const [doador, setDoador] = useState([]);
+  const [isFirstRender, setIsFirstRender] = React.useState(true);
+
+  //Variaveis de popup
   const [popupAdicionarDoador, setPopupAdicionarDoador] = useState(false)
   const [popupEditarDoador, setPopupEditarDoador] = useState(false)
+  const [popupDesativarDoador, setPopupDesativarDoador] = useState(false)
+  const [popupReativarDoador, setPopupReativarDoador] = useState(false)
+
+  //Variaveis de loading
   const [loading, setLoading] = useState(true)
+
+  //Variaveis de Atualização
+  const [varAtualizarLista, SetVarAtualizarLista] = useState(1)
+
+  //Variaveis de switch
+  const [switchDesativos, setSwitchDesativos] = useState(-1)
+
+  //Lista
+  const [doador, setDoador] = useState([]);
+
+  //Ids de busca
   const [idToFind, setIdToFind] = useState(-1)
+  const [idToDesativar, setIdToDesativar] = useState(-1)
+  const [idToReativar, setIdToReativar] = useState(-1)
+
+  //Doadores a serem editados
   const [novoDoador, setNovoDoador] = useState({
     CPFCNPJ: "",
     Nome: "",
@@ -34,21 +115,34 @@ export default function Home() {
     Telefone: "",
     Email: ""
   })
-
   const [doadorEditado, setDoadorEditado] = useState({
-    IdDoador: "",
-    CPFCNPJ: "",
-    Nome: "",
-    CEP: "",
-    Numero: "",
-    Contato: "",
-    Telefone: "",
-    Email: ""
+    IdDoador: " ",
+    CPFCNPJ: " ",
+    Nome: " ",
+    CEP: " ",
+    Numero: " ",
+    Complemento: " ",
+    Contato: " ",
+    Telefone: " ",
+    Email: " "
   })
 
+  //Funções Normais
+  const atualizarLista = () => {
+    SetVarAtualizarLista(varAtualizarLista * -1)
+    setLoading(true)
+  }
+
+  const alteraSwitchDesativos = () => {
+    setSwitchDesativos(switchDesativos * -1)
+    atualizarLista()
+  }
+
+
+  //Funções de Fetch
   const fetchLoadDoadores = async () => {
     try {
-      const response = await fetch('/api/doador', {
+      const response = await fetch(`/api/doador?desativados=${switchDesativos}`, {
         method: 'GET',
       });
       const data = await response.json(); // Converta a resposta para JSON
@@ -69,6 +163,7 @@ export default function Home() {
         body: JSON.stringify(novoDoador) // Envia os dados do novo doador
       })
       setPopupAdicionarDoador(false) // Fecha o popup após adicionar
+      atualizarLista()
     } catch (error) {
       console.error('Erro ao adicionar doador:', error)
     }
@@ -85,26 +180,55 @@ export default function Home() {
       })
       setPopupEditarDoador(false) // Fecha o popup após adicionar
 
-      setNovoDoador({
-        CPFCNPJ: "",
-        Nome: "",
-        CEP: "",
-        Numero: "",
-        Contato: "",
-        Telefone: "",
-        Email: ""
+      setDoadorEditado({
+        IdDoador: " ",
+        CPFCNPJ: " ",
+        Nome: " ",
+        CEP: " ",
+        Numero: " ",
+        Complemento: " ",
+        Contato: " ",
+        Telefone: " ",
+        Email: " "
       })
+      atualizarLista()
 
     } catch (error) {
       console.error('Erro ao adicionar doador:', error)
     }
   }
 
+  const fetchDesativarDoador = async () => {
+    try{
+      const response = await fetch(`api/doadorById?action=1&id=${idToDesativar}`, {
+        method: 'PUT'
+      })
+      setPopupDesativarDoador(false) // Fecha o popup após adicionar
+      setIdToDesativar(-1)
+      atualizarLista()
+    } catch (error){
+        console.error('Erro ao desativar doador:', error)
+    }
+  }
+
+  const fetchReativarDoador = async () => {
+    try{
+      const response = await fetch(`api/doadorById?action=2&id=${idToReativar}`, {
+        method: 'PUT'
+      })
+      setPopupReativarDoador(false) // Fecha o popup após adicionar
+      setIdToReativar(-1)
+      atualizarLista()
+    } catch (error){
+        console.error('Erro ao desativar doador:', error)
+    }
+  }
+
   useEffect(() => {
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    if (isFirstRender) {
+      setIsFirstRender(false)
+      return
     }
 
     const fetchGetDoador = async () => {
@@ -129,10 +253,12 @@ export default function Home() {
   // Função de carregar os doadores quando abre a pagina
   useEffect(() => {
     fetchLoadDoadores()
-  }, []);
+  }, [varAtualizarLista]);
 
 
 
+
+  //HTML de retorno
   return (
     <div className="text-center">
         <div className="flex mt-6 h-[60px]">
@@ -140,14 +266,139 @@ export default function Home() {
             <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Doadores</h1>
         </div>
 
-        <div className="flex">
-            <Button 
-              variant="outline" 
-              className="rounded-lg ml-8 mt-6 px-3 py-1 bg-emerald-400 border-none hover:bg-emerald-500" 
-              onClick={() => setPopupAdicionarDoador(true)}
-            >
-                + Adicionar Doador
-            </Button>
+        <div className="flex mt-6 justify-between w-[95%] ml-auto mr-auto">
+          <div className="flex">
+            <Input className="w-[230px] mr-2" placeholder="Pesquisar"></Input>
+
+            <Popover open={open} onOpenChange={setOpen} className="w-10">
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-[160px] justify-between"
+                >
+                  {value
+                    ? frameworks.find((framework) => framework.value === value)?.label
+                    : "Pesquisar Por..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandList>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandGroup>
+                      {frameworks.map((framework) => (
+                        <CommandItem
+                          key={framework.value}
+                          value={framework.value}
+                          onSelect={(currentValue) => {
+                            setValue(currentValue === value ? "" : currentValue)
+                            setOpen(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              value === framework.value ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {framework.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="flex">
+                      
+            <Select >
+              <SelectTrigger className=" bg-slate-50 hover:bg-slate-300 text-black ml-10 w-[240px]">
+                <i className="fas fa-sort"></i>
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Nenhum">Nenhum</SelectItem>
+                <SelectItem value="DoacaoRecente">Doação mais Recente</SelectItem>
+                <SelectItem value="DoacaoAntigo">Doação mais Antiga</SelectItem>
+                <SelectItem value="AdicionadoRecente">Adicionado mais Recente</SelectItem>
+                <SelectItem value="AdicionadoAntigo">Adicionado mais Antigo</SelectItem>
+              </SelectContent>
+            </Select>
+
+
+            <Sheet>
+              <SheetTrigger>
+                <Button className="bg-slate-50 hover:bg-slate-300 text-black ml-3">
+                  <i className="fas fa-filter"></i>
+                  Filtrar
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Filtrar</SheetTitle>
+                  <SheetDescription>
+                    <>
+                      <hr className="mt-5" />
+
+                      <h1 className="mt-2 text-xl text-gray-800 mb-3">Por Criação</h1>
+                      <div className="flex justify-between">
+                        <p className="mt-auto mb-auto mr-2 text-base">Adicionado a partir de:</p>
+                        <Input type="date" className="w-50" />
+                      </div>
+                      <div className="flex mt-2 justify-between">
+                        <p className="mt-auto mb-auto mr-2 text-base">Adicionado antes de:</p>
+                        <Input type="date" className="w-50" />
+                      </div>
+
+                      <hr className="mt-3" />
+
+                      <h1 className="mt-2 text-xl text-gray-800 mb-3">Por doação</h1>
+                      <div className="flex justify-between">
+                        <p className="mt-auto mb-auto mr-2 text-base">Doou a partir de:</p>
+                        <Input type="date" className="w-50" />
+                      </div>
+                      <div className="flex mt-2 justify-between">
+                        <p className="mt-auto mb-auto mr-2 text-base">Doou antes de:</p>
+                        <Input type="date" className="w-50" />
+                      </div>
+                      <div className="flex mt-6 justify-between">
+                        <p className="mt-auto mb-auto mr-2 text-base">Doou mais de:</p>
+                        <Input type="number" className="w-[143px]" />
+                      </div>
+                      <div className="flex mt-2 justify-between">
+                        <p className="mt-auto mb-auto mr-2 text-base">Doou menos de:</p>
+                        <Input type="number" className="w-[143px]" />
+                      </div>
+
+                      <hr className="mt-3" />
+
+                      <div className="flex mt-2 justify-end">
+                        <Button className="bg-green-500 hover:bg-green-700">Aplicar</Button>
+                      </div>
+                    </>
+                  </SheetDescription>
+                </SheetHeader>
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+          <div className="mt-auto mb-auto flex">
+            <p className="mr-1">Mostrar Desativos</p>
+            <Switch onClick={alteraSwitchDesativos}/>
+          </div>
+
+          <Button 
+            variant="outline" 
+            className="rounded-lg ml-8 px-3 py-1 bg-emerald-400 border-none hover:bg-emerald-500" 
+            onClick={() => setPopupAdicionarDoador(true)}
+          >
+              + Adicionar Doador
+          </Button>
         </div>
 
         
@@ -189,24 +440,37 @@ export default function Home() {
                 </>
                           :
                 doador.map((doador) => (
-                    <TableRow key={doador.IdDoador}>
+                    <TableRow key={doador.IdDoador} className={doador.Status ? 'bg-white' : 'bg-red-100 hover:bg-red-200'}>
                         <TableCell className="font-medium border-slut-100 border">{doador.CPFCNPJ}</TableCell>
                         <TableCell className="border-slut-100 border">{doador.Nome}</TableCell>
                         <TableCell className="border-slut-100 border">{doador.Rua}, {doador.Numero}, {doador.Bairro}</TableCell>
                         <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
                         <TableCell className="border-slut-100 border flex">
-                          <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
-                          <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"><i className="fas fa-info-circle"></i></Button>
+                          <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
+                          <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}><i className="fas fa-info-circle"></i></Button>
                           <Button 
-                            className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"
-                            onClick={() => {setPopupEditarDoador(true);
+                            className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                            onClick={() => {
+                              setPopupEditarDoador(true);
                               setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador});
                               setIdToFind(doador.IdDoador);
                             }}
                           >
                             <i className="fas fa-edit"></i>
                           </Button>
-                          <Button className="rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1"><i className="fas fa-ban"></i></Button>
+                          <Button 
+                            className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-green-300 hover:bg-green-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                            onClick={doador.Status? () => {
+                              setIdToDesativar(doador.IdDoador)
+                              setPopupDesativarDoador(true)
+                            } : () => {
+                              setIdToReativar(doador.IdDoador)
+                              setPopupReativarDoador(true)
+                            }
+                          }
+                          >
+                            <i className={doador.Status ? ' fas fa-ban' : ' fas fa-sync'}></i>
+                          </Button>
                         </TableCell>
                     </TableRow>
                 ))
@@ -343,7 +607,20 @@ export default function Home() {
                 
                 <button
                   className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
-                  onClick={() => setPopupEditarDoador(false)}
+                  onClick={() => {
+                    setPopupEditarDoador(false)
+                    setDoadorEditado({
+                      IdDoador: " ",
+                      CPFCNPJ: " ",
+                      Nome: " ",
+                      CEP: " ",
+                      Numero: " ",
+                      Complemento: " ",
+                      Contato: " ",
+                      Telefone: " ",
+                      Email: " "
+                    })
+                  }}
                 >
                   Cancelar
                 </button>
@@ -351,6 +628,85 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {popupDesativarDoador && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+              
+              <h1 className=" text-2xl mb-5">
+                Desativar Doador
+              </h1>
+
+              <div className="text-left flex flex-col gap-5">
+                <p>- Ao desativar este doador, não será permitido que voce adicione doações a ele.</p>
+                <p>- Este doador não irá aparecer na lista de doadores, a não ser que voce habilite a opção de mostrar doadores inativos.</p>
+                <p>- Você pode reverter esta ação à qualquer momento.</p>
+
+                <hr></hr>
+              </div>
+
+              <p className="mt-4">Tem certeza que deseja confirmar esta ação?</p>
+
+              <div className="flex justify-center mt-3">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                  onClick={fetchDesativarDoador}
+                >
+                  Confirmar
+                </button>
+                
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded  transition"
+                  onClick={() => {
+                    setPopupDesativarDoador(false)
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {popupReativarDoador && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+              
+              <h1 className=" text-2xl mb-5">
+                Reativar Doador
+              </h1>
+
+              <div className="text-left flex flex-col gap-5">
+                <p>- Ao reativar este doador, Ele voltará a aparecer na lista de doadores e em todas as outras listas.</p>
+                <p>- Poderá ser adicionado doações à este doador.</p>
+                <p>- Você pode reverter esta ação à qualquer momento.</p>
+
+                <hr></hr>
+              </div>
+
+              <p className="mt-4">Tem certeza que deseja confirmar esta ação?</p>
+
+              <div className="flex justify-center mt-3">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                  onClick={fetchReativarDoador}
+                >
+                  Confirmar
+                </button>
+                
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded  transition"
+                  onClick={() => {
+                    setPopupReativarDoador(false)
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
     </div>
   )
 }

@@ -51,3 +51,51 @@ export async function GET(req) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
+
+export async function PUT(req) {
+  try {
+    const url = new URL(req.url);
+    const searchParams = url.searchParams;
+    const action = searchParams.get('action');
+
+    switch(action){
+      case '1':
+        const IdDesativar = parseInt(searchParams.get('id'), 10)
+
+
+        if(!IdDesativar){
+          return new Response(JSON.stringify({ error: 'Adicione um "Id à ser desativado" na URL.' }), { status: 404 });
+        }
+
+        const resultDesativar = await prisma.doador.update({
+          where: { IdDoador: IdDesativar },
+          data: {
+            Status: 0
+          }
+        })
+        return new Response(JSON.stringify({ resultDesativar }), { status: 201 }); // O result funciona como um Break
+
+      case '2':
+        
+        const IdReativar = parseInt(searchParams.get('id'), 10)
+
+        if(!IdReativar){
+          return new Response(JSON.stringify({ error: 'Adicione um "Id à ser reativado" na URL.' }), { status: 404 });
+        }
+
+        const resultReativar = await prisma.doador.update({
+          where: { IdDoador: IdReativar },
+          data: {
+            Status: 1
+          }
+        })
+        return new Response(JSON.stringify({ resultReativar }), { status: 201 }); // O result funciona como um Break
+    }
+
+    
+  }
+  catch (error){
+    console.error('Erro ao processar a solicitação:', error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+}

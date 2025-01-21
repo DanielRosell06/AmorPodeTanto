@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,20 +8,21 @@ datasource db {
 }
 
 model Doador {
-  IdDoador   Int    @id @default(autoincrement()) // Primary Key, auto increment, unique
-  CPFCNPJ    String @unique                      // Not null, unique
-  Nome       String                              // Not null
-  CEP        String                              // Not null
-  Rua        String                              // Not null
-  Numero     String                              // Not null
-  Bairro     String                              // Not null
-  Complemento String?                            // Opcional (nullable)
+  IdDoador    Int     @id @default(autoincrement())
+  CPFCNPJ     String  @unique
+  Nome        String
+  CEP         String
+  Rua         String
+  Numero      String
+  Bairro      String
+  Complemento String?
+  Status      Int     @db.SmallInt @default(1)
 }
 
 model Contato {
-  IdContato Int    @id @default(autoincrement()) // Primary Key, auto increment, unique
-  IdDoador  Int                          // Foreign Key, único
-  Contato   String?                             // Opcional
-  Telefone  String?                             // Opcional
-  Email     String?                             // Opcional
+  IdContato Int     @id @default(autoincrement())
+  IdDoador  Int
+  Contato   String?
+  Telefone  String?
+  Email     String?
 }

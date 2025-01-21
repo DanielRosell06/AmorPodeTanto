@@ -2,10 +2,21 @@ import { PrismaClient } from '@prisma/client'
 let prisma = new PrismaClient()
 
 export async function GET(req) {
-    const doadoresList = await prisma.doador.findMany()
 
-    
-    
+    const url = new URL(req.url);
+    const searchParams = url.searchParams;
+    const desativados = searchParams.get('desativados')
+
+    let doadoresList;
+
+    if(desativados == '1'){
+        doadoresList = await prisma.doador.findMany()
+    }else{
+        doadoresList = await prisma.doador.findMany({
+            where: { Status : { not : 0}}
+        })
+    }
+
     const doadoresComTelefone = await Promise.all(doadoresList.map(async (doador) => {
         const contato = await prisma.contato.findFirst({
             where: { IdDoador : doador.IdDoador }
