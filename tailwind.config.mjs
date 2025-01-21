@@ -3,7 +3,7 @@ const tailwindConfig = {
     darkMode: ["class"],
     content: [
     "./pages/**/*.{js,ts,jsx,tsx}", // Inclui arquivos em `pages`
-    "./components/**/*.{js,ts,jsx,tsx}", // Inclui arquivos em `components`
+    "./src/components/**/*.{js,ts,jsx,tsx}", // Inclui arquivos em `components`
     "./src/app/**/*.{js,ts,jsx,tsx}", // Inclui arquivos em `components`
   ],
   theme: {

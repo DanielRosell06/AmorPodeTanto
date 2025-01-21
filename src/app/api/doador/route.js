@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 let prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(req) {
     const doadoresList = await prisma.doador.findMany()
+
+    
     
     const doadoresComTelefone = await Promise.all(doadoresList.map(async (doador) => {
         const contato = await prisma.contato.findFirst({
@@ -18,7 +20,6 @@ export async function GET() {
         return doador; // Retorna o doador atualizado
     }))
         
-
     return new Response(JSON.stringify(doadoresComTelefone))
 }
 
@@ -62,9 +63,6 @@ export async function POST(req, res) {
                 Email
             }
         })
-
-        // AQUI, O QUE EU QUERO FAZER É, EU BUSCO UM DOADOR QUE TENHA O CPFCNPJ = CPFCNPJ, E PEGO O ID DESSE CARA
-        // DAI COM O ID EU CONSIGO CADASTRAR O CONTATO DELE
         
         return new Response(
             JSON.stringify({ resultDoador, resultContato }),
@@ -77,4 +75,62 @@ export async function POST(req, res) {
         console.error('Erro ao processar a requisição:', errorMessage);
         return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
     }
+}
+
+export async function PUT(req) {
+    const { IdDoador, CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email} = await req.json()
+
+    try{
+        const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
+        const data = await response.json();
+        const Rua = data.logradouro
+        const Bairro = data.bairro
+
+        const resultDoador = await prisma.doador.update({
+            where: { IdDoador: IdDoador },
+            data: {
+                CPFCNPJ,
+                Nome,
+                CEP, 
+                Rua,
+                Numero,
+                Bairro,
+                Complemento
+            }
+        })
+
+        const contato = await prisma.contato.findFirst({
+            where: { IdDoador: IdDoador }
+        });
+
+        // Verifica se o doador existe e extrai o ID
+        if (!contato) {
+            throw new Error('Doador não encontrado.');
+        }
+
+        const _IdContato = contato.IdContato;
+
+
+        const resultContato = await prisma.contato.update({
+            where: { IdContato: _IdContato },
+            data: {
+                IdDoador,
+                Contato,
+                Telefone, 
+                Email
+            }
+        })
+        
+        return new Response(
+            JSON.stringify({ resultDoador, resultContato }),
+            { status: 201 }
+        );
+
+    } catch (error) {
+        // Certifique-se de que o erro é um objeto ou string
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+        console.error('Erro ao processar a requisição:', errorMessage);
+        return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+    }
+    
 }
