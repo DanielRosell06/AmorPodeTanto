@@ -62,7 +62,7 @@ const frameworks = [
     value: "nome",
     label: "Nome",
   },
-  
+
   {
     value: "rua",
     label: "Rua",
@@ -148,18 +148,7 @@ export default function Home() {
 
 
   //Funções de Fetch
-  const fetchLoadDoadores = async () => {
-    try {
-      const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}`, {
-        method: 'GET',
-      });
-      const data = await response.json(); // Converta a resposta para JSON
-      setDoador(data); // Atualize o estado com os dados
-    } catch (error) {
-      console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
-    }
-    setLoading(false);
-  }
+  
 
   const fetchAdicionarDoador = async () => {
     try {
@@ -255,13 +244,26 @@ export default function Home() {
       await fetchGetDoador();
     };
     fetchData();
-  }, [idToFind]);
+  }, [idToFind, isFirstRender]);
 
 
   // Função de carregar os doadores quando abre a pagina
   useEffect(() => {
+    const fetchLoadDoadores = async () => {
+      try {
+        const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}`, {
+          method: 'GET',
+        });
+        const data = await response.json(); // Converta a resposta para JSON
+        setDoador(data); // Atualize o estado com os dados
+      } catch (error) {
+        console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
+      }
+      setLoading(false);
+    }
+
     fetchLoadDoadores()
-  }, [varAtualizarLista]);
+  }, [varAtualizarLista, switchDesativos, pesquisa, pesquisaInput]);
 
 
 
