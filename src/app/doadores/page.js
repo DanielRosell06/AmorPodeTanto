@@ -89,6 +89,7 @@ export default function Home() {
   const [popupEditarDoador, setPopupEditarDoador] = useState(false)
   const [popupDesativarDoador, setPopupDesativarDoador] = useState(false)
   const [popupReativarDoador, setPopupReativarDoador] = useState(false)
+  const [popupInformacoes, setPopupInformacoes] = useState(false)
 
   //Variaveis de loading
   const [loading, setLoading] = useState(true)
@@ -464,7 +465,13 @@ export default function Home() {
                         <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
                         <TableCell className="border-slut-100 border flex">
                           <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
-                          <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}><i className="fas fa-info-circle"></i></Button>
+                          <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                            onClick={() => {
+                              setPopupInformacoes(true);
+                              setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador});
+                              setIdToFind(doador.IdDoador);
+                            }}
+                          ><i className="fas fa-info-circle"></i></Button>
                           <Button 
                             className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
                             onClick={() => {
@@ -718,6 +725,99 @@ export default function Home() {
                   }}
                 >
                   Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {popupInformacoes && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+              <h1 className="text-xl font-bold mb-4">Informações de {doadorEditado.Nome}</h1>
+
+
+                <div className="flex text-left">
+                  <div>
+                    <h1 className=" font-bold">CPF/CNPJ:</h1>
+                    <h1>{doadorEditado.CPFCNPJ}</h1>
+                  </div>
+                  <div className="ml-10">
+                    <h1 className=" font-bold">Nome:</h1>
+                    <h1>{doadorEditado.Nome}</h1>
+                  </div>
+                </div>
+
+                <hr className="mt-4"></hr>
+
+                <div className="flex mt-4">
+                  <div>
+                    <h1 className="text-left font-bold">CEP:</h1>
+                    <h1>{doadorEditado.CEP}</h1>
+                  </div>
+                  <div>
+                    <h1 className="ml-2 text-left font-bold">Número:</h1>
+                    <h1>{doadorEditado.Numero}</h1>
+                  </div>
+                </div>
+
+                <div className="flex">
+                  <div className="flex flex-col text-left mt-4">
+                    <h1 className="font-bold">Rua:</h1>
+                    <h1>{doadorEditado.Rua}</h1>
+                  </div>
+
+                  <div className="flex flex-col text-left mt-4 ml-10">
+                    <h1 className="font-bold">Bairro:</h1>
+                    <h1>{doadorEditado.Bairro}</h1>
+                  </div>
+                  </div>
+
+                <div className="flex flex-col text-left mt-4">
+                  <h1 className="mt-5 font-bold">Complemento:</h1>
+                  <h1>{doadorEditado.Complemento}</h1>
+                </div>
+
+                <hr className="mt-4"></hr>
+
+                <div className="flex mt-4 text-left">
+                  <div>
+                    <h1 className="font-bold ">Nome do Contato:</h1>
+                    <h1>{doadorEditado.Contato}</h1>
+                  </div>
+                  <div className="ml-20">
+                    <h1 className="text-left font-bold">Telefone:</h1>
+                    <h1>{doadorEditado.Telefone}</h1>
+                  </div>
+                </div>
+                <div className=" text-left">
+                  <h1 className="mt-5 font-bold">E-mail:</h1>
+                  <h1>{doadorEditado.Email}</h1>
+                </div>
+
+                <hr className="mt-4"></hr>
+
+              <div className="flex justify-end mt-3">
+                
+                
+                <button
+                  className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-slate-500 transition"
+                  onClick={() => {
+                    setPopupInformacoes(false)
+                    setDoadorEditado({
+                      IdDoador: " ",
+                      CPFCNPJ: " ",
+                      Nome: " ",
+                      CEP: " ",
+                      Numero: " ",
+                      Complemento: " ",
+                      Contato: " ",
+                      Telefone: " ",
+                      Email: " "
+                    })
+                  }}
+                >
+                  Fechar
                 </button>
               </div>
             </div>
