@@ -5,17 +5,51 @@ export async function GET(req) {
 
     const url = new URL(req.url);
     const searchParams = url.searchParams;
-    const desativados = searchParams.get('desativados')
+    const desativados = searchParams.get('desativados') || 0
+    const searchBy = searchParams.get('searchBy')
+    const input = searchParams.get('searchIn');
 
-    let doadoresList;
+    const where = {};
 
-    if(desativados == '1'){
-        doadoresList = await prisma.doador.findMany()
-    }else{
-        doadoresList = await prisma.doador.findMany({
-            where: { Status : { not : 0}}
-        })
+    // Filtra por status se 'desativados' não for '1'
+    if (desativados !== '1') {
+        where.Status = { not: 0 };
     }
+    
+    if (searchBy && input) {
+        switch (searchBy){
+            case 'CPFCNPJ':
+                where.CPFCNPJ = {
+                    contains: input,
+                    mode: 'insensitive', // Torna a busca case-insensitive
+                  };
+                break
+
+            case 'nome':
+                where.Nome = {
+                    contains: input,
+                    mode: 'insensitive', // Torna a busca case-insensitive
+                  };
+                break
+
+            case 'rua':
+                where.Rua = {
+                    contains: input,
+                    mode: 'insensitive', // Torna a busca case-insensitive
+                    };
+                break
+
+            case 'bairro':
+                where.Bairro = {
+                    contains: input,
+                    mode: 'insensitive', // Torna a busca case-insensitive
+                    };
+                break
+        }
+        
+    }
+
+    const doadoresList = await prisma.doador.findMany({ where: where });
 
     const doadoresComTelefone = await Promise.all(doadoresList.map(async (doador) => {
         const contato = await prisma.contato.findFirst({

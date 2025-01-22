@@ -55,20 +55,22 @@ import { Switch } from "@/components/ui/switch"
 
 const frameworks = [
   {
-    value: "CPF / CNPJ",
+    value: "CPFCNPJ",
     label: "CPF / CNPJ",
   },
   {
-    value: "Nome",
+    value: "nome",
     label: "Nome",
   },
+  
   {
-    value: "Endereço",
-    label: "Endereço",
+    value: "rua",
+    label: "Rua",
   },
+
   {
-    value: "Telefone",
-    label: "Telefone",
+    value: "bairro",
+    label: "Bairro",
   },
 ]
 
@@ -96,6 +98,12 @@ export default function Home() {
 
   //Variaveis de switch
   const [switchDesativos, setSwitchDesativos] = useState(-1)
+
+  //Variaveis de controllers ativos ou não
+  const [pesquisa, setPesquisa] = useState('')
+
+  //Variaveis que vem do usuario
+  const [pesquisaInput, setPesquisaInput] = useState('')
 
   //Lista
   const [doador, setDoador] = useState([]);
@@ -142,7 +150,7 @@ export default function Home() {
   //Funções de Fetch
   const fetchLoadDoadores = async () => {
     try {
-      const response = await fetch(`/api/doador?desativados=${switchDesativos}`, {
+      const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}`, {
         method: 'GET',
       });
       const data = await response.json(); // Converta a resposta para JSON
@@ -268,7 +276,12 @@ export default function Home() {
 
         <div className="flex mt-6 justify-between w-[95%] ml-auto mr-auto">
           <div className="flex">
-            <Input className="w-[230px] mr-2" placeholder="Pesquisar"></Input>
+            <Input className="w-[230px] mr-2" placeholder="Pesquisar"
+              onChange={(e) => {
+                setPesquisaInput(e.target.value)
+                atualizarLista()
+              }}
+            ></Input>
 
             <Popover open={open} onOpenChange={setOpen} className="w-10">
               <PopoverTrigger asChild>
@@ -295,6 +308,8 @@ export default function Home() {
                           value={framework.value}
                           onSelect={(currentValue) => {
                             setValue(currentValue === value ? "" : currentValue)
+                            setPesquisa(currentValue)
+                            atualizarLista()
                             setOpen(false)
                           }}
                         >
