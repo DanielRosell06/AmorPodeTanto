@@ -16,7 +16,7 @@ model Doador {
   Numero      String
   Bairro      String
   Complemento String?
-  Status      Int     @db.SmallInt @default(1)
+  Status      Int     @default(1) @db.SmallInt
 }
 
 model Contato {
@@ -25,4 +25,10 @@ model Contato {
   Contato   String?
   Telefone  String?
   Email     String?
+}
+
+model Produto {
+  IdProduto Int     @id @default(autoincrement())
+  Nome      String  @unique
+  UN        String? @db.VarChar(20)
 }

@@ -229,6 +229,10 @@ export default function Home() {
       return
     }
 
+    if (idToFind == -1){
+      return
+    }
+
     const fetchGetDoador = async () => {
       try {
         const response = await fetch(`api/doadorById?Id=${idToFind}`, {
@@ -236,6 +240,7 @@ export default function Home() {
         })
         const data = await response.json();
         setDoadorEditado(data)
+        setIdToFind(-1)
       } catch (error) {
         console.error('Erro ao buscar doador:', error)
       }
@@ -273,7 +278,7 @@ export default function Home() {
   return (
     <div className="text-center">
         <div className="flex mt-6 h-[60px]">
-            <button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto"><i className="fas fa-arrow-left"></i></button>
+            <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
             <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Doadores</h1>
         </div>
 
