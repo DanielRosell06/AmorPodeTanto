@@ -32,3 +32,17 @@ model Produto {
   Nome      String  @unique
   UN        String? @db.VarChar(20)
 }
+
+model Doacao {
+  IdDoacao   Int      @id @default(autoincrement())
+  IdDoador   Int
+  DataDoacao DateTime @default(now())
+}
+
+model DoacaoItem {
+  IdDoacaoItem Int @id @default(autoincrement())
+  IdDoacao     Int
+  IdProduto    Int
+  Quantidade   Int
+  UNItem       String? @db.VarChar(20)
+}

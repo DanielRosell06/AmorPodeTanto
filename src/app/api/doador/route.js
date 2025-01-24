@@ -115,7 +115,6 @@ export async function POST(req, res) {
         );
 
     } catch (error) {
-        // Certifique-se de que o erro é um objeto ou string
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
         console.error('Erro ao processar a requisição:', errorMessage);
         return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });

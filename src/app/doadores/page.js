@@ -1,6 +1,16 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Check, ChevronsUpDown } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+import React, { useEffect, useState, useRef, setOpen } from "react";
+
 import {
   Table,
   TableBody,
@@ -11,15 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import React, { useEffect, useState, useRef, setOpen } from "react";
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton";
 
-
-//Combobox
-import { Check, ChevronsUpDown } from "lucide-react"
  
-import { cn } from "@/lib/utils"
 import {
   Command,
   CommandEmpty,
@@ -28,6 +31,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+
 import {
   Popover,
   PopoverContent,
@@ -50,8 +54,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Item } from "@radix-ui/react-select";
 
-import { Switch } from "@/components/ui/switch"
 
 const frameworks = [
   {
@@ -76,11 +80,13 @@ const frameworks = [
 
 
 
-
 export default function Home() {
 
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
+
+  const [openProduto, setOpenProduto] = React.useState(false)
+  const [valueProduto, setValueProduto] = React.useState("")
 
   const [isFirstRender, setIsFirstRender] = React.useState(true);
 
@@ -90,6 +96,8 @@ export default function Home() {
   const [popupDesativarDoador, setPopupDesativarDoador] = useState(false)
   const [popupReativarDoador, setPopupReativarDoador] = useState(false)
   const [popupInformacoes, setPopupInformacoes] = useState(false)
+  const [popupAdicionarDoacao, setPopupAdicionarDoacao] = useState(false)
+  const [popupAdicionarProduto, setPopupAdicionarProduto] = useState(false)
 
   //Variaveis de loading
   const [loading, setLoading] = useState(true)
@@ -108,6 +116,17 @@ export default function Home() {
 
   //Lista
   const [doador, setDoador] = useState([]);
+  const [Produtos, setProdutos] = useState([])
+  const [Itens, setItens] = useState([])
+
+  //Variaveis simples
+  const [nomeDoadorAdicionado, setNomeDoadorAdicionado] = useState('')
+  const [unidadeAtual, setunidadeAtual] = useState('')
+  const [quantidadeAtual, setQuantidadeAtual] = useState(1); // Estado para o primeiro input
+  const [nomeProdutoAtual, setnomeProdutoAtual] = useState("");
+
+  //Ids
+  const [IdDoadorDoando, setIdDoadorDoando] = useState(0);
 
   //Ids de busca
   const [idToFind, setIdToFind] = useState(-1)
@@ -134,6 +153,10 @@ export default function Home() {
     Contato: " ",
     Telefone: " ",
     Email: " "
+  })
+  const [novoProduto, setNovoProduto] = useState({
+      Nome: "",
+      UN: ""
   })
 
   //Funções Normais
@@ -222,6 +245,48 @@ export default function Home() {
     }
   }
 
+  const fetchAdicionarProduto = async () => {
+    try {
+        const response = await fetch(`/api/produto`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(novoProduto) 
+        })
+        setPopupAdicionarProduto(false)
+        fetchLoadProdutos()
+        setNovoProduto({
+            Nome: "",
+            UN: ""
+        })
+        atualizarLista()
+    } catch (error) {
+        console.error('Erro ao adicionar doador:', error)
+    }
+  }
+
+  const fetchAdicionarDoacao = async () => {
+    try {
+        const response = await fetch(`/api/doacao?IdDoador=${IdDoadorDoando}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Itens) 
+        })
+        setPopupAdicionarDoacao(false)
+        setIdDoadorDoando(0)
+        setItens([])
+        setValueProduto(''); // Reseta o valor do produto
+        setnomeProdutoAtual(''); // Reseta o valor do produto
+        setQuantidadeAtual(0); // Reseta o valor do produto
+        setunidadeAtual(''); // Reseta o valor do produto
+    } catch (error) {
+        console.error('Erro ao adicionar doador:', error)
+    }
+  }
+
   useEffect(() => {
 
     if (isFirstRender) {
@@ -251,6 +316,18 @@ export default function Home() {
     };
     fetchData();
   }, [idToFind, isFirstRender]);
+
+  const fetchLoadProdutos = async () => {
+    try {
+        const response = await fetch(`/api/produto`, {
+            method: 'GET',
+        });
+        const data = await response.json(); // Converta a resposta para JSON
+        setProdutos(data); // Atualize o estado com os dados
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error); // Adicione um tratamento de erro
+    }
+  }
 
 
   // Função de carregar os doadores quando abre a pagina
@@ -469,7 +546,14 @@ export default function Home() {
                         <TableCell className="border-slut-100 border">{doador.Rua}, {doador.Numero}, {doador.Bairro}</TableCell>
                         <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
                         <TableCell className="border-slut-100 border flex">
-                          <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
+                          <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'} 
+                            onClick={() => {
+                              setPopupAdicionarDoacao(true);
+                              setNomeDoadorAdicionado(doador.Nome)
+                              fetchLoadProdutos()
+                              setIdDoadorDoando(doador.IdDoador)
+                            }}
+                          ><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
                           <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
                             onClick={() => {
                               setPopupInformacoes(true);
@@ -559,19 +643,19 @@ export default function Home() {
                 <hr className="mt-4"></hr>
 
               <div className="flex justify-end mt-3">
-                <button
+                <Button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
                   onClick={fetchAdicionarDoador}
                 >
                   Confirmar
-                </button>
+                </Button>
                 
-                <button
+                <Button
                   className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
                   onClick={() => setPopupAdicionarDoador(false)}
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -627,14 +711,14 @@ export default function Home() {
                 <hr className="mt-4"></hr>
 
               <div className="flex justify-end mt-3">
-                <button
+                <Button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
                   onClick={fetchEditarDoador}
                 >
                   Confirmar
-                </button>
+                </Button>
                 
-                <button
+                <Button
                   className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
                   onClick={() => {
                     setPopupEditarDoador(false)
@@ -652,7 +736,7 @@ export default function Home() {
                   }}
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -677,21 +761,21 @@ export default function Home() {
               <p className="mt-4">Tem certeza que deseja confirmar esta ação?</p>
 
               <div className="flex justify-center mt-3">
-                <button
+                <Button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
                   onClick={fetchDesativarDoador}
                 >
                   Confirmar
-                </button>
+                </Button>
                 
-                <button
+                <Button
                   className="px-4 py-2 bg-red-500 text-white rounded  transition"
                   onClick={() => {
                     setPopupDesativarDoador(false)
                   }}
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -716,21 +800,21 @@ export default function Home() {
               <p className="mt-4">Tem certeza que deseja confirmar esta ação?</p>
 
               <div className="flex justify-center mt-3">
-                <button
+                <Button
                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
                   onClick={fetchReativarDoador}
                 >
                   Confirmar
-                </button>
+                </Button>
                 
-                <button
+                <Button
                   className="px-4 py-2 bg-red-500 text-white rounded  transition"
                   onClick={() => {
                     setPopupReativarDoador(false)
                   }}
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -805,7 +889,7 @@ export default function Home() {
               <div className="flex justify-end mt-3">
                 
                 
-                <button
+                <Button
                   className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-slate-500 transition"
                   onClick={() => {
                     setPopupInformacoes(false)
@@ -823,7 +907,182 @@ export default function Home() {
                   }}
                 >
                   Fechar
-                </button>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {popupAdicionarDoacao && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 flex">
+                {popupAdicionarProduto && (
+                  <div className="mr-5 pr-5 border-r mt-auto mb-auto">
+                    <h1 className="text-left font-bold">Adicionar Prduto</h1>
+                    <h1 className="text-left mt-3">Nome do Produto</h1>
+                    <Input placeholder="Nome" onChange={(e) => setNovoProduto({ ...novoProduto, Nome: e.target.value })}></Input>
+                    <h1 className="text-left mt-3">Unidade Padrão</h1>
+                    <Input placeholder="Unidade" onChange={(e) => setNovoProduto({ ...novoProduto, UN: e.target.value })}></Input>
+                    <Button className="pl-11 pr-11 bg-green-400 hover:bg-green-500 text-white mt-10"
+                      onClick={() => {
+                        fetchAdicionarProduto()
+                      }}
+                    >Adicionar Produto</Button>
+                  </div>
+                )}
+              <div>
+                <h1 className="text-xl font-bold mb-8">Adicionar Doação à {nomeDoadorAdicionado}</h1>
+
+                <div className="flex ">
+                  
+                  <div className="mr-10">
+                    <h1 className="text-left font-bold mb-2">Adicionar Item</h1>
+                    <Popover open={openProduto} onOpenChange={setOpenProduto}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openProduto}
+                          className="w-[200px] justify-between"
+                        >
+                          {valueProduto
+                            ? Produtos.find((produto) => produto.IdProduto === Number(valueProduto))?.Nome
+                            : "Selecione um Produto..."}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Buscar produto..." className="h-9" />
+                          <CommandList>
+                            <ScrollArea className="h-40">
+                              <CommandEmpty>Nenhum Produto Encontrado.</CommandEmpty>
+                              <CommandGroup>
+                                {Array.isArray(Produtos) && Produtos.length > 0 ? (
+                                  Produtos.map((produto) => (
+                                    <CommandItem
+                                      key={produto.IdProduto}
+                                      value={produto.IdProduto.toString()}
+                                      onSelect={(currentValue) => {
+                                        const selectedProduto = Produtos.find(
+                                          (item) => item.IdProduto === Number(currentValue)
+                                        );
+
+                                        setValueProduto(Number(currentValue)); // Define o ID do produto
+                                        setunidadeAtual(selectedProduto?.UN || ""); // Define a unidade do produto
+                                        setnomeProdutoAtual(selectedProduto?.Nome || ""); // Define o nome do produto
+                                        setOpenProduto(false); // Fecha o Popover
+                                      }}
+                                    >
+                                      {produto.Nome}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          valueProduto === produto.IdProduto ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))
+                                ) : (
+                                  <CommandEmpty>Nenhum Produto Encontrado.</CommandEmpty>
+                                )}
+                              </CommandGroup>
+                            </ScrollArea>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    
+                    <Button className={`pl-10 pr-10 mt-5 block text-black ${popupAdicionarProduto ? "bg-slate-400 hover:bg-slate-500"  : "bg-slate-300 hover:bg-slate-400"}`}
+                      onClick={() => {popupAdicionarProduto ? setPopupAdicionarProduto(false) : setPopupAdicionarProduto(true)}}
+                    >Criar novo Produto</Button>
+                    
+                    <div className="flex">
+                      <div className="mr-5">
+                      <h1 className="text-left mb-0 mt-3">Quantidade</h1>
+                        <Input
+                          className="w-[90px]"
+                          value={quantidadeAtual}
+                          type="Number"
+                          onChange={(e) => setQuantidadeAtual(e.target.value)} // Atualiza o estado
+                        />
+                      </div>
+                      <div>
+                        <h1 className="text-left mb-0 mt-3">Unidade</h1>
+                        <Input
+                          className="w-[90px]"
+                          value={unidadeAtual}
+                          onChange={(e) => setunidadeAtual(e.target.value)} // Atualiza o estado
+                        />
+                      </div>
+                    </div>
+
+
+                    <Button
+                      className="pl-6 pr-6 bg-green-400 hover:bg-green-500 text-white mt-5"
+                      onClick={() => {
+                        if (quantidadeAtual > 0 && valueProduto !== '') {
+                          setItens([
+                            ...Itens, // Adiciona os itens existentes
+                            {
+                              IdProduto: valueProduto,
+                              Quantidade: quantidadeAtual,
+                              Nome: nomeProdutoAtual,
+                              UNItem: unidadeAtual
+                            },
+                          ]);
+                          setValueProduto(''); // Reseta o valor do produto
+                          setnomeProdutoAtual(''); // Reseta o valor do produto
+                          setQuantidadeAtual(0); // Reseta o valor do produto
+                          setunidadeAtual(''); // Reseta o valor do produto
+                        }
+                      }}
+                    >
+                      Adicionar Item
+                    </Button>
+
+
+                  </div>
+                  <div>
+                    <h1 className="font-bold text-left mb-2">Itens Doados</h1>
+                    <ScrollArea className="h-[223px] w-[350px] rounded-md border p-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px] text-center">Nome</TableHead>
+                            <TableHead className="w-[75px] text-center">Quantidade</TableHead>
+                            <TableHead className="w-[75px] text-center">Unidade</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {Itens.map((item) => (
+                            <TableRow key={item.IdProduto}>
+                              <TableCell>{item.Nome}</TableCell>
+                              <TableCell className="text-center">{item.Quantidade}</TableCell>
+                              <TableCell className="text-center">{item.UNItem}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-3">
+                  <Button
+                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                    onClick={fetchAdicionarDoacao}
+                  >
+                    Confirmar
+                  </Button>
+                  
+                  <Button
+                    className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                    onClick={() => {setPopupAdicionarDoacao(false); setPopupAdicionarProduto(false); setItens([])}}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

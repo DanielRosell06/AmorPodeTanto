@@ -5,14 +5,14 @@ let prisma = new PrismaClient()
 export async function GET(req) {
     const url = new URL(req.url);
     const searchParams = url.searchParams;
-    const IdToEditar = parseInt(searchParams.get('IdToGet'), 10) || 0
+    const IdToEditar = parseInt(searchParams.get('IdToGet'), 10) || -1
     const NomeToSearch = searchParams.get('nomeSearch')
 
     let produtos;
 
     try{
         if(!IdToEditar || IdToEditar == -1){
-            if(NomeToSearch != ""){
+            if(NomeToSearch){
                 produtos = await prisma.produto.findMany({
                     where: {
                         Nome:{

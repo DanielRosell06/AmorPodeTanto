@@ -65,6 +65,10 @@ export default function Home() {
             body: JSON.stringify(novoProduto) // Envia os dados do novo doador
             })
             setPopupAdicionarProduto(false) // Fecha o popup após adicionar
+            setNovoProduto({
+                Nome: "",
+                UN: ""
+            })
             atualizarLista()
         } catch (error) {
             console.error('Erro ao adicionar doador:', error)
