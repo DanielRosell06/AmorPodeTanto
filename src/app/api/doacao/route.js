@@ -1,12 +1,151 @@
 import { PrismaClient } from '@prisma/client'
 let prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(req) {
     try {
-        // Busca todas as doações
-        const doacoes = await prisma.doacao.findMany();
+        const now = new Date(); // Data e hora atual
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const todayEnd = new Date(todayStart);
+        todayEnd.setDate(todayEnd.getDate() + 1); // Fim do dia de hoje
 
-        // Para cada doação, carrega os dados relacionados manualmente
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1)); // Segunda-feira da semana atual
+        const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7)); // Domingo da semana atual
+
+        const url = new URL(req.url);
+        const searchParams = url.searchParams;
+
+        const searchBy = searchParams.get('searchBy');
+        const searchIn = searchParams.get('searchIn');
+        const orderBy = searchParams.get('orderBy');
+        const filterBy = searchParams.get('filterBy');
+
+        let doacoes;
+        let whereFilter = {};
+
+        if (filterBy && filterBy !== "Nenhum") {
+            switch (filterBy) {
+                case "agendado":
+                    whereFilter = { 
+                        StatusDoacao: 0,
+                        DataAgendada: {
+                            gte: todayStart,
+                        }
+                     };
+                    break;
+                case "pendente":
+                    whereFilter = {
+                        StatusDoacao: 0,
+                        DataAgendada: { lt: todayEnd },
+                    };
+                    break;
+                case "agendadoHoje":
+                    whereFilter = {
+                        StatusDoacao: 0,
+                        DataAgendada: {
+                            gte: todayStart,
+                            lt: todayEnd,
+                        },
+                    };
+                    break;
+                case "agendadoSemana":
+                    whereFilter = {
+                        StatusDoacao: 0,
+                        DataAgendada: {
+                            gte: startOfWeek,
+                            lt: endOfWeek,
+                        },
+                    };
+                    break;
+                case "retirado":
+                    whereFilter = { StatusDoacao: 1 };
+                    break;
+
+                case "cancelado":
+                    whereFilter = { StatusDoacao: 3 };
+                    break;
+            }
+        }
+
+        // Definindo o filtro para pesquisa
+        if (searchBy && searchIn) {
+            if (searchBy === 'Nome') {
+                whereFilter = {
+                    ...whereFilter,
+                    IdDoador: {
+                        in: await prisma.doador.findMany({
+                            where: {
+                                Nome: {
+                                    contains: searchIn,
+                                    mode: 'insensitive',
+                                },
+                            },
+                            select: {
+                                IdDoador: true,
+                            },
+                        }).then(donors => donors.map(d => d.IdDoador)),
+                    },
+                };
+            } else if (searchBy === 'Telefone') {
+                whereFilter = {
+                    ...whereFilter,
+                    IdDoador: {
+                        in: await prisma.contato.findMany({
+                            where: {
+                                Telefone: {
+                                    contains: searchIn,
+                                    mode: 'insensitive',
+                                },
+                            },
+                            select: {
+                                IdDoador: true,
+                            },
+                        }).then(contacts => contacts.map(c => c.IdDoador)),
+                    },
+                };
+            }
+        }
+
+        // Lógica para ordenação das doações
+        if (orderBy) {
+            switch (orderBy) {
+                case "adicionadoRecente":
+                    doacoes = await prisma.doacao.findMany({
+                        orderBy: { DataDoacao: 'desc' },
+                        where: whereFilter,
+                    });
+                    break;
+                case "adicionadoAntigo":
+                    doacoes = await prisma.doacao.findMany({
+                        orderBy: { DataDoacao: 'asc' },
+                        where: whereFilter,
+                    });
+                    break;
+                case "agendamentoMaisProximo":
+                    doacoes = await prisma.doacao.findMany({
+                        where: {
+                            DataAgendada: { gte: todayStart },
+                            ...whereFilter,
+                        },
+                        orderBy: { DataAgendada: 'asc' },
+                    });
+                    break;
+                case "agendamentoMaisLonge":
+                    doacoes = await prisma.doacao.findMany({
+                        where: {
+                            DataAgendada: { gte: todayStart },
+                            ...whereFilter,
+                        },
+                        orderBy: { DataAgendada: 'desc' },
+                    });
+                    break;
+                default:
+                    doacoes = await prisma.doacao.findMany({ where: whereFilter });
+                    break;
+            }
+        } else {
+            doacoes = await prisma.doacao.findMany({ where: whereFilter });
+        }
+
         const doacoesCompletas = await Promise.all(
             doacoes.map(async (doacao) => {
                 const doador = await prisma.doador.findUnique({
@@ -17,15 +156,10 @@ export async function GET() {
                     where: { IdDoador: doacao.IdDoador },
                 });
 
-                return {
-                    ...doacao,
-                    doador,
-                    contato,
-                };
+                return { ...doacao, doador, contato };
             })
         );
 
-        // Retorna as doações completas
         return new Response(JSON.stringify(doacoesCompletas), { status: 200 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -33,6 +167,7 @@ export async function GET() {
         return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
     }
 }
+
 
 export async function POST(req) {
     let Itens;
@@ -64,7 +199,7 @@ export async function POST(req) {
                 IdDoador: IdDoador,
                 Observacao: observacao,
                 DataAgendada: date, // Salva a data no formato Date
-                StatusDoacao: date? 0 : 2
+                StatusDoacao: date ? 0 : 2
             }
         });
 
@@ -98,14 +233,14 @@ export async function PUT(req) {
     const searchParams = url.searchParams;
 
     const IdToUpdate = parseInt(searchParams.get('idToUpdate'), 10);
-    const novoStatus = searchParams.has('novoStatus') 
-        ? parseInt(searchParams.get('novoStatus'), 10) 
+    const novoStatus = searchParams.has('novoStatus')
+        ? parseInt(searchParams.get('novoStatus'), 10)
         : undefined;
-    const novaDataAgendada = searchParams.has('novaDataAgendada') 
-        ? new Date(searchParams.get('novaDataAgendada')) 
+    const novaDataAgendada = searchParams.has('novaDataAgendada')
+        ? new Date(searchParams.get('novaDataAgendada'))
         : undefined;
-    const novaDataRetirada = searchParams.has('novaDataRetirada') 
-        ? new Date(searchParams.get('novaDataRetirada')) 
+    const novaDataRetirada = searchParams.has('novaDataRetirada')
+        ? new Date(searchParams.get('novaDataRetirada'))
         : undefined;
 
     if (isNaN(IdToUpdate)) {
@@ -114,7 +249,7 @@ export async function PUT(req) {
             { status: 400 }
         );
     }
-    
+
     try {
         const updateData = {};
 

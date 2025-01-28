@@ -17,6 +17,7 @@ model Doador {
   Bairro      String
   Complemento String?
   Status      Int     @default(1) @db.SmallInt
+  DataDoador DateTime @default(now())
 }
 
 model Contato {

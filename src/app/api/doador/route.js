@@ -8,52 +8,75 @@ export async function GET(req) {
     const desativados = searchParams.get('desativados') || 0
     const searchBy = searchParams.get('searchBy')
     const input = searchParams.get('searchIn');
+    const ordenarPor = searchParams.get('ordenarPor');
 
     const where = {};
+    let orderBy = {};
+    let doadoresList;
 
     // Filtra por status se 'desativados' não for '1'
     if (desativados !== '1') {
         where.Status = { not: 0 };
     }
-    
+
     if (searchBy && input) {
-        switch (searchBy){
+        switch (searchBy) {
             case 'CPFCNPJ':
                 where.CPFCNPJ = {
                     contains: input,
                     mode: 'insensitive', // Torna a busca case-insensitive
-                  };
+                };
                 break
 
             case 'nome':
                 where.Nome = {
                     contains: input,
                     mode: 'insensitive', // Torna a busca case-insensitive
-                  };
+                };
                 break
 
             case 'rua':
                 where.Rua = {
                     contains: input,
                     mode: 'insensitive', // Torna a busca case-insensitive
-                    };
+                };
                 break
 
             case 'bairro':
                 where.Bairro = {
                     contains: input,
                     mode: 'insensitive', // Torna a busca case-insensitive
-                    };
+                };
                 break
         }
-        
+
     }
 
-    const doadoresList = await prisma.doador.findMany({ where: where });
+    if (ordenarPor) {
+        switch (ordenarPor) {
+            case "AdicionadoRecente":
+                orderBy = {
+                    DataDoador: 'desc'
+                };
+                doadoresList = await prisma.doador.findMany({ where: where, orderBy: orderBy });
+                break;
+
+            case "AdicionadoAntigo":
+                orderBy = {
+                    DataDoador: 'asc'
+                };
+                doadoresList = await prisma.doador.findMany({ where: where, orderBy: orderBy });
+                break;
+        }
+    }else{
+        doadoresList = await prisma.doador.findMany({where : where})
+    }
+
+
 
     const doadoresComTelefone = await Promise.all(doadoresList.map(async (doador) => {
         const contato = await prisma.contato.findFirst({
-            where: { IdDoador : doador.IdDoador }
+            where: { IdDoador: doador.IdDoador }
         })
 
         if (!contato) {
@@ -64,14 +87,14 @@ export async function GET(req) {
 
         return doador; // Retorna o doador atualizado
     }))
-        
+
     return new Response(JSON.stringify(doadoresComTelefone))
 }
 
 export async function POST(req, res) {
-    const { CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email} = await req.json()
+    const { CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email } = await req.json()
 
-    try{
+    try {
         const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
         const data = await response.json();
         const Rua = data.logradouro
@@ -81,14 +104,14 @@ export async function POST(req, res) {
             data: {
                 CPFCNPJ,
                 Nome,
-                CEP, 
+                CEP,
                 Rua,
                 Numero,
                 Bairro,
                 Complemento
             }
         })
-        
+
         const doador = await prisma.doador.findUnique({
             where: { CPFCNPJ: CPFCNPJ }
         });
@@ -104,11 +127,11 @@ export async function POST(req, res) {
             data: {
                 IdDoador,
                 Contato,
-                Telefone, 
+                Telefone,
                 Email
             }
         })
-        
+
         return new Response(
             JSON.stringify({ resultDoador, resultContato }),
             { status: 201 }
@@ -122,9 +145,9 @@ export async function POST(req, res) {
 }
 
 export async function PUT(req) {
-    const { IdDoador, CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email} = await req.json()
+    const { IdDoador, CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email } = await req.json()
 
-    try{
+    try {
         const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
         const data = await response.json();
         const Rua = data.logradouro
@@ -135,7 +158,7 @@ export async function PUT(req) {
             data: {
                 CPFCNPJ,
                 Nome,
-                CEP, 
+                CEP,
                 Rua,
                 Numero,
                 Bairro,
@@ -160,11 +183,11 @@ export async function PUT(req) {
             data: {
                 IdDoador,
                 Contato,
-                Telefone, 
+                Telefone,
                 Email
             }
         })
-        
+
         return new Response(
             JSON.stringify({ resultDoador, resultContato }),
             { status: 201 }
@@ -176,5 +199,5 @@ export async function PUT(req) {
         console.error('Erro ao processar a requisição:', errorMessage);
         return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
     }
-    
+
 }

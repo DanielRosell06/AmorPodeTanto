@@ -87,6 +87,9 @@ const frameworks = [
 
 export default function Home() {
 
+  //Variavel de ordenar
+  const [ordenacao, setOrdenacao] = useState('');
+
   const [date, setDate] = React.useState();
 
   const [open, setOpen] = React.useState(false)
@@ -352,19 +355,19 @@ export default function Home() {
   useEffect(() => {
     const fetchLoadDoadores = async () => {
       try {
-        const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}`, {
-          method: 'GET',
-        });
-        const data = await response.json(); // Converta a resposta para JSON
-        setDoador(data); // Atualize o estado com os dados
+        const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}&ordenarPor=${ordenacao}`,
+          { method: 'GET' }
+        );
+        const data = await response.json();
+        setDoador(data);
       } catch (error) {
-        console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
+        console.error('Erro ao carregar doadores:', error);
       }
       setLoading(false);
     }
-
-    fetchLoadDoadores()
-  }, [varAtualizarLista, switchDesativos, pesquisa, pesquisaInput]);
+  
+    fetchLoadDoadores();
+  }, [varAtualizarLista, switchDesativos, pesquisa, pesquisaInput, ordenacao]);
 
 
 
@@ -434,75 +437,20 @@ export default function Home() {
           
           <div className="flex">
                       
-            <Select >
-              <SelectTrigger className=" bg-slate-50 hover:bg-slate-300 text-black ml-10 w-[240px]">
-                <i className="fas fa-sort"></i>
-                <SelectValue placeholder="Ordenar por" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Nenhum">Nenhum</SelectItem>
-                <SelectItem value="DoacaoRecente">Doação mais Recente</SelectItem>
-                <SelectItem value="DoacaoAntigo">Doação mais Antiga</SelectItem>
-                <SelectItem value="AdicionadoRecente">Adicionado mais Recente</SelectItem>
-                <SelectItem value="AdicionadoAntigo">Adicionado mais Antigo</SelectItem>
-              </SelectContent>
-            </Select>
-
-
-            <Sheet>
-              <SheetTrigger>
-                <Button className="bg-slate-50 hover:bg-slate-300 text-black ml-3">
-                  <i className="fas fa-filter"></i>
-                  Filtrar
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Filtrar</SheetTitle>
-                  <SheetDescription>
-                    <>
-                      <hr className="mt-5" />
-
-                      <h1 className="mt-2 text-xl text-gray-800 mb-3">Por Criação</h1>
-                      <div className="flex justify-between">
-                        <p className="mt-auto mb-auto mr-2 text-base">Adicionado a partir de:</p>
-                        <Input type="date" className="w-50" />
-                      </div>
-                      <div className="flex mt-2 justify-between">
-                        <p className="mt-auto mb-auto mr-2 text-base">Adicionado antes de:</p>
-                        <Input type="date" className="w-50" />
-                      </div>
-
-                      <hr className="mt-3" />
-
-                      <h1 className="mt-2 text-xl text-gray-800 mb-3">Por doação</h1>
-                      <div className="flex justify-between">
-                        <p className="mt-auto mb-auto mr-2 text-base">Doou a partir de:</p>
-                        <Input type="date" className="w-50" />
-                      </div>
-                      <div className="flex mt-2 justify-between">
-                        <p className="mt-auto mb-auto mr-2 text-base">Doou antes de:</p>
-                        <Input type="date" className="w-50" />
-                      </div>
-                      <div className="flex mt-6 justify-between">
-                        <p className="mt-auto mb-auto mr-2 text-base">Doou mais de:</p>
-                        <Input type="number" className="w-[143px]" />
-                      </div>
-                      <div className="flex mt-2 justify-between">
-                        <p className="mt-auto mb-auto mr-2 text-base">Doou menos de:</p>
-                        <Input type="number" className="w-[143px]" />
-                      </div>
-
-                      <hr className="mt-3" />
-
-                      <div className="flex mt-2 justify-end">
-                        <Button className="bg-green-500 hover:bg-green-700">Aplicar</Button>
-                      </div>
-                    </>
-                  </SheetDescription>
-                </SheetHeader>
-              </SheetContent>
-            </Sheet>
+          <Select onValueChange={(value) => {
+            setOrdenacao(value);
+            atualizarLista();
+          }}>
+            <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black ml-10 w-[240px]">
+              <i className="fas fa-sort"></i>
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Nenhum">Nenhum</SelectItem>
+              <SelectItem value="AdicionadoRecente">Adicionado mais Recente</SelectItem>
+              <SelectItem value="AdicionadoAntigo">Adicionado mais Antigo</SelectItem>
+            </SelectContent>
+          </Select>
           </div>
           
           <div className="mt-auto mb-auto flex">

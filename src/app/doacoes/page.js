@@ -17,7 +17,7 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-  } from "@/components/ui/popover"
+} from "@/components/ui/popover"
 
 import {
     Table,
@@ -36,28 +36,36 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-  } from "@/components/ui/command"
+} from "@/components/ui/command"
 
-  const frameworks = [
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+const frameworks = [
     {
-      value: '3',
-      label: "Cancelado",
+        value: '3',
+        label: "Cancelado",
     },
     {
-      value: '0',
-      label: "Agendado",
+        value: '0',
+        label: "Agendado",
     },
     {
-      value: '1',
-      label: "Retirado",
+        value: '1',
+        label: "Retirado",
     },
-  ]
+]
 
 
 
 export default function Home() {
 
-    
+
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("")
     const [semiValue, setSemiValue] = React.useState("")
@@ -67,9 +75,16 @@ export default function Home() {
     const [semiDateAgenda, setSemiDateAgenda] = React.useState();
     const [semiDateRetirado, setSemiDateRetirado] = React.useState();
 
+    const [loading, setLoading] = useState(true)
+    const [loadingItens, setLoadingItens] = useState(false)
+
     // Variaveis de Busca
     const [idDoacaoBusca, setIdDoacaoBusca] = useState(-1)
-    
+    const [searchBy, setSearchBy] = useState("")
+    const [orderBy, setOrderBy] = useState("")
+    const [searchIn, setSearchIn] = useState("")
+    const [filterBy, setFilterBy] = useState("")
+
     // Variaveis de atualizar
     const [varLista, setVarLista] = useState(-1)
 
@@ -78,11 +93,11 @@ export default function Home() {
     const [observacaoAtual, setObservacaoAtual] = useState("")
 
     //Variaveis de atualização
-    const[update, setUpdate] = useState("")
-    const[idToUpdate, setIdToUpdate] = useState(-1)
-    const[novoStatus, setNovoStatus] = useState(-1)
-    const[novaDataAgendada, setNovaDataAgendada] = useState()
-    
+    const [update, setUpdate] = useState("")
+    const [idToUpdate, setIdToUpdate] = useState(-1)
+    const [novoStatus, setNovoStatus] = useState(-1)
+    const [novaDataAgendada, setNovaDataAgendada] = useState()
+
     // Variaveis de lista
     const [doacao, setDoacao] = useState([])
     const [itens, setItens] = useState([])
@@ -91,7 +106,27 @@ export default function Home() {
     //Funções normais
     const atualizarLista = () => {
         setVarLista(varLista * -1)
+        setLoading(true)
     }
+
+    const [inputValue, setInputValue] = useState("");
+    const timeoutRef = useRef(null); // Referência para o timeout
+    let timer;
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // Reseta o timer a cada nova digitação
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        // Inicia um novo timer para atualizar searchIn após 1 segundo
+        timeoutRef.current = setTimeout(() => {
+            setSearchIn(value); // Atualiza searchIn após 1 segundo
+            setLoading(true)
+          }, 1000);
+    };
 
 
 
@@ -113,45 +148,47 @@ export default function Home() {
     useEffect(() => {
         const fetchLoadDoacoes = async () => {
             try {
-              const response = await fetch(`/api/doacao`, {
-                method: 'GET',
-              });
-              const data = await response.json();
-              setDoacao(data); 
+                const response = await fetch(`/api/doacao?orderBy=${orderBy}&searchBy=${searchBy}&searchIn=${searchIn}&filterBy=${filterBy}`, {
+                    method: 'GET',
+                });
+                const data = await response.json();
+                setDoacao(data);
+                setLoading(false)
             } catch (error) {
-              console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
+                console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
             }
-          }
-      
-          fetchLoadDoacoes()
-    }, [varLista])
+        }
+
+        fetchLoadDoacoes()
+    }, [varLista, orderBy, searchBy, searchIn, filterBy])
 
     useEffect(() => {
         const fetchLoadItens = async () => {
 
-            if(idDoacaoBusca == -1){
+            if (idDoacaoBusca == -1) {
                 return
             }
 
             try {
-              const response = await fetch(`/api/doacaoItem?IdDoacao=${idDoacaoBusca}`, {
-                method: 'GET',
-              });
-              const data = await response.json();
-              setObservacaoAtual(observacaoSemiAtual)
-              setDateAgenda(semiDateAgenda)
-              setDateRetirado(semiDateRetirado)
-              setValue(semiValue)
-              setItens(data); 
+                const response = await fetch(`/api/doacaoItem?IdDoacao=${idDoacaoBusca}`, {
+                    method: 'GET',
+                });
+                const data = await response.json();
+                setObservacaoAtual(observacaoSemiAtual)
+                setDateAgenda(semiDateAgenda)
+                setDateRetirado(semiDateRetirado)
+                setValue(semiValue)
+                setItens(data);
+                setLoadingItens(false)
             } catch (error) {
-              console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
+                console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
             }
-          }
-      
-          fetchLoadItens()
+        }
+
+        fetchLoadItens()
     }, [idDoacaoBusca, observacaoSemiAtual, semiDateAgenda, semiDateRetirado, semiValue])
 
-    return(
+    return (
         <div className="ml-8">
             <div className="flex mt-6 h-[60px] mb-3">
                 <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
@@ -160,208 +197,279 @@ export default function Home() {
             <div className="flex justify-between">
                 <div className="w-[60%]">
                     <div className="flex justify-between mb-3">
-                        <Button className=" w-[32%] bg-slate-200 hover:bg-slate-300 text-black">Ordenar Por</Button>
-                        <Button className=" w-[32%] bg-slate-200 hover:bg-slate-300 text-black">Filtrar</Button>
-                        <Button className=" w-[32%] bg-green-400 hover:bg-green-500">Adicionar Doação</Button>
+
+
+                        <Select onValueChange={(value) => {
+                            setOrderBy(value);
+                            atualizarLista();
+                        }}>
+                            <SelectTrigger className="bg-slate-200 hover:bg-slate-300 text-black w-[49%]">
+                                <i></i>
+                                <SelectValue placeholder="Ordenar por" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Nenhum">Nenhum</SelectItem>
+                                <SelectItem value="adicionadoRecente">Adicionado mais Recente</SelectItem>
+                                <SelectItem value="adicionadoAntigo">Adicionado mais Antigo</SelectItem>
+                                <SelectItem value="agendamentoMaisProximo">Agendamento mais Próximo</SelectItem>
+                                <SelectItem value="agendamentoMaisLonge">Agendamento mais Longe</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select onValueChange={(value) => {
+                            setFilterBy(value);
+                            atualizarLista();
+                        }}>
+                            <SelectTrigger className="bg-slate-200 hover:bg-slate-300 text-black w-[49%]">
+                                <i></i>
+                                <SelectValue placeholder="Filtrar" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Nenhum">Nenhum</SelectItem>
+                                <SelectItem value="agendado">Agendado</SelectItem>
+                                <SelectItem value="pendente">Pendente</SelectItem>
+                                <SelectItem value="agendadoHoje">Agendado para Hoje</SelectItem>
+                                <SelectItem value="agendadoSemana">Agendado para Esta Semana</SelectItem>
+                                <SelectItem value="retirado">Retirado</SelectItem>
+                                <SelectItem value="cancelado">Cancelado</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="flex justify-between mb-3">
-                        <Input placeholder="Pesquisar " className=" w-[66%]"></Input>
-                        <Button className=" w-[32%] bg-slate-200 hover:bg-slate-300 text-black">Pesquisar Por</Button>
+
+                        <Input className="w-[66%] mr-2" placeholder="Pesquisar"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                        ></Input>
+
+
+                        <Select onValueChange={(value) => {
+                            setSearchBy(value);
+                            atualizarLista();
+                        }}>
+                            <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[32%]">
+                                <i></i>
+                                <SelectValue placeholder="Pesquisar Por" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Nenhum">Nenhum</SelectItem>
+                                <SelectItem value="Nome">Nome</SelectItem>
+                                <SelectItem value="Telefone">Telefone</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+
                     </div>
                     <div className="h-[58vh]">
                         <ScrollArea className="border-none rounded-none h-[100%]">
-                        <div >
-                            {doacao.map((doacao, index) => (
-                                <div key={index} className="flex pt-3 pl-4 pb-3 pr-4 rounded-xl border mb-5 hover:bg-slate-200 hover:cursor-pointer transition"
-                                    onClick={() => {
-                                        setSemiDateAgenda(doacao.DataAgendada? new Date(doacao.DataAgendada) : null)
-                                        setSemiDateRetirado(doacao.DataRetirada? new Date(doacao.DataRetirada) : null)
-                                        setSemiValue(doacao.StatusDoacao)
-                                        setIdDoacaoBusca(doacao.IdDoacao)
-                                        setObservacaoSemiAtual(doacao.Observacao)
-                                        setIdToUpdate(doacao.IdDoacao)
-                                    }}
-                                >
-                                <div className="w-[50%]">
-                                    <div className="flex">
-                                        <h1 className="text-lg text-slate-300">Status: </h1>
-                                        <h1
-                                            className={`font-bold text-xl ml-1 ${
-                                                doacao.StatusDoacao === 0
-                                                    ? (new Date(doacao.DataAgendada).getTime() < new Date().getTime() ? "text-yellow-500" : "text-blue-500")
-                                                    : doacao.StatusDoacao === 1
-                                                    ? "text-green-500"
-                                                    : doacao.StatusDoacao === 3
-                                                    ? "text-red-500"
-                                                    : ""
-                                            }`}
+                            {loading ?
+                                <>
+                                    <div className="flex flex-col gap-5">
+                                        <Skeleton className="w-full h-56"></Skeleton>
+                                        <Skeleton className="w-full h-56"></Skeleton>
+                                        <Skeleton className="w-full h-56"></Skeleton>
+                                    </div>
+                                </>
+                                :
+                                <div >
+                                    {doacao.map((doacao, index) => (
+                                        <div key={index} className="flex pt-3 pl-4 pb-3 pr-4 rounded-xl border mb-5 hover:bg-slate-200 hover:cursor-pointer transition"
+                                            onClick={() => {
+                                                setSemiDateAgenda(doacao.DataAgendada ? new Date(doacao.DataAgendada) : null)
+                                                setSemiDateRetirado(doacao.DataRetirada ? new Date(doacao.DataRetirada) : null)
+                                                setSemiValue(doacao.StatusDoacao)
+                                                setIdDoacaoBusca(doacao.IdDoacao)
+                                                setObservacaoSemiAtual(doacao.Observacao)
+                                                setIdToUpdate(doacao.IdDoacao)
+                                                setLoadingItens(true)
+                                            }}
                                         >
-                                            {(() => {
-                                                switch (doacao.StatusDoacao) {
-                                                    case 0:
-                                                        return `${new Date(doacao.DataAgendada).getTime() < new Date().getTime() ? "Pendente. Agendado para" : "Agendado"}: ${doacao.DataAgendada?new Date(doacao.DataAgendada).toLocaleDateString("pt-BR") : "Data não informada"}`;
-                                                    case 1:
-                                                        return `Retirado: ${new Date(doacao.DataRetirada).toLocaleDateString("pt-BR") || "Não informado"}`;
-                                                    case 3:
-                                                        return "Cancelado";
-                                                    default:
-                                                        return "Status desconhecido";
-                                                }
-                                            })()}
-                                        </h1>
-                                    </div>
-                                    <div className="flex flex-col gap-[10px]">
-                                        <h1 className="font-bold text-lg mt-3 mb-2">Informações do Doador</h1>
-                                        <h1>Nome: {doacao.doador.Nome || "Não informado"}</h1>
-                                        <h1>Telefone: {doacao.contato?.[0]?.Telefone || "Não informado"}</h1>
-                                        <Button className=" bg-white text-black border border-slate-300 hover:bg-slate-300 text-sm mt-2 w-36">
-                                            Mais Informações
-                                        </Button>
-                                    </div>
+                                            <div className="w-[50%]">
+                                                <div className="flex">
+                                                    <h1 className="text-lg text-slate-300">Status: </h1>
+                                                    <h1
+                                                        className={`font-bold text-xl ml-1 ${doacao.StatusDoacao === 0
+                                                                ? (new Date(doacao.DataAgendada).getTime() < new Date().getTime() ? "text-yellow-500" : "text-blue-500")
+                                                                : doacao.StatusDoacao === 1
+                                                                    ? "text-green-500"
+                                                                    : doacao.StatusDoacao === 3
+                                                                        ? "text-red-500"
+                                                                        : ""
+                                                            }`}
+                                                    >
+                                                        {(() => {
+                                                            switch (doacao.StatusDoacao) {
+                                                                case 0:
+                                                                    return `${new Date(doacao.DataAgendada).getTime() < new Date().getTime() ? "Pendente. Agendado para" : "Agendado"}: ${doacao.DataAgendada ? new Date(doacao.DataAgendada).toLocaleDateString("pt-BR") : "Data não informada"}`;
+                                                                case 1:
+                                                                    return `Retirado: ${new Date(doacao.DataRetirada).toLocaleDateString("pt-BR") || "Não informado"}`;
+                                                                case 3:
+                                                                    return "Cancelado";
+                                                                default:
+                                                                    return "Status desconhecido";
+                                                            }
+                                                        })()}
+                                                    </h1>
+                                                </div>
+                                                <div className="flex flex-col gap-[10px]">
+                                                    <h1 className="font-bold text-lg mt-3 mb-2">Informações do Doador</h1>
+                                                    <h1>Nome: {doacao.doador.Nome || "Não informado"}</h1>
+                                                    <h1>Telefone: {doacao.contato?.[0]?.Telefone || "Não informado"}</h1>
+                                                    <Button className=" bg-white text-black border border-slate-300 hover:bg-slate-300 text-sm mt-2 w-36">
+                                                        Mais Informações
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <div className="text-right w-[50%]">
+                                                <div className="flex justify-end">
+                                                    <h1 className="text-lg text-slate-300">Data: </h1>
+                                                    <h1 className="text-black text-lg ml-1">
+                                                        {new Date(doacao.DataDoacao).toLocaleDateString("pt-BR") || "Não informado"}
+                                                    </h1>
+                                                </div>
+                                                <div className="text-left">
+                                                    <h1 className="mt-[16px] font-bold text-lg">Endereço:</h1>
+                                                    <h1 className="mt-[16px]">
+                                                        {doacao.doador.Rua}, {doacao.doador.Numero}, {doacao.doador.Bairro}
+                                                    </h1>
+                                                </div>
+                                                <Button className="bg-green-400 mt-[26px]">Imprimir Ficha de Retirada</Button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="text-right w-[50%]">
-                                    <div className="flex justify-end">
-                                    <h1 className="text-lg text-slate-300">Data: </h1>
-                                    <h1 className="text-black text-lg ml-1">
-                                        {new Date(doacao.DataDoacao).toLocaleDateString("pt-BR") || "Não informado"}
-                                    </h1>
-                                    </div>
-                                    <div className="text-left">
-                                    <h1 className="mt-[16px] font-bold text-lg">Endereço:</h1>
-                                    <h1 className="mt-[16px]">
-                                        {doacao.doador.Rua}, {doacao.doador.Numero}, {doacao.doador.Bairro}
-                                    </h1>
-                                    </div>
-                                    <Button className="bg-green-400 mt-[26px]">Imprimir Ficha de Retirada</Button>
-                                </div>
-                                </div>
-                            ))}
-                            </div>
+                            }
                         </ScrollArea>
                     </div>
                 </div>
-                <div className={(itens.length === 0 ? "border-2 border-dashed flex" : "text-left") +  " w-[35%] mr-8 h-[73vh]"}>
-                    {itens.length === 0 ? <>
-                            <h1 className=" mt-auto mb-auto ml-auto mr-auto text-lg">Clique em uma doação para ver mais detalhes aqui </h1>
-                        </> 
+                <div className={(itens.length === 0 && !loadingItens ? "border-2 border-dashed flex" : "text-left") + " w-[35%] mr-8 h-[73vh]"}>
+                    {itens.length === 0 && !loadingItens ? <>
+                        <h1 className=" mt-auto mb-auto ml-auto mr-auto text-lg">Clique em uma doação para ver mais detalhes aqui </h1>
+                    </>
                         :
                         <>
-                            <h1 className="font-bold text-xl mb-2">Itens Doados:</h1>
-                            <ScrollArea className="h-[168px] mt-3 border">
-                                <Table className=" ml-auto mr-auto text-center">
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="w-[100px] border-r text-center">Nome</TableHead>
-                                            <TableHead className="w-[90px] border-r text-center">Quantidade</TableHead>
-                                            <TableHead className="w-[90px] text-center">Unidade</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {itens.map((item, index) => (
-                                            <TableRow key={index}>
-                                                <TableHead className="w-[100px] border-r text-center">{item.produto.Nome}</TableHead>
-                                                <TableHead className="w-[90px] border-r text-center">{item.Quantidade}</TableHead>
-                                                <TableHead className="w-[90px] text-center">{item.UNItem}</TableHead>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </ScrollArea>
-                            <h1 className="font-bold text-xl mb-2 mt-5">Observações:</h1>
-                            <ScrollArea className="border h-[54px] w-full">
-                                <h1>{observacaoAtual? observacaoAtual : ""}</h1>
-                            </ScrollArea>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[48%] mt-4 justify-start text-left font-normal",
-                                        !dateAgenda && "text-muted-foreground"
-                                    )}
-                                    >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateAgenda ? format(dateAgenda, "PPP", { locale: ptBR }) : <span>Alterar data agendada</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                    mode="single"
-                                    selected={dateAgenda}
-                                    onSelect={setDateAgenda}
-                                    initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                            <Popover >
-                                <PopoverTrigger asChild>
-                                    <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[48%] justify-start text-left font-normal ml-[4%] mt-4",
-                                        !dateRetirado && "text-muted-foreground"
-                                    )}
-                                    >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRetirado ? format(dateRetirado, "PPP", { locale: ptBR }) : <span>Alterar data de Retirada</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                    mode="single"
-                                    selected={dateRetirado}
-                                    onSelect={setDateRetirado}
-                                    initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-
-                            <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={open}
-                                    className="w-[48%] justify-between mt-4"
-                                >
-                                    {value != 'a'
-                                    ? frameworks.find((framework) => framework.value === `${value}`)?.label
-                                    : "Alterar Status"}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[200px] p-0">
-                                <Command>
-                                    <CommandList>
-                                    <CommandEmpty>No framework found.</CommandEmpty>
-                                    <CommandGroup>
-                                        {frameworks.map((framework) => (
-                                        <CommandItem
-                                            key={framework.value}
-                                            value={framework.value}
-                                            onSelect={(currentValue) => {
-                                                setValue(currentValue)
-                                                setOpen(false)
-                                            }}
-                                        >
-                                            <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                value === framework.value ? "opacity-100" : "opacity-0"
-                                            )}
+                            {loadingItens ?
+                                <Skeleton className="w-full h-full"></Skeleton>
+                                :
+                                <>
+                                    <h1 className="font-bold text-xl mb-2">Itens Doados:</h1>
+                                    <ScrollArea className="h-[168px] mt-3 border">
+                                        <Table className=" ml-auto mr-auto text-center">
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="w-[100px] border-r text-center">Nome</TableHead>
+                                                    <TableHead className="w-[90px] border-r text-center">Quantidade</TableHead>
+                                                    <TableHead className="w-[90px] text-center">Unidade</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {itens.map((item, index) => (
+                                                    <TableRow key={index}>
+                                                        <TableHead className="w-[100px] border-r text-center">{item.produto.Nome}</TableHead>
+                                                        <TableHead className="w-[90px] border-r text-center">{item.Quantidade}</TableHead>
+                                                        <TableHead className="w-[90px] text-center">{item.UNItem}</TableHead>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </ScrollArea>
+                                    <h1 className="font-bold text-xl mb-2 mt-5">Observações:</h1>
+                                    <ScrollArea className="border h-[54px] w-full">
+                                        <h1>{observacaoAtual ? observacaoAtual : ""}</h1>
+                                    </ScrollArea>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-[48%] mt-4 justify-start text-left font-normal",
+                                                    !dateAgenda && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {dateAgenda ? format(dateAgenda, "PPP", { locale: ptBR }) : <span>Alterar data agendada</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={dateAgenda}
+                                                onSelect={setDateAgenda}
+                                                initialFocus
                                             />
-                                            {framework.label}
-                                        </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                                </PopoverContent>
-                            </Popover>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <Popover >
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-[48%] justify-start text-left font-normal ml-[4%] mt-4",
+                                                    !dateRetirado && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {dateRetirado ? format(dateRetirado, "PPP", { locale: ptBR }) : <span>Alterar data de Retirada</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={dateRetirado}
+                                                onSelect={setDateRetirado}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
 
-                            <Button className="bg-green-400 hover:bg-green-500 w-[48%] ml-[4%]"
-                                onClick={fetchUpdateDoacao}
-                            >Aplicar Edições</Button>
+                                    <Popover open={open} onOpenChange={setOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={open}
+                                                className="w-[48%] justify-between mt-4"
+                                            >
+                                                {value != 'a'
+                                                    ? frameworks.find((framework) => framework.value === `${value}`)?.label
+                                                    : "Alterar Status"}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[200px] p-0">
+                                            <Command>
+                                                <CommandList>
+                                                    <CommandEmpty>No framework found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {frameworks.map((framework) => (
+                                                            <CommandItem
+                                                                key={framework.value}
+                                                                value={framework.value}
+                                                                onSelect={(currentValue) => {
+                                                                    setValue(currentValue)
+                                                                    setOpen(false)
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        value === framework.value ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                {framework.label}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+
+                                    <Button className="bg-green-400 hover:bg-green-500 w-[48%] ml-[4%]"
+                                        onClick={fetchUpdateDoacao}
+                                    >Aplicar Edições</Button>
+                                </>
+                            }
                         </>
                     }
                 </div>
