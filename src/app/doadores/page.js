@@ -6,6 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Check, ChevronsUpDown } from "lucide-react"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import { Textarea } from "@/components/ui/textarea"
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale'; // Importando a localidade do Brasil
 
 import { cn } from "@/lib/utils"
 
@@ -82,6 +87,8 @@ const frameworks = [
 
 export default function Home() {
 
+  const [date, setDate] = React.useState();
+
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
 
@@ -113,6 +120,7 @@ export default function Home() {
 
   //Variaveis que vem do usuario
   const [pesquisaInput, setPesquisaInput] = useState('')
+  const [observacao, setObservacao] = useState("")
 
   //Lista
   const [doador, setDoador] = useState([]);
@@ -268,20 +276,30 @@ export default function Home() {
 
   const fetchAdicionarDoacao = async () => {
     try {
+
+      const bodyData = {
+        IdDoador: IdDoadorDoando,
+        itens: Itens,
+        date: date,           
+        observacao: observacao 
+      };
+
         const response = await fetch(`/api/doacao?IdDoador=${IdDoadorDoando}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(Itens) 
+        body: JSON.stringify(bodyData) 
         })
         setPopupAdicionarDoacao(false)
         setIdDoadorDoando(0)
         setItens([])
-        setValueProduto(''); // Reseta o valor do produto
-        setnomeProdutoAtual(''); // Reseta o valor do produto
-        setQuantidadeAtual(0); // Reseta o valor do produto
-        setunidadeAtual(''); // Reseta o valor do produto
+        setValueProduto('');
+        setnomeProdutoAtual('');
+        setQuantidadeAtual(0);
+        setunidadeAtual('');
+        setObservacao("");
+        setDate(null)
     } catch (error) {
         console.error('Erro ao adicionar doador:', error)
     }
@@ -968,10 +986,10 @@ export default function Home() {
                                           (item) => item.IdProduto === Number(currentValue)
                                         );
 
-                                        setValueProduto(Number(currentValue)); // Define o ID do produto
-                                        setunidadeAtual(selectedProduto?.UN || ""); // Define a unidade do produto
-                                        setnomeProdutoAtual(selectedProduto?.Nome || ""); // Define o nome do produto
-                                        setOpenProduto(false); // Fecha o Popover
+                                        setValueProduto(Number(currentValue));
+                                        setunidadeAtual(selectedProduto?.UN || ""); 
+                                        setnomeProdutoAtual(selectedProduto?.Nome || "");
+                                        setOpenProduto(false); 
                                       }}
                                     >
                                       {produto.Nome}
@@ -1066,6 +1084,38 @@ export default function Home() {
                       </Table>
                     </ScrollArea>
                   </div>
+                  <div className="ml-8">
+                    <h1 className="text-left font-bold mb-2">Agendamento</h1>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[280px] justify-start text-left font-normal",
+                            !date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "PPP", { locale: ptBR }) : <span>Escolha uma data de Agendamento</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <h1 className="text-left font-bold mb-2 mt-5">Observações</h1>
+                    <Textarea className="resize-none h-[135px]"
+                      onChange={(e) => {
+                        setObservacao(e.target.value)
+                        console.log(observacao)
+                      }}
+                    ></Textarea>
+                  </div>
                 </div>
 
                 <div className="flex justify-end mt-3">
@@ -1078,7 +1128,7 @@ export default function Home() {
                   
                   <Button
                     className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
-                    onClick={() => {setPopupAdicionarDoacao(false); setPopupAdicionarProduto(false); setItens([])}}
+                    onClick={() => {setPopupAdicionarDoacao(false); setPopupAdicionarProduto(false); setItens([]); setObservacao(""); setDate(null)}}
                   >
                     Cancelar
                   </Button>
