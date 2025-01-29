@@ -120,10 +120,11 @@ export default function Home() {
                         </Button>
 
                         <Select
-                            value={tipoSelecionado}
+                            value={String(tipoSelecionado)} // Converte para string
                             onValueChange={(value) => {
-                                setTipoSelecionado(value);
-                            }}>
+                                setTipoSelecionado(Number(value)); // Converte para número ao salvar
+                            }}
+                        >
                             <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black ml-5 w-[150px]">
                                 <h1>Tipo: </h1>
                                 <SelectValue placeholder="Tipo de Usuário" />
@@ -132,11 +133,12 @@ export default function Home() {
                                 <h1 className='mb-1'>Normal: Pode adicionar doador, adicionar doação, criar produto, imprimir ficha</h1>
                                 <h1 className='mb-1'>Administrador: Faz tudo que o Normal faz + Cadastra novos usuários</h1>
                                 <h1 className='mb-1'>Diretor: Faz tudo que o Administrador faz + Pode acessar Doadores em Potencial</h1>
-                                <SelectItem value={0} >Normal</SelectItem>
-                                <SelectItem value={1}>Administrador</SelectItem>
-                                <SelectItem value={2}>Diretor</SelectItem>
+                                <SelectItem value="0">Normal</SelectItem> {/* Agora são strings */}
+                                <SelectItem value="1">Administrador</SelectItem>
+                                <SelectItem value="2">Diretor</SelectItem>
                             </SelectContent>
                         </Select>
+
                     </div>
                     <div className='flex'>
                         <Button className="bg-green-400 hover:bg-green-500 ml-auto mr-auto mt-6 text-lg text-white pl-6 pr-6 mb-5"

@@ -17,7 +17,7 @@ export default function Home() {
 
     const fetchSearchUsuario = async () => {
         try {
-            const response = await fetch(`/api/logincadastro?email=${emailDigitado}&senha=${senhaDigitada}`, {
+            const response = await fetch(`/api/logincadastro?email=${emailDigitado}&senha=${encodeURIComponent(senhaDigitada)}`, {
                 method: 'GET',
             });
             const data = await response.json();

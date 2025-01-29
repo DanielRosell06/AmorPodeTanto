@@ -1,62 +1,84 @@
-import { PrismaClient } from '@prisma/client'
-let prisma = new PrismaClient()
+import { PrismaClient } from '@prisma/client';
+import { hash, compare } from "bcryptjs";
+
+let prisma = new PrismaClient();
 
 export async function GET(req) {
     try {
         const url = new URL(req.url);
         const searchParams = url.searchParams;
-        const email = searchParams.get('email')
-        const senha = searchParams.get('senha')
+        const email = searchParams.get('email');
+        const senha = searchParams.get('senha');
 
-        const result = await prisma.usuario.findUnique({
-            where : {
-                EmailUsuario : email,
-                SenhaUsuario : senha
-            }
-        })
-
-        if(result){
-            const usuarioSecao = {
-                Nome : result.NomeUsuario,
-                Email : result.EmailUsuario,
-                Tipo : result.TipoUsuario
-            }
-            return new Response(JSON.stringify(usuarioSecao))
-        } else{
-            return new Response(JSON.stringify(false))
+        if (!email || !senha) {
+            return new Response(JSON.stringify({ error: "E-mail e senha são obrigatórios" }), { status: 400 });
         }
 
+        const result = await prisma.usuario.findUnique({
+            where: {
+                EmailUsuario: email,
+            }
+        });
+
+        if (!result) {
+            return new Response(JSON.stringify(false));
+        }
+
+        const senhaValida = await compare(senha, result.SenhaUsuario);
+
+        if (!senhaValida) {
+            return new Response(JSON.stringify(false));
+        }
+
+        const usuarioSecao = {
+            Nome: result.NomeUsuario,
+            Email: result.EmailUsuario,
+            Tipo: result.TipoUsuario
+        };
+
+        return new Response(JSON.stringify(usuarioSecao));
+
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-        console.error('Erro ao processar a requisição:', errorMessage);
-        return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+        console.error('Erro ao processar a requisição:', error);
+        return new Response(JSON.stringify({ error: error.message || 'Erro desconhecido' }), { status: 500 });
     }
 }
 
-
 export async function POST(req) {
     try {
-        const { NomeUsuario, EmailUsuario, SenhaUsuario, TipoUsuario } = await req.json();
+        const body = await req.json().catch(() => null);
 
-        const result = await prisma.usuario.create({  // Adicione "await" aqui
+        if (!body || Object.keys(body).length === 0) {
+            return new Response(JSON.stringify({ error: "Requisição inválida ou corpo vazio" }), { status: 400 });
+        }
+
+        const { NomeUsuario, EmailUsuario, SenhaUsuario, TipoUsuario } = body;
+
+        if (!NomeUsuario || !EmailUsuario || !SenhaUsuario || TipoUsuario === undefined) {
+            return new Response(JSON.stringify({ error: "Todos os campos são obrigatórios" }), { status: 400 });
+        }
+
+        const senhaCriptografada = await hash(SenhaUsuario, 10);
+
+        const result = await prisma.usuario.create({
             data: {
                 NomeUsuario,
                 EmailUsuario,
-                SenhaUsuario,
+                SenhaUsuario: senhaCriptografada,
                 TipoUsuario
             }
         });
 
-        return new Response(
-            JSON.stringify({ success: true, user: result }),
-            { status: 201, headers: { 'Content-Type': 'application/json' } }
-        );
+        return new Response(JSON.stringify({ success: true, user: result }), {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' }
+        });
 
     } catch (error) {
         console.error('Erro ao processar a requisição:', error);
-        return new Response(
-            JSON.stringify({ error: error.message || 'Erro desconhecido' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
+        return new Response(JSON.stringify({ error: error.message || 'Erro desconhecido' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 }
