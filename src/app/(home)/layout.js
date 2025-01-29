@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Image from 'next/image';
 import { Toaster } from "@/components/ui/sonner"
+import Link from 'next/link';
 
 
 const geistSans = Geist({
@@ -52,18 +53,26 @@ export default function Layout({ children }) {
 
 
           <div className="flex w-[33.3%] justify-between">
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-[25%] h-[60px]">
-              Início
-            </button>
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-[25%] h-[60px]">
-              Doadores
-            </button>
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-[25%] h-[60px]">
-              Produtos
-            </button>
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-[25%] h-[60px]">
-              Dashboard
-            </button>
+            <Link href={"/inicio"} className="w-[25%]">
+              <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                Início
+              </button>
+            </Link>
+            <Link href={"/doadores"} className="w-[25%]">
+            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                Doadores
+              </button>
+            </Link>
+            <Link href={"/doacoes"} className="w-[25%]">
+            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                Doações
+              </button>
+              </Link>
+            <Link href={"/produtos"} className="w-[25%]">
+            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                Produtos
+              </button>
+              </Link>
           </div>
 
 
