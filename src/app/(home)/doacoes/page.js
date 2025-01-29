@@ -11,6 +11,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Check, ChevronsUpDown } from "lucide-react"
 
+import Link from 'next/link';
+
 import { cn } from "@/lib/utils"
 
 import {
@@ -85,12 +87,31 @@ export default function Home() {
     const [searchIn, setSearchIn] = useState("")
     const [filterBy, setFilterBy] = useState("")
 
+    //Variaveis locais
+    const [IdDoacoesFicha, setIdDoacoesFicha] = useState([])
+
+    const toggleIdDoacoesFicha = (Id) => {
+        if (IdDoacoesFicha.includes(Id)) {
+            // Remove o ID se já estiver presente
+            setIdDoacoesFicha(IdDoacoesFicha.filter(num => num !== Id));
+        } else {
+            // Adiciona o ID se não estiver presente
+            setIdDoacoesFicha([...IdDoacoesFicha, Id]);
+        }
+    };
+
+    useEffect(() => {
+        localStorage.setItem('ArrayIdDoacoes', JSON.stringify(IdDoacoesFicha));
+    }, [IdDoacoesFicha])
+
     // Variaveis de atualizar
     const [varLista, setVarLista] = useState(-1)
 
     //Variaveis normais
     const [observacaoSemiAtual, setObservacaoSemiAtual] = useState("")
     const [observacaoAtual, setObservacaoAtual] = useState("")
+    const [destinoSemiAtual, setDestinoSemiAtual] = useState("")
+    const [destinoAtual, setDestinoAtual] = useState("")
 
     //Variaveis de atualização
     const [update, setUpdate] = useState("")
@@ -125,7 +146,7 @@ export default function Home() {
         timeoutRef.current = setTimeout(() => {
             setSearchIn(value); // Atualiza searchIn após 1 segundo
             setLoading(true)
-          }, 1000);
+        }, 1000);
     };
 
 
@@ -133,7 +154,7 @@ export default function Home() {
     // Fetchs sem UseEffect
     const fetchUpdateDoacao = async () => {
         try {
-            const response = await fetch(`/api/doacao?&idToUpdate=${idToUpdate}&novoStatus=${value}&novaDataAgendada=${dateAgenda}&novaDataRetirada=${dateRetirado}`, {
+            const response = await fetch(`/api/doacao?&idToUpdate=${idToUpdate}&novoStatus=${value}&novaDataAgendada=${dateAgenda}&novaDataRetirada=${dateRetirado}&novaObservacao=${observacaoAtual}&novoDestino=${destinoAtual}`, {
                 method: 'PUT',
             });
             const result = await response.json();
@@ -175,6 +196,7 @@ export default function Home() {
                 });
                 const data = await response.json();
                 setObservacaoAtual(observacaoSemiAtual)
+                setDestinoAtual(destinoSemiAtual)
                 setDateAgenda(semiDateAgenda)
                 setDateRetirado(semiDateRetirado)
                 setValue(semiValue)
@@ -186,13 +208,20 @@ export default function Home() {
         }
 
         fetchLoadItens()
-    }, [idDoacaoBusca, observacaoSemiAtual, semiDateAgenda, semiDateRetirado, semiValue])
+    }, [idDoacaoBusca, observacaoSemiAtual, semiDateAgenda, semiDateRetirado, semiValue, destinoSemiAtual])
 
     return (
         <div className="ml-8">
-            <div className="flex mt-6 h-[60px] mb-3">
-                <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
-                <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Doações</h1>
+            <div className="flex mt-6 h-[60px] mb-3 justify-between">
+                <div className="flex">
+                    <Link href={"/inicio"}>
+                        <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
+                    </Link>
+                    <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Doações</h1>
+                </div>
+                <Link href="/ficha" target="_blank">
+                    <Button className={(IdDoacoesFicha.length > 0 ? "bg-green-400 hover:bg-green-500" : "bg-slate-200 text-slate-400 hover:bg-slate-200 cursor-default") + " mr-8"}>Imprimir Ficha de Retirada ({IdDoacoesFicha.length} Doações)</Button>
+                </Link>
             </div>
             <div className="flex justify-between">
                 <div className="w-[60%]">
@@ -275,13 +304,16 @@ export default function Home() {
                                     {doacao.map((doacao, index) => (
                                         <div key={index} className="flex pt-3 pl-4 pb-3 pr-4 rounded-xl border mb-5 hover:bg-slate-200 hover:cursor-pointer transition"
                                             onClick={() => {
-                                                setSemiDateAgenda(doacao.DataAgendada ? new Date(doacao.DataAgendada) : null)
-                                                setSemiDateRetirado(doacao.DataRetirada ? new Date(doacao.DataRetirada) : null)
-                                                setSemiValue(doacao.StatusDoacao)
-                                                setIdDoacaoBusca(doacao.IdDoacao)
-                                                setObservacaoSemiAtual(doacao.Observacao)
-                                                setIdToUpdate(doacao.IdDoacao)
-                                                setLoadingItens(true)
+                                                if (idToUpdate != doacao.IdDoacao) {
+                                                    setSemiDateAgenda(doacao.DataAgendada ? new Date(doacao.DataAgendada) : null)
+                                                    setSemiDateRetirado(doacao.DataRetirada ? new Date(doacao.DataRetirada) : null)
+                                                    setSemiValue(doacao.StatusDoacao)
+                                                    setIdDoacaoBusca(doacao.IdDoacao)
+                                                    setObservacaoSemiAtual(doacao.Observacao)
+                                                    setDestinoSemiAtual(doacao.Destino)
+                                                    setIdToUpdate(doacao.IdDoacao)
+                                                    setLoadingItens(true)
+                                                }
                                             }}
                                         >
                                             <div className="w-[50%]">
@@ -289,12 +321,12 @@ export default function Home() {
                                                     <h1 className="text-lg text-slate-300">Status: </h1>
                                                     <h1
                                                         className={`font-bold text-xl ml-1 ${doacao.StatusDoacao === 0
-                                                                ? (new Date(doacao.DataAgendada).getTime() < new Date().getTime() ? "text-yellow-500" : "text-blue-500")
-                                                                : doacao.StatusDoacao === 1
-                                                                    ? "text-green-500"
-                                                                    : doacao.StatusDoacao === 3
-                                                                        ? "text-red-500"
-                                                                        : ""
+                                                            ? (new Date(doacao.DataAgendada).getTime() < new Date().getTime() ? "text-yellow-500" : "text-blue-500")
+                                                            : doacao.StatusDoacao === 1
+                                                                ? "text-green-500"
+                                                                : doacao.StatusDoacao === 3
+                                                                    ? "text-red-500"
+                                                                    : ""
                                                             }`}
                                                     >
                                                         {(() => {
@@ -333,7 +365,14 @@ export default function Home() {
                                                         {doacao.doador.Rua}, {doacao.doador.Numero}, {doacao.doador.Bairro}
                                                     </h1>
                                                 </div>
-                                                <Button className="bg-green-400 mt-[26px]">Imprimir Ficha de Retirada</Button>
+                                                <Button
+                                                    className={(IdDoacoesFicha.includes(doacao.IdDoacao) ? "bg-red-400 hover:bg-red-500" : "bg-green-400 hover:bg-green-500") + " mt-[26px]"}
+                                                    onClick={() => toggleIdDoacoesFicha(doacao.IdDoacao)}
+                                                >
+                                                    {IdDoacoesFicha.includes(doacao.IdDoacao)
+                                                        ? "Remover da Ficha de Retirada"
+                                                        : "Adicionar à Ficha de Retirada"}
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
@@ -373,10 +412,14 @@ export default function Home() {
                                             </TableBody>
                                         </Table>
                                     </ScrollArea>
-                                    <h1 className="font-bold text-xl mb-2 mt-5">Observações:</h1>
-                                    <ScrollArea className="border h-[54px] w-full">
-                                        <h1>{observacaoAtual ? observacaoAtual : ""}</h1>
-                                    </ScrollArea>
+                                    <h1 className="font-bold text-xl mb-2 mt-2">Observações:</h1>
+                                    <Textarea className="resize-none"
+                                        value={observacaoAtual ? observacaoAtual : ""}
+                                        onChange={(e) => {
+                                            setObservacaoAtual(e.target.value)
+                                        }}>
+                                    </Textarea>
+
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <Button
@@ -422,50 +465,59 @@ export default function Home() {
                                         </PopoverContent>
                                     </Popover>
 
-                                    <Popover open={open} onOpenChange={setOpen}>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                aria-expanded={open}
-                                                className="w-[48%] justify-between mt-4"
-                                            >
-                                                {value != 'a'
-                                                    ? frameworks.find((framework) => framework.value === `${value}`)?.label
-                                                    : "Alterar Status"}
-                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[200px] p-0">
-                                            <Command>
-                                                <CommandList>
-                                                    <CommandEmpty>No framework found.</CommandEmpty>
-                                                    <CommandGroup>
-                                                        {frameworks.map((framework) => (
-                                                            <CommandItem
-                                                                key={framework.value}
-                                                                value={framework.value}
-                                                                onSelect={(currentValue) => {
-                                                                    setValue(currentValue)
-                                                                    setOpen(false)
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn(
-                                                                        "mr-2 h-4 w-4",
-                                                                        value === framework.value ? "opacity-100" : "opacity-0"
-                                                                    )}
-                                                                />
-                                                                {framework.label}
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
+                                    <div className="flex">
+                                        <Popover open={open} onOpenChange={setOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={open}
+                                                    className="w-[48%] justify-between mt-4"
+                                                >
+                                                    {value != 'a'
+                                                        ? frameworks.find((framework) => framework.value === `${value}`)?.label
+                                                        : "Alterar Status"}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[200px] p-0">
+                                                <Command>
+                                                    <CommandList>
+                                                        <CommandEmpty>No framework found.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {frameworks.map((framework) => (
+                                                                <CommandItem
+                                                                    key={framework.value}
+                                                                    value={framework.value}
+                                                                    onSelect={(currentValue) => {
+                                                                        setValue(currentValue)
+                                                                        setOpen(false)
+                                                                    }}
+                                                                >
+                                                                    <Check
+                                                                        className={cn(
+                                                                            "mr-2 h-4 w-4",
+                                                                            value === framework.value ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    {framework.label}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
 
-                                    <Button className="bg-green-400 hover:bg-green-500 w-[48%] ml-[4%]"
+                                        <Input placeholder="Destino" className="w-[48%] ml-[4%] mt-4"
+                                            value={destinoAtual ? destinoAtual : ""}
+                                            onChange={(e) => {
+                                                setDestinoAtual(e.target.value)
+                                            }}>
+                                        </Input>
+                                    </div>
+
+                                    <Button className="bg-green-400 hover:bg-green-500 w-full mt-4"
                                         onClick={fetchUpdateDoacao}
                                     >Aplicar Edições</Button>
                                 </>

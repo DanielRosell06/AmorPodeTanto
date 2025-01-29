@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useEffect, useState, useRef, setOpen } from "react";
 
+import Link from 'next/link';
+
 import {
     Table,
     TableBody,
@@ -12,11 +14,11 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-  } from "@/components/ui/table"
+} from "@/components/ui/table"
 
 export default function Home() {
     //Variaveis de Loading
-    const[loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true)
 
     //Variaveis de Popup
     const [popupAdicionarProduto, setPopupAdicionarProduto] = useState(false)
@@ -58,11 +60,11 @@ export default function Home() {
     const fetchAdicionarProduto = async () => {
         try {
             const response = await fetch(`/api/produto`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(novoProduto) // Envia os dados do novo doador
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(novoProduto) // Envia os dados do novo doador
             })
             setPopupAdicionarProduto(false) // Fecha o popup após adicionar
             setNovoProduto({
@@ -78,11 +80,11 @@ export default function Home() {
     const fetchDeletarProduto = async () => {
         try {
             const response = await fetch(`/api/produto?IdToDelete=${idToDelete}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(novoProduto) // Envia os dados do novo doador
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(novoProduto) // Envia os dados do novo doador
             })
             setPopupDeletarProduto(false) // Fecha o popup após adicionar
             atualizarLista()
@@ -107,7 +109,7 @@ export default function Home() {
                 IdProduto: "",
                 Nome: "",
                 UN: ""
-            })        
+            })
         } catch (error) {
             console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
         }
@@ -116,7 +118,7 @@ export default function Home() {
 
     useEffect(() => {
 
-        if (idToEditar == -1){
+        if (idToEditar == -1) {
             return
         }
 
@@ -141,27 +143,29 @@ export default function Home() {
 
     useEffect(() => {
         const fetchLoadProdutos = async () => {
-          try {
-            const response = await fetch(`/api/produto?nomeSearch=${nomePesquisa}`, {
-              method: 'GET',
-            });
-            const data = await response.json(); // Converta a resposta para JSON
-            setProduto(data); // Atualize o estado com os dados
-          } catch (error) {
-            console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
-          }
-          setLoading(false);
+            try {
+                const response = await fetch(`/api/produto?nomeSearch=${nomePesquisa}`, {
+                    method: 'GET',
+                });
+                const data = await response.json(); // Converta a resposta para JSON
+                setProduto(data); // Atualize o estado com os dados
+            } catch (error) {
+                console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
+            }
+            setLoading(false);
         }
-    
+
         fetchLoadProdutos()
-      }, [varAtualizaLista, nomePesquisa]);
+    }, [varAtualizaLista, nomePesquisa]);
 
 
-    return(
+    return (
         <div className="ml-8">
 
             <div className="flex mt-6 h-[60px]">
-                <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
+                <Link href={"/inicio"}>
+                    <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
+                </Link>
                 <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Produtos</h1>
             </div>
 
@@ -193,72 +197,74 @@ export default function Home() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {loading ? 
-                        <>
-                            <TableRow>
-                                <TableCell className="font-medium border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                                <TableCell className="border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                                <TableCell className=""><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                                <TableCell className="border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                                <TableCell className=""><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                                <TableCell className="border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                                <TableCell className=""><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
-                            </TableRow>
-                        </>
-                        :
-                        <>
-                            {produto.map((produto) => (
-                                <TableRow key={produto.IdProduto}>
-                                    <TableCell className="font-medium border-r">{produto.Nome}</TableCell>
-                                    <TableCell className="border-r">{produto.UN}</TableCell>
-                                    <TableCell className="">
-                                        <Button className=" rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] "
-                                            onClick={() => {
-                                                setIdToEditar(produto.IdProduto)
-                                                setProdutoEditar({...produtoEditar, IdProduto: produto.IdProduto})
-                                                setPopupEditarProduto(true)
-                                            }}
-                                        ><i className="fas fa-edit"></i></Button>
-                                        <Button className=" rounded-full bg-slate-300 hover:bg-red-400 w-[35px] h-[35px] ml-1"
-                                            onClick={() => {
-                                                setIdToDelete(produto.IdProduto)
-                                                setPopupDeletarProduto(true)
-                                            }}
-                                        ><i className="fas fa-trash"></i></Button>
-                                    </TableCell>
+                        {loading ?
+                            <>
+                                <TableRow>
+                                    <TableCell className="font-medium border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                    <TableCell className="border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                    <TableCell className=""><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
                                 </TableRow>
-                            ))}
-                        </>
+                                <TableRow>
+                                    <TableCell className="font-medium border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                    <TableCell className="border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                    <TableCell className=""><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                    <TableCell className="border-r"><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                    <TableCell className=""><Skeleton className="h-9 w-[100%]"></Skeleton></TableCell>
+                                </TableRow>
+                            </>
+                            :
+                            <>
+                                {produto.map((produto) => (
+                                    <TableRow key={produto.IdProduto}>
+                                        <TableCell className="font-medium border-r">{produto.Nome}</TableCell>
+                                        <TableCell className="border-r">{produto.UN}</TableCell>
+                                        <TableCell className="">
+                                            <Button className=" rounded-full bg-slate-300 hover:bg-slate-400 w-[35px] h-[35px] "
+                                                onClick={() => {
+                                                    setIdToEditar(produto.IdProduto)
+                                                    setProdutoEditar({ ...produtoEditar, IdProduto: produto.IdProduto })
+                                                    setPopupEditarProduto(true)
+                                                }}
+                                            ><i className="fas fa-edit"></i></Button>
+                                            {
+                                                //<Button className=" rounded-full bg-slate-300 hover:bg-red-400 w-[35px] h-[35px] ml-1"
+                                                //onClick={() => {
+                                                //    setIdToDelete(produto.IdProduto)
+                                                //    setPopupDeletarProduto(true)
+                                                //}}
+                                                //><i className="fas fa-trash"></i></Button>
+                                            }
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </>
                         }
                     </TableBody>
                 </Table>
             </div>
-            
+
 
 
             {popupAdicionarProduto && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
                         <h1 className="text-xl font-bold mb-4 text-center">Adicionar Produto</h1>
-        
-        
+
+
                         <div className="flex text-left">
                             <div>
                                 <h1>Nome</h1>
-                                <Input type="CPF/CNPJ" placeholder="Nome" className="w-[223px]" onChange={(e) => setNovoProduto({ ...novoProduto, Nome: e.target.value })}/>
+                                <Input type="CPF/CNPJ" placeholder="Nome" className="w-[223px]" onChange={(e) => setNovoProduto({ ...novoProduto, Nome: e.target.value })} />
                             </div>
                             <div>
                                 <h1 className="ml-2">Unidade</h1>
-                                <Input type="Name" placeholder="Unidade (kg, L, etc.)" className="w-[170px] ml-2" onChange={(e) => setNovoProduto({ ...novoProduto, UN: e.target.value })}/>
+                                <Input type="Name" placeholder="Unidade (kg, L, etc.)" className="w-[170px] ml-2" onChange={(e) => setNovoProduto({ ...novoProduto, UN: e.target.value })} />
                             </div>
                         </div>
-        
+
                         <hr className="mt-4 mb-4"></hr>
 
                         <div>
@@ -268,7 +274,7 @@ export default function Home() {
                             >
                                 Confirmar
                             </button>
-                            
+
                             <button
                                 className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
                                 onClick={() => setPopupAdicionarProduto(false)}
@@ -282,58 +288,59 @@ export default function Home() {
 
 
             {popupEditarProduto && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-                <h1 className="text-xl font-bold mb-4 text-center">Editar Produto</h1>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                        <h1 className="text-xl font-bold mb-4 text-center">Editar Produto</h1>
 
-                <div className="flex text-left">
-                    <div>
-                    <h1>Nome</h1>
-                    <Input 
-                        type="text" 
-                        placeholder="Nome" 
-                        className="w-[223px]" 
-                        onChange={(e) => setProdutoEditar({ ...produtoEditar, Nome: e.target.value })} 
-                        value={produtoEditar.Nome || ''}
-                    />
+                        <div className="flex text-left">
+                            <div>
+                                <h1>Nome</h1>
+                                <Input
+                                    type="text"
+                                    placeholder="Nome"
+                                    className="w-[223px]"
+                                    onChange={(e) => setProdutoEditar({ ...produtoEditar, Nome: e.target.value })}
+                                    value={produtoEditar.Nome || ''}
+                                />
+                            </div>
+                            <div>
+                                <h1 className="ml-2">Unidade</h1>
+                                <Input
+                                    type="text"
+                                    placeholder="Unidade (kg, L, etc.)"
+                                    className="w-[170px] ml-2"
+                                    onChange={(e) => setProdutoEditar({ ...produtoEditar, UN: e.target.value })}
+                                    value={produtoEditar.UN || ''}
+                                />
+                            </div>
+                        </div>
+
+                        <hr className="mt-4 mb-4"></hr>
+
+                        <div>
+                            <button
+                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                                onClick={fetchEditarProduto}
+                            >
+                                Confirmar
+                            </button>
+
+                            <button
+                                className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                                onClick={() => {
+                                    setPopupEditarProduto(false)
+                                    setProdutoEditar({
+                                        IdProduto: "",
+                                        Nome: "",
+                                        UN: ""
+                                    })
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                    <h1 className="ml-2">Unidade</h1>
-                    <Input 
-                        type="text" 
-                        placeholder="Unidade (kg, L, etc.)" 
-                        className="w-[170px] ml-2" 
-                        onChange={(e) => setProdutoEditar({ ...produtoEditar, UN: e.target.value })} 
-                        value={produtoEditar.UN || ''}
-                    />
-                    </div>
                 </div>
-
-                <hr className="mt-4 mb-4"></hr>
-
-                <div>
-                    <button
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                    onClick={fetchEditarProduto}
-                    >
-                    Confirmar
-                    </button>
-                    
-                    <button
-                    className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
-                    onClick={() => {setPopupEditarProduto(false)
-                    setProdutoEditar({
-                        IdProduto: "",
-                        Nome: "",
-                        UN: ""
-                    })   
-                    }}
-                    >
-                    Cancelar
-                    </button>
-                </div>
-                </div>
-            </div>
             )}
 
 
@@ -346,7 +353,7 @@ export default function Home() {
                         <div className="flex text-left">
                             Você tem certeza que deseja deletar este produto?
                         </div>
-        
+
                         <hr className="mt-4 mb-4"></hr>
 
                         <div>
@@ -356,7 +363,7 @@ export default function Home() {
                             >
                                 Confirmar
                             </button>
-                            
+
                             <button
                                 className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
                                 onClick={() => setPopupDeletarProduto(false)}

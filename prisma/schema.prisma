@@ -42,6 +42,7 @@ model Doacao {
   DataAgendada DateTime?
   DataRetirada DateTime?
   Observacao String?
+  Destino String?
 }
 
 model DoacaoItem {

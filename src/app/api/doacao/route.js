@@ -172,6 +172,7 @@ export async function GET(req) {
 export async function POST(req) {
     let Itens;
     let observacao;
+    let destino;
     let date;
 
     try {
@@ -180,7 +181,8 @@ export async function POST(req) {
 
         // Extrai a observacao e a data do corpo da requisição
         observacao = Itens.observacao || ""; // Atribui uma string vazia caso não tenha observação
-        date = Itens.date ? new Date(Itens.date) : new Date(); // Usa a data fornecida ou a data atual
+        destino = Itens.destino || ""; // Atribui uma string vazia caso não tenha observação
+        date = Itens.date ? new Date(Itens.date) : null; // Usa a data fornecida ou a data atual
 
         // Verifica se Itens.itens é um array
         if (!Array.isArray(Itens.itens)) {
@@ -198,8 +200,9 @@ export async function POST(req) {
             data: {
                 IdDoador: IdDoador,
                 Observacao: observacao,
+                Destino: destino, 
                 DataAgendada: date, // Salva a data no formato Date
-                StatusDoacao: date ? 0 : 2
+                StatusDoacao: 0
             }
         });
 
@@ -233,6 +236,8 @@ export async function PUT(req) {
     const searchParams = url.searchParams;
 
     const IdToUpdate = parseInt(searchParams.get('idToUpdate'), 10);
+    const novaObservacao = (searchParams.get('novaObservacao'));
+    const novoDestino = (searchParams.get('novoDestino'));
     const novoStatus = searchParams.has('novoStatus')
         ? parseInt(searchParams.get('novoStatus'), 10)
         : undefined;
@@ -252,6 +257,9 @@ export async function PUT(req) {
 
     try {
         const updateData = {};
+
+        updateData.Observacao = novaObservacao
+        updateData.Destino = novoDestino
 
         if (novoStatus !== undefined && !isNaN(novoStatus)) {
             updateData.StatusDoacao = novoStatus;
