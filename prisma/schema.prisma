@@ -52,3 +52,11 @@ model DoacaoItem {
   Quantidade   Int
   UNItem       String? @db.VarChar(20)
 }
+
+model Usuario {
+  IdUsuario Int @id @default(autoincrement())
+  NomeUsuario String
+  EmailUsuario String @unique
+  SenhaUsuario String
+  TipoUsuario Int @default(0)
+}

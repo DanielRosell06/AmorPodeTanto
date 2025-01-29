@@ -78,7 +78,6 @@ export default function NoLayoutPage() {
                     Destino: {doacao.Destino}
                   </div>
                 </div>
-                {setLoading(false)}
               </div>
             )) :
             <>

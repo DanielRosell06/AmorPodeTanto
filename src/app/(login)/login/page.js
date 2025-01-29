@@ -13,6 +13,26 @@ export default function Home() {
     const [emailDigitado, setEmailDigitado] = useState("")
     const [senhaDigitada, setSenhaDigitada] = useState("")
 
+    const [digitarNovamente, setDigitarNovamente] = useState(false)
+
+    const fetchSearchUsuario = async () => {
+        try {
+            const response = await fetch(`/api/logincadastro?email=${emailDigitado}&senha=${senhaDigitada}`, {
+                method: 'GET',
+            });
+            const data = await response.json();
+
+            if (data == false){
+                setDigitarNovamente(true)
+            }else{
+                setDigitarNovamente(false)
+                localStorage.setItem('Usuario', JSON.stringify(data));
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar usuário:', error);
+        }
+    };
+
     return (
         <div className='flex  w-full h-[100vh]'>
             <div className="border w-[450px]  rounded-xl ml-auto mr-auto mt-auto mb-auto p-5">
@@ -43,11 +63,16 @@ export default function Home() {
                             className="w-[50px] text-black border bg-slate-50 hover:bg-slate-200"
                             onClick={() => { setVerSenha(verSenha * -1) }}
                         >
-                            {verSenha != 1 ? <i class="fas fa-eye"></i> : <i class="fas fa-eye-slash"></i>}
+                            {verSenha != 1 ? <i className="fas fa-eye"></i> : <i className="fas fa-eye-slash"></i>}
                         </Button>
                     </div>
+                    <div>
+                        <h1 className='text-red-500'>{digitarNovamente ? "Email ou Senha Incorreta, digite novamente" : ""}</h1>
+                    </div>
                     <div className='flex'>
-                        <Button className="bg-green-400 hover:bg-green-500 ml-auto mr-auto mt-6 text-lg text-white pl-6 pr-6 mb-5">Entrar</Button>
+                        <Button className="bg-green-400 hover:bg-green-500 ml-auto mr-auto mt-6 text-lg text-white pl-6 pr-6 mb-5"
+                            onClick={fetchSearchUsuario}
+                        >Entrar</Button>
                     </div>
                 </div>
             </div>

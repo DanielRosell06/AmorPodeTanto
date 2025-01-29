@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Image from 'next/image';
+import { Toaster } from "@/components/ui/sonner"
 
 
 const geistSans = Geist({
@@ -77,6 +78,7 @@ export default function Layout({ children }) {
         </div>
         <hr></hr>
         {children}
+        <Toaster />
       </body>
     </html>
   );
