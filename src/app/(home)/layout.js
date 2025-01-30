@@ -3,6 +3,8 @@ import "../globals.css";
 import Image from 'next/image';
 import { Toaster } from "@/components/ui/sonner"
 import Link from 'next/link';
+import Providers from "@/components/Providers";
+import LogoutButton from "@/components/LogoutButton"; 
 
 
 const geistSans = Geist({
@@ -26,7 +28,7 @@ export const metadata = {
 export default function Layout({ children }) {
   return (
     <html lang="en">
-      
+
       <head>
         {/* Font Awesome */}
         <link
@@ -37,57 +39,52 @@ export default function Layout({ children }) {
 
 
       <body>
-        <div className="flex gap-2 justify-between">
+        <Providers>
+          <div className="flex gap-2 justify-between">
 
-          <div className="flex w-[33.3%]">
-            <Image
-              src='/Logo.png'
-              alt='Logo'
-              width={84}
-              height={50}
-              quality={100}
-              className="ml-4 mt-[5px] w-[84px] h-[50px]"
-            />
-          </div>
-
-
-
-          <div className="flex w-[33.3%] justify-between">
-            <Link href={"/inicio"} className="w-[25%]">
-              <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
-                Início
-              </button>
-            </Link>
-            <Link href={"/doadores"} className="w-[25%]">
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
-                Doadores
-              </button>
-            </Link>
-            <Link href={"/doacoes"} className="w-[25%]">
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
-                Doações
-              </button>
-              </Link>
-            <Link href={"/produtos"} className="w-[25%]">
-            <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
-                Produtos
-              </button>
-              </Link>
-          </div>
-
-
-
-          <div className="w-[33.3%]">
-            <div className="flex w-[40px] h-[100%] float-right mr-10">
-              <a href="#" className="mt-auto mb-auto ">Sair</a>
+            <div className="flex w-[33.3%]">
+              <Image
+                src='/Logo.png'
+                alt='Logo'
+                width={84}
+                height={50}
+                quality={100}
+                className="ml-4 mt-[5px] w-[84px] h-[50px]"
+              />
             </div>
+
+
+
+            <div className="flex w-[33.3%] justify-between">
+              <Link href={"/doadores"} className="w-[33.3%]">
+                <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                  Doadores
+                </button>
+              </Link>
+              <Link href={"/doacoes"} className="w-[33.3%]">
+                <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                  Doações
+                </button>
+              </Link>
+              <Link href={"/produtos"} className="w-[33.3%]">
+                <button className="bg-white text-black hover:bg-pink-100 hover:shadow-pink-100 transition-all duration-200 ease-in-out transform w-full h-[60px]">
+                  Produtos
+                </button>
+              </Link>
+            </div>
+
+
+
+            <div className="w-[33.3%] flex">
+             <LogoutButton />
+            </div>
+
+
           </div>
-
-
-        </div>
-        <hr></hr>
-        {children}
-        <Toaster />
+          <hr></hr>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

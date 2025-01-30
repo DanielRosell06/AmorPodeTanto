@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Image from 'next/image';
+import Providers from "@/components/Providers"; // Importando o Provider
 
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Ficha de Retirada",
-  description: "Ficha de Retirada",
+  title: "Login",
+  description: "Login no Sistema",
 };
 
 
@@ -24,7 +25,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      
+
       <head>
         {/* Font Awesome */}
         <link
@@ -35,7 +36,9 @@ export default function RootLayout({ children }) {
 
 
       <body>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

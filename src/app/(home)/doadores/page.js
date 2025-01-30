@@ -86,6 +86,8 @@ const frameworks = [
 ]
 
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
 
@@ -374,6 +376,22 @@ export default function Home() {
     fetchLoadDoadores();
   }, [varAtualizarLista, switchDesativos, pesquisa, pesquisaInput, ordenacao]);
 
+
+
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Verifica se a sessão ainda está carregando ou se não existe
+    if (status === "loading") return; // Não faz nada enquanto carrega
+    if (!session) {
+      router.push("/login");
+    }
+  }, [session, status, router]);
+
+  if (status === "loading") {
+    return null; // Ou um carregando, enquanto a sessão é carregada
+  }
 
 
 

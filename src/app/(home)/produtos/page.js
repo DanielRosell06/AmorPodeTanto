@@ -16,6 +16,11 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+
 export default function Home() {
     //Variaveis de Loading
     const [loading, setLoading] = useState(true)
@@ -159,12 +164,30 @@ export default function Home() {
     }, [varAtualizaLista, nomePesquisa]);
 
 
+
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        // Verifica se a sessão ainda está carregando ou se não existe
+        if (status === "loading") return; // Não faz nada enquanto carrega
+        if (!session) {
+            router.push("/login");
+        }
+    }, [session, status, router]);
+
+    if (status === "loading") {
+        return null; // Ou um carregando, enquanto a sessão é carregada
+    }
+
+
+
     return (
         <div className="ml-8">
 
             <div className="flex mt-6 h-[60px]">
                 <Link href={"/inicio"}>
-                    <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full ml-8 mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
+                    <Button className="w-[50px] h-[50px] bg-slate-200 rounded-full mt-auto mb-auto hover:bg-slate-400 text-black"><i className="fas fa-arrow-left"></i></Button>
                 </Link>
                 <h1 className=" text-3xl mt-auto mb-auto ml-3 underline">Produtos</h1>
             </div>

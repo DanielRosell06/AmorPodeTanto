@@ -17,6 +17,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 export default function Home() {
 
 
@@ -66,6 +69,28 @@ export default function Home() {
             console.error('Erro ao adicionar usuário:', error);
         }
     };
+
+
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        // Verifica se a sessão ainda está carregando ou se não existe
+        if (status === "loading") return; // Não faz nada enquanto carrega
+        if (!session || session.user.role < 1) {
+            if (!session){
+                router.push("/login");
+            }else{
+                router.push("/inicio");
+            }
+
+        }
+    }, [session, status, router]);
+
+    if (status === "loading") {
+        return null; // Ou um carregando, enquanto a sessão é carregada
+    }
+
 
     return (
         <div className='w-full h-[80vh]'>

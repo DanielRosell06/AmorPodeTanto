@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Image from 'next/image';
+import Providers from "@/components/Providers"; // Importando o Provider
 
 
 const geistSans = Geist({
@@ -35,7 +36,9 @@ export default function RootLayout({ children }) {
 
 
             <body>
-                {children}
+                <Providers>
+                    {children}
+                </Providers>
             </body>
         </html>
     );
