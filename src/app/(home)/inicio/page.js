@@ -168,12 +168,12 @@ export default function Home() {
       <h1 className="text-4xl  mt-10 mb-10 ml-4">{nomeUsuario != "" ? `👋Olá ${nomeUsuario}` : ""}</h1>
 
       {loading ?
-        <div className="flex justify-between">
+        <div className="flex">
           <Skeleton className="w-[500px] h-[393px]"></Skeleton>
-          <Skeleton className="w-[740px] h-[393px]"></Skeleton>
+          <Skeleton className="w-[740px] h-[393px] ml-4"></Skeleton>
         </div>
         :
-        <div className="flex justify-between">
+        <div className="flex">
           <Card className="flex w-[500px]">
             <CardContent className="flex-1 pb-0 flex">
               <div className="flex-1">
@@ -222,7 +222,7 @@ export default function Home() {
           </Card>
 
 
-          <Card className="w-[740px]">
+          <Card className="w-[740px] ml-4">
             <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
               <div className="grid flex-1 gap-1 text-center sm:text-left">
                 <CardTitle className="text-lg">Doações feitas e Doadores Adicionados Por Dia</CardTitle>

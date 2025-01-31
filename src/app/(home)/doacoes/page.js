@@ -88,6 +88,9 @@ export default function Home() {
     const [searchIn, setSearchIn] = useState("")
     const [filterBy, setFilterBy] = useState("")
 
+    //Popups
+    const [popupInformacoes, setPopupInformacoes] = useState(false)
+
     //Variaveis locais
     const [IdDoacoesFicha, setIdDoacoesFicha] = useState([])
 
@@ -107,6 +110,10 @@ export default function Home() {
 
     // Variaveis de atualizar
     const [varLista, setVarLista] = useState(-1)
+    const [isFirstRender, setIsFirstRender] = useState(true)
+
+    //Variaveis de busca
+    const [idToFind, setIdToFind] = useState(-1)
 
     //Variaveis normais
     const [observacaoSemiAtual, setObservacaoSemiAtual] = useState("")
@@ -123,6 +130,19 @@ export default function Home() {
     // Variaveis de lista
     const [doacao, setDoacao] = useState([])
     const [itens, setItens] = useState([])
+
+    //Listas
+    const [doadorEditado, setDoadorEditado] = useState({
+        IdDoador: " ",
+        CPFCNPJ: " ",
+        Nome: " ",
+        CEP: " ",
+        Numero: " ",
+        Complemento: " ",
+        Contato: " ",
+        Telefone: " ",
+        Email: " "
+    })
 
 
     //Funções normais
@@ -164,6 +184,37 @@ export default function Home() {
             console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
         }
     }
+
+
+    useEffect(() => {
+
+        if (isFirstRender) {
+            setIsFirstRender(false)
+            return
+        }
+
+        if (idToFind == -1) {
+            return
+        }
+
+        const fetchGetDoador = async () => {
+            try {
+                const response = await fetch(`api/doadorById?Id=${idToFind}`, {
+                    method: 'GET',
+                })
+                const data = await response.json();
+                setDoadorEditado(data)
+                setIdToFind(-1)
+            } catch (error) {
+                console.error('Erro ao buscar doador:', error)
+            }
+        }
+
+        const fetchData = async () => {
+            await fetchGetDoador();
+        };
+        fetchData();
+    }, [idToFind, isFirstRender]);
 
 
     // Fetchs com useEffect
@@ -363,7 +414,12 @@ export default function Home() {
                                                     <h1 className="font-bold text-lg mt-3 mb-2">Informações do Doador</h1>
                                                     <h1>Nome: {doacao.doador.Nome || "Não informado"}</h1>
                                                     <h1>Telefone: {doacao.contato?.[0]?.Telefone || "Não informado"}</h1>
-                                                    <Button className=" bg-white text-black border border-slate-300 hover:bg-slate-300 text-sm mt-2 w-36">
+                                                    <Button className=" bg-white text-black border border-slate-300 hover:bg-slate-300 text-sm mt-2 w-36"
+                                                        onClick={() => {
+                                                            setPopupInformacoes(true)
+                                                            setIdToFind(doacao.doador.IdDoador)
+                                                        }}
+                                                    >
                                                         Mais Informações
                                                     </Button>
                                                 </div>
@@ -542,6 +598,101 @@ export default function Home() {
                     }
                 </div>
             </div>
+
+
+            {popupInformacoes && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50  text-center">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                        <h1 className="text-xl font-bold mb-4">Informações de {doadorEditado.Nome}</h1>
+
+
+                        <div className="flex text-left">
+                            <div>
+                                <h1 className=" font-bold">CPF/CNPJ:</h1>
+                                <h1>{doadorEditado.CPFCNPJ}</h1>
+                            </div>
+                            <div className="ml-10">
+                                <h1 className=" font-bold">Nome:</h1>
+                                <h1>{doadorEditado.Nome}</h1>
+                            </div>
+                        </div>
+
+                        <hr className="mt-4"></hr>
+
+                        <div className="flex mt-4">
+                            <div>
+                                <h1 className="text-left font-bold">CEP:</h1>
+                                <h1>{doadorEditado.CEP}</h1>
+                            </div>
+                            <div>
+                                <h1 className="ml-2 text-left font-bold">Número:</h1>
+                                <h1>{doadorEditado.Numero}</h1>
+                            </div>
+                        </div>
+
+                        <div className="flex">
+                            <div className="flex flex-col text-left mt-4">
+                                <h1 className="font-bold">Rua:</h1>
+                                <h1>{doadorEditado.Rua}</h1>
+                            </div>
+
+                            <div className="flex flex-col text-left mt-4 ml-10">
+                                <h1 className="font-bold">Bairro:</h1>
+                                <h1>{doadorEditado.Bairro}</h1>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col text-left mt-4">
+                            <h1 className="mt-5 font-bold">Complemento:</h1>
+                            <h1>{doadorEditado.Complemento}</h1>
+                        </div>
+
+                        <hr className="mt-4"></hr>
+
+                        <div className="flex mt-4 text-left">
+                            <div>
+                                <h1 className="font-bold ">Nome do Contato:</h1>
+                                <h1>{doadorEditado.Contato}</h1>
+                            </div>
+                            <div className="ml-20">
+                                <h1 className="text-left font-bold">Telefone:</h1>
+                                <h1>{doadorEditado.Telefone}</h1>
+                            </div>
+                        </div>
+                        <div className=" text-left">
+                            <h1 className="mt-5 font-bold">E-mail:</h1>
+                            <h1>{doadorEditado.Email}</h1>
+                        </div>
+
+                        <hr className="mt-4"></hr>
+
+                        <div className="flex justify-end mt-3">
+
+
+                            <Button
+                                className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-slate-500 transition"
+                                onClick={() => {
+                                    setPopupInformacoes(false)
+                                    setDoadorEditado({
+                                        IdDoador: " ",
+                                        CPFCNPJ: " ",
+                                        Nome: " ",
+                                        CEP: " ",
+                                        Numero: " ",
+                                        Complemento: " ",
+                                        Contato: " ",
+                                        Telefone: " ",
+                                        Email: " "
+                                    })
+                                }}
+                            >
+                                Fechar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     )
 }

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Login",
-  description: "Login no Sistema",
+  title: "Ficha de retirada",
+  description: "Ficha de retirada",
 };
 
 
@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
       </head>
 
 
-      <body>
+      <body className="mt-0">
         <Providers>
           {children}
         </Providers>

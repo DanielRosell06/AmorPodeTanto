@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function NoLayoutPage() {
 
@@ -47,9 +48,20 @@ export default function NoLayoutPage() {
         :
         <>
           {doacoes.length > 0 ?
-            doacoes.map((doacao) => (
-              <div key={doacao.IdDoacao} className='ml-10 mr-10 text-sm mt-4'>
-                <div className='border'>
+            doacoes.map((doacao, index) => (
+
+              <div key={doacao.IdDoacao} className='ml-10 mr-10 text-sm '>
+                {index % 7 == 0 ?
+                  <Image
+                    className=" mt-[5px] w-[126px] h-[75px] "
+                    src='/Logo.png'
+                    alt='Logo'
+                    width={168}
+                    height={100}
+                    quality={100}
+                  />
+                  : ""}
+                <div className='border mt-4'>
                   <div className='flex'>
                     <div className='w-[33%] border-r border-b'>Nome: {doacao.contato[0].Contato}</div>
                     <div className='w-[33%] border-r border-b'>Telefone: {doacao.contato[0].Telefone}</div>

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-    title: "Ficha de Retirada",
-    description: "Ficha de Retirada",
+    title: "Login",
+    description: "Login",
 };
 
 
