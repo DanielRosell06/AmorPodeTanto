@@ -102,6 +102,23 @@ export async function GET(req) {
                         }).then(contacts => contacts.map(c => c.IdDoador)),
                     },
                 };
+            } else if (searchBy === 'CPFCNPJ') {
+                whereFilter = {
+                    ...whereFilter,
+                    IdDoador: {
+                        in: await prisma.doador.findMany({
+                            where: {
+                                CPFCNPJ: {
+                                    contains: searchIn,
+                                    mode: 'insensitive',
+                                },
+                            },
+                            select: {
+                                IdDoador: true,
+                            },
+                        }).then(donors => donors.map(d => d.IdDoador)),
+                    },
+                };
             }
         }
 

@@ -351,6 +351,7 @@ export default function Home() {
                                 <SelectItem value="Nenhum">Nenhum</SelectItem>
                                 <SelectItem value="Nome">Nome</SelectItem>
                                 <SelectItem value="Telefone">Telefone</SelectItem>
+                                <SelectItem value="CPFCNPJ">CPF / CNPJ</SelectItem>
                             </SelectContent>
                         </Select>
 
