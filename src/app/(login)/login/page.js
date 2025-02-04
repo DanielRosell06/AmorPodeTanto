@@ -60,7 +60,7 @@ export default function Login() {
                             onChange={(e) => setSenha(e.target.value)}
                         />
                         <Button
-                            className="w-[50px] text-black border bg-slate-50 hover:bg-slate-200"
+                            className="w-[50px] text-black border bg-slate-50 hover:bg-slate-200 ml-2"
                             onClick={() => { setVerSenha(verSenha * -1) }}
                         >
                             {verSenha != 1 ? <i className="fas fa-eye"></i> : <i className="fas fa-eye-slash"></i>}

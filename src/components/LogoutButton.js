@@ -28,7 +28,7 @@ export default function LogoutButton() {
         <>
             <button
                 onClick={() => {signOut(); router.push("/login")}}
-                className="mt-auto mb-auto hover:underline mr-8 ml-auto text-slate-400 hover:text-black"
+                className="text-sm mt-auto mb-auto hover:bg-slate-100 mr-3 ml-8 text-slate-400 hover:text-black border pl-3 pr-3 pt-1 pb-1 rounded-sm"
             >
                 Sair
             </button>
@@ -36,7 +36,7 @@ export default function LogoutButton() {
                 <>
                     <button
                         onClick={() => { router.push("/cadastro"); }}
-                        className="mt-auto mb-auto text-slate-400 hover:text-black hover:underline mr-10"
+                        className="text-sm mt-auto mb-auto hover:bg-slate-100 mr-8  text-slate-400 hover:text-black border pl-3 pr-3 pt-1 pb-1 rounded-sm"
                     >
                         Cadastrar Usuário
                     </button>

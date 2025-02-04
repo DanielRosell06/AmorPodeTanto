@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner"
 import Link from 'next/link';
 import Providers from "@/components/Providers";
 import LogoutButton from "@/components/LogoutButton"; 
+import UserNavbarName from "@/components/UserNavbarName";
 
 
 const geistSans = Geist({
@@ -76,6 +77,7 @@ export default function Layout({ children }) {
 
 
             <div className="w-[33.3%] flex">
+             <UserNavbarName />
              <LogoutButton />
             </div>
 
