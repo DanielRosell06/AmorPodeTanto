@@ -79,7 +79,7 @@ export default function Home() {
     const [semiDateRetirado, setSemiDateRetirado] = React.useState();
 
     const [loading, setLoading] = useState(true)
-    const [loadingItens, setLoadingItens] = useState(false)
+    const [loadingItens, setLoadingItens] = useState(-1)
 
     // Variaveis de Busca
     const [idDoacaoBusca, setIdDoacaoBusca] = useState(-1)
@@ -253,7 +253,7 @@ export default function Home() {
                 setDateRetirado(semiDateRetirado)
                 setValue(semiValue)
                 setItens(data);
-                setLoadingItens(false)
+                setLoadingItens(0)
             } catch (error) {
                 console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
             }
@@ -380,7 +380,7 @@ export default function Home() {
                                                     setObservacaoSemiAtual(doacao.Observacao)
                                                     setDestinoSemiAtual(doacao.Destino)
                                                     setIdToUpdate(doacao.IdDoacao)
-                                                    setLoadingItens(true)
+                                                    setLoadingItens(1)
                                                 }
                                             }}
                                         >
@@ -454,13 +454,13 @@ export default function Home() {
                         </ScrollArea>
                     </div>
                 </div>
-                <div className={(itens.length === 0 && !loadingItens ? "border-2 border-dashed flex" : "text-left") + " w-[35%] mr-8 h-[73vh]"}>
-                    {itens.length === 0 && !loadingItens ? <>
+                <div className={(loadingItens == -1 ? "border-2 border-dashed flex" : "text-left") + " w-[35%] mr-8 h-[73vh]"}>
+                    {loadingItens == -1 ? <>
                         <h1 className=" mt-auto mb-auto ml-auto mr-auto text-lg">Clique em uma doação para ver mais detalhes aqui </h1>
                     </>
                         :
                         <>
-                            {loadingItens ?
+                            {loadingItens == 1 ?
                                 <Skeleton className="w-full h-full"></Skeleton>
                                 :
                                 <>
