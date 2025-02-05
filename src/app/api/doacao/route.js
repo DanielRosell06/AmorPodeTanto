@@ -276,7 +276,9 @@ export async function PUT(req) {
         const updateData = {};
 
         updateData.Observacao = novaObservacao
-        updateData.Destino = novoDestino
+        if (novoDestino != "null" && novoDestino != null){
+            updateData.Destino = novoDestino
+        }
 
         if (novoStatus !== undefined && !isNaN(novoStatus)) {
             updateData.StatusDoacao = novoStatus;
