@@ -63,7 +63,15 @@ export default function NoLayoutPage() {
                   : ""}
                 <div className='border mt-4'>
                   <div className='flex'>
-                    <div className='w-[33%] border-r border-b'>Nome: {doacao.contato[0].Contato}</div>
+                    <div className='w-[33%] border-r border-b'>
+                      Nome: {(() => {
+                        const partes = doacao.doador.Nome.split(" ");
+                        if (partes.length > 2 && ["da", "de", "do"].includes(partes[1].toLowerCase())) {
+                          return partes.slice(0, 3).join(" ");
+                        }
+                        return partes.slice(0, 2).join(" ");
+                      })()}
+                    </div>
                     <div className='w-[33%] border-r border-b'>Telefone: {doacao.contato[0].Telefone}</div>
                     <div className='w-[33%] border-b'>Data Agendada: {new Date(doacao.DataAgendada).toLocaleString('pt-BR', {
                       year: 'numeric',

@@ -11,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Textarea } from "@/components/ui/textarea"
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale'; // Importando a localidade do Brasil
+import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 
@@ -112,6 +113,7 @@ export default function Home() {
   const [popupInformacoes, setPopupInformacoes] = useState(false)
   const [popupAdicionarDoacao, setPopupAdicionarDoacao] = useState(false)
   const [popupAdicionarProduto, setPopupAdicionarProduto] = useState(false)
+  const [popupAdicionarContato, setPopupAdicionarContato] = useState(false)
 
   //Variaveis de loading
   const [loading, setLoading] = useState(true)
@@ -140,6 +142,7 @@ export default function Home() {
   const [unidadeAtual, setunidadeAtual] = useState('')
   const [quantidadeAtual, setQuantidadeAtual] = useState(1); // Estado para o primeiro input
   const [nomeProdutoAtual, setnomeProdutoAtual] = useState("");
+  const [nomeDoadorAdicionarContato, setNomeDoadorAdicionarContato] = useState("")
 
   //Ids
   const [IdDoadorDoando, setIdDoadorDoando] = useState(0);
@@ -155,6 +158,12 @@ export default function Home() {
     Nome: "",
     CEP: "",
     Numero: "",
+    Contato: "",
+    Telefone: "",
+    Email: ""
+  })
+  const [novoContato, setNovoContato] = useState({
+    IdDoador: "",
     Contato: "",
     Telefone: "",
     Email: ""
@@ -201,6 +210,30 @@ export default function Home() {
       })
       setPopupAdicionarDoador(false) // Fecha o popup após adicionar
       atualizarLista()
+    } catch (error) {
+      console.error('Erro ao adicionar doador:', error)
+    }
+  }
+
+  const fetchAdicionarContato = async () => {
+    try {
+      const response = await fetch('/api/contato', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(novoContato) // Envia os dados do novo doador
+      })
+      setPopupAdicionarContato(false) // Fecha o popup após adicionar
+      toast("Novo contato Cadastrado!", {
+        description: `Um novo contato foi adicionado à ${nomeDoadorAdicionarContato}`,
+      })
+      setNovoContato({
+        IdDoador: "",
+        Contato: "",
+        Telefone: "",
+        Email: ""
+      })
     } catch (error) {
       console.error('Erro ao adicionar doador:', error)
     }
@@ -563,6 +596,16 @@ export default function Home() {
                     <i className="fas fa-edit"></i>
                   </Button>
                   <Button
+                    className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                    onClick={() => {
+                      setPopupAdicionarContato(true);
+                      setNomeDoadorAdicionarContato(doador.Nome)
+                      setNovoContato({ ...novoContato, IdDoador: doador.IdDoador })
+                    }}
+                  >
+                    <i className="fas fa-user-plus"></i>
+                  </Button>
+                  <Button
                     className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-green-300 hover:bg-green-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
                     onClick={doador.Status ? () => {
                       setIdToDesativar(doador.IdDoador)
@@ -723,6 +766,54 @@ export default function Home() {
                     Contato: " ",
                     Telefone: " ",
                     Email: " "
+                  })
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {popupAdicionarContato && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+            <h1 className="text-xl font-bold mb-4">Adicionar Contato à {nomeDoadorAdicionarContato}</h1>
+
+            <div className="flex mt-4">
+              <div>
+                <h1 className="text-left">Nome do Contato</h1>
+                <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setNovoContato({ ...novoContato, Contato: e.target.value })} />
+              </div>
+              <div className="ml-5">
+                <h1 className="ml-2 text-left">Telefone</h1>
+                <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setNovoContato({ ...novoContato, Telefone: e.target.value })} />
+              </div>
+            </div>
+            <h1 className="mt-5 text-left">E-mail</h1>
+            <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setNovoContato({ ...novoContato, Email: e.target.value })} />
+
+            <hr className="mt-4"></hr>
+
+            <div className="flex justify-end mt-3">
+              <Button
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                onClick={fetchAdicionarContato}
+              >
+                Confirmar
+              </Button>
+
+              <Button
+                className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                onClick={() => {
+                  setPopupAdicionarContato(false)
+                  setNovoContato({
+                    IdDoador: "",
+                    Contato: "",
+                    Telefone: "",
+                    Email: ""
                   })
                 }}
               >
