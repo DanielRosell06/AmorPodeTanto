@@ -72,7 +72,7 @@ export default function NoLayoutPage() {
                     })}</div>
                   </div>
                   <div className='border-b pt-1'>
-                    Endereço: {doacao.doador.Rua}, {doacao.doador.Numero}, {doacao.doador.Bairro}
+                    Endereço: {doacao.doador.Rua}, {doacao.doador.Numero}, {doacao.doador.Bairro}, {doacao.doador.Complemento}
                   </div>
                   <div className='border-b pt-1 flex'>
                     Itens:{doacao.itensComProduto.map((item, index) => {
