@@ -953,13 +953,15 @@ export default function Home() {
                                 Produtos.map((produto) => (
                                   <CommandItem
                                     key={produto.IdProduto}
-                                    value={produto.IdProduto.toString()}
+                                    value={`${produto.IdProduto}-${produto.Nome}`} // Inclui ID e Nome no value
                                     onSelect={(currentValue) => {
+                                      const idSelecionado = currentValue.split("-")[0]; // Extrai apenas o ID
+
                                       const selectedProduto = Produtos.find(
-                                        (item) => item.IdProduto === Number(currentValue)
+                                        (item) => item.IdProduto === Number(idSelecionado)
                                       );
 
-                                      setValueProduto(Number(currentValue));
+                                      setValueProduto(Number(idSelecionado));
                                       setunidadeAtual(selectedProduto?.UN || "");
                                       setnomeProdutoAtual(selectedProduto?.Nome || "");
                                       setOpenProduto(false);
