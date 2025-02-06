@@ -136,6 +136,7 @@ export default function Home() {
   const [doador, setDoador] = useState([]);
   const [Produtos, setProdutos] = useState([])
   const [Itens, setItens] = useState([])
+  const [contatos, setContatos] = useState([])
 
   //Variaveis simples
   const [nomeDoadorAdicionado, setNomeDoadorAdicionado] = useState('')
@@ -143,6 +144,7 @@ export default function Home() {
   const [quantidadeAtual, setQuantidadeAtual] = useState(1); // Estado para o primeiro input
   const [nomeProdutoAtual, setnomeProdutoAtual] = useState("");
   const [nomeDoadorAdicionarContato, setNomeDoadorAdicionarContato] = useState("")
+  const [verMaisContatosInformacoes, setVerMaisContatosInformacoes] = useState(-1)
 
   //Ids
   const [IdDoadorDoando, setIdDoadorDoando] = useState(0);
@@ -151,6 +153,7 @@ export default function Home() {
   const [idToFind, setIdToFind] = useState(-1)
   const [idToDesativar, setIdToDesativar] = useState(-1)
   const [idToReativar, setIdToReativar] = useState(-1)
+  const [idDoadorContato, setIdDoadorContato] = useState(-1)
 
   //Doadores a serem editados
   const [novoDoador, setNovoDoador] = useState({
@@ -234,6 +237,21 @@ export default function Home() {
         Telefone: "",
         Email: ""
       })
+    } catch (error) {
+      console.error('Erro ao adicionar doador:', error)
+    }
+  }
+
+  const fetchPegarContatos = async () => {
+    try {
+      const response = await fetch(`/api/contato?contatoDoadorId=${idDoadorContato}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await response.json();
+      setContatos(data)
     } catch (error) {
       console.error('Erro ao adicionar doador:', error)
     }
@@ -366,6 +384,7 @@ export default function Home() {
         })
         const data = await response.json();
         setDoadorEditado(data)
+        console.log(data)
         setIdToFind(-1)
       } catch (error) {
         console.error('Erro ao buscar doador:', error)
@@ -582,6 +601,7 @@ export default function Home() {
                     onClick={() => {
                       setPopupInformacoes(true);
                       setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador });
+                      setIdDoadorContato(doador.IdDoador)
                       setIdToFind(doador.IdDoador);
                     }}
                   ><i className="fas fa-info-circle"></i></Button>
@@ -904,92 +924,129 @@ export default function Home() {
 
       {popupInformacoes && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-            <h1 className="text-xl font-bold mb-4">Informações de {doadorEditado.Nome}</h1>
+          <div className="bg-white rounded-lg shadow-lg p-6  flex">
 
-
-            <div className="flex text-left">
-              <div>
-                <h1 className=" font-bold">CPF/CNPJ:</h1>
-                <h1>{doadorEditado.CPFCNPJ}</h1>
+            {verMaisContatosInformacoes == 1 && contatos.length > 0 ?
+              <div className="flex">
+                <div>
+                  <h1 className="w-[200px] mb-5 font-bold">Todos os Contatos</h1>
+                  {contatos.map((contato, index) => (
+                    <div key={index} className="flex flex-col">
+                      <Button className=" mt-1 w-[180px] text-left justify-start bg-white hover:bg-slate-100 text-slate-500 border-none shadow-none"
+                        onClick={() => {
+                          setDoadorEditado({
+                            ...doadorEditado,
+                            Contato: contato.Contato,
+                            Telefone: contato.Telefone,
+                            Email: contato.Email
+                          });
+                        }}
+                      >{contato.Contato}</Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-[1px] h-full bg-slate-300 mr-8" />
               </div>
-              <div className="ml-10">
-                <h1 className=" font-bold">Nome:</h1>
-                <h1>{doadorEditado.Nome}</h1>
-              </div>
-            </div>
+              : ""
+            }
+            <div>
+              <h1 className="text-xl font-bold mb-4">Informações de {doadorEditado.Nome}</h1>
 
-            <hr className="mt-4"></hr>
 
-            <div className="flex mt-4">
-              <div>
-                <h1 className="text-left font-bold">CEP:</h1>
-                <h1>{doadorEditado.CEP}</h1>
+              <div className="flex text-left">
+                <div>
+                  <h1 className=" font-bold">CPF/CNPJ:</h1>
+                  <h1>{doadorEditado.CPFCNPJ}</h1>
+                </div>
+                <div className="ml-10">
+                  <h1 className=" font-bold">Nome:</h1>
+                  <h1>{doadorEditado.Nome}</h1>
+                </div>
               </div>
-              <div>
-                <h1 className="ml-2 text-left font-bold">Número:</h1>
-                <h1>{doadorEditado.Numero}</h1>
-              </div>
-            </div>
 
-            <div className="flex">
+              <hr className="mt-4"></hr>
+
+              <div className="flex mt-4">
+                <div>
+                  <h1 className="text-left font-bold">CEP:</h1>
+                  <h1>{doadorEditado.CEP}</h1>
+                </div>
+                <div>
+                  <h1 className="ml-2 text-left font-bold">Número:</h1>
+                  <h1>{doadorEditado.Numero}</h1>
+                </div>
+              </div>
+
+              <div className="flex">
+                <div className="flex flex-col text-left mt-4">
+                  <h1 className="font-bold">Rua:</h1>
+                  <h1>{doadorEditado.Rua}</h1>
+                </div>
+
+                <div className="flex flex-col text-left mt-4 ml-10">
+                  <h1 className="font-bold">Bairro:</h1>
+                  <h1>{doadorEditado.Bairro}</h1>
+                </div>
+              </div>
+
               <div className="flex flex-col text-left mt-4">
-                <h1 className="font-bold">Rua:</h1>
-                <h1>{doadorEditado.Rua}</h1>
+                <h1 className="mt-5 font-bold">Complemento:</h1>
+                <h1>{doadorEditado.Complemento}</h1>
               </div>
 
-              <div className="flex flex-col text-left mt-4 ml-10">
-                <h1 className="font-bold">Bairro:</h1>
-                <h1>{doadorEditado.Bairro}</h1>
+              <hr className="mt-4"></hr>
+
+              <div className="flex mt-4 text-left">
+                <div>
+                  <h1 className="font-bold ">Nome do Contato:</h1>
+                  <h1>{doadorEditado.Contato}</h1>
+                </div>
+                <div className="ml-20">
+                  <h1 className="text-left font-bold">Telefone:</h1>
+                  <h1>{doadorEditado.Telefone}</h1>
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-col text-left mt-4">
-              <h1 className="mt-5 font-bold">Complemento:</h1>
-              <h1>{doadorEditado.Complemento}</h1>
-            </div>
-
-            <hr className="mt-4"></hr>
-
-            <div className="flex mt-4 text-left">
-              <div>
-                <h1 className="font-bold ">Nome do Contato:</h1>
-                <h1>{doadorEditado.Contato}</h1>
+              <div className=" text-left">
+                <h1 className="mt-5 font-bold">E-mail:</h1>
+                <h1>{doadorEditado.Email}</h1>
               </div>
-              <div className="ml-20">
-                <h1 className="text-left font-bold">Telefone:</h1>
-                <h1>{doadorEditado.Telefone}</h1>
+
+              <hr className="mt-4"></hr>
+
+              <div className="flex justify-between mt-3">
+                <Button
+                  className={verMaisContatosInformacoes == 1 ? "bg-slate-500 hover:bg-slate-600" : "bg-slate-400 hover:bg-slate-500"}
+                  onClick={() => {
+                    setVerMaisContatosInformacoes(verMaisContatosInformacoes * -1);
+                    fetchPegarContatos()
+                  }}
+                >
+                  Mostrar Outros Contatos
+                </Button>
+
+                <Button
+                  className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-slate-500 transition"
+                  onClick={() => {
+                    setPopupInformacoes(false)
+                    setDoadorEditado({
+                      IdDoador: " ",
+                      CPFCNPJ: " ",
+                      Nome: " ",
+                      CEP: " ",
+                      Numero: " ",
+                      Complemento: " ",
+                      Contato: " ",
+                      Telefone: " ",
+                      Email: " "
+                    })
+                    setVerMaisContatosInformacoes(-1)
+                    setIdDoadorContato(-1)
+                    setContatos([])
+                  }}
+                >
+                  Fechar
+                </Button>
               </div>
-            </div>
-            <div className=" text-left">
-              <h1 className="mt-5 font-bold">E-mail:</h1>
-              <h1>{doadorEditado.Email}</h1>
-            </div>
-
-            <hr className="mt-4"></hr>
-
-            <div className="flex justify-end mt-3">
-
-
-              <Button
-                className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-slate-500 transition"
-                onClick={() => {
-                  setPopupInformacoes(false)
-                  setDoadorEditado({
-                    IdDoador: " ",
-                    CPFCNPJ: " ",
-                    Nome: " ",
-                    CEP: " ",
-                    Numero: " ",
-                    Complemento: " ",
-                    Contato: " ",
-                    Telefone: " ",
-                    Email: " "
-                  })
-                }}
-              >
-                Fechar
-              </Button>
             </div>
           </div>
         </div>
