@@ -178,6 +178,7 @@ export default function Home() {
     CEP: " ",
     Numero: " ",
     Complemento: " ",
+    IdContato: " ",
     Contato: " ",
     Telefone: " ",
     Email: " "
@@ -279,6 +280,10 @@ export default function Home() {
         Telefone: " ",
         Email: " "
       })
+      
+      setVerMaisContatosInformacoes(-1)
+      setIdDoadorContato(-1)
+      setContatos([])
       atualizarLista()
 
     } catch (error) {
@@ -611,6 +616,7 @@ export default function Home() {
                       setPopupEditarDoador(true);
                       setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador });
                       setIdToFind(doador.IdDoador);
+                      setIdDoadorContato(doador.IdDoador)
                     }}
                   >
                     <i className="fas fa-edit"></i>
@@ -717,80 +723,121 @@ export default function Home() {
 
       {popupEditarDoador && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-            <h1 className="text-xl font-bold mb-4">Editar Doador</h1>
-
-
-            <div className="flex text-left">
-              <div>
-                <h1>CPF/CNPJ</h1>
-                <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CPFCNPJ: e.target.value })} value={doadorEditado.CPFCNPJ || ''} />
+          <div className="bg-white rounded-lg shadow-lg p-6 flex">
+            {verMaisContatosInformacoes == 1 && contatos.length > 0 ?
+              <div className="flex">
+                <div>
+                  <h1 className="w-[200px] mb-5 font-bold">Todos os Contatos</h1>
+                  {contatos.map((contato, index) => (
+                    <div key={index} className="flex flex-col">
+                      <Button className=" mt-1 w-[180px] text-left justify-start bg-white hover:bg-slate-100 text-slate-500 border-none shadow-none"
+                        onClick={() => {
+                          setDoadorEditado({
+                            ...doadorEditado,
+                            IdContato: contato.IdContato,
+                            Contato: contato.Contato,
+                            Telefone: contato.Telefone,
+                            Email: contato.Email
+                          });
+                        }}
+                      >{contato.Contato}</Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-[1px] h-full bg-slate-300 mr-8" />
               </div>
-              <div>
-                <h1 className="ml-2">Nome</h1>
-                <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Nome: e.target.value })} value={doadorEditado.Nome || ''} />
+              : ""
+            }
+            <div>
+              <h1 className="text-xl font-bold mb-4">Editar Doador</h1>
+
+
+              <div className="flex text-left">
+                <div>
+                  <h1>CPF/CNPJ</h1>
+                  <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CPFCNPJ: e.target.value })} value={doadorEditado.CPFCNPJ || ''} />
+                </div>
+                <div>
+                  <h1 className="ml-2">Nome</h1>
+                  <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Nome: e.target.value })} value={doadorEditado.Nome || ''} />
+                </div>
               </div>
-            </div>
 
-            <hr className="mt-4"></hr>
+              <hr className="mt-4"></hr>
 
-            <div className="flex mt-4">
-              <div>
-                <h1 className="text-left">CEP</h1>
-                <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CEP: e.target.value })} value={doadorEditado.CEP || ''} />
+              <div className="flex mt-4">
+                <div>
+                  <h1 className="text-left">CEP</h1>
+                  <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CEP: e.target.value })} value={doadorEditado.CEP || ''} />
+                </div>
+                <div>
+                  <h1 className="ml-2 text-left">Número</h1>
+                  <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Numero: e.target.value })} value={doadorEditado.Numero || ''} />
+                </div>
               </div>
-              <div>
-                <h1 className="ml-2 text-left">Número</h1>
-                <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Numero: e.target.value })} value={doadorEditado.Numero || ''} />
+              <h1 className="mt-5 text-left">Complemento</h1>
+              <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Complemento: e.target.value })} value={doadorEditado.Complemento || ''} />
+
+              <hr className="mt-4"></hr>
+
+              <div className="flex mt-4">
+                <div>
+                  <h1 className="text-left">Nome do Contato</h1>
+                  <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Contato: e.target.value })} value={doadorEditado.Contato || ''} />
+                </div>
+                <div className="ml-5">
+                  <h1 className="ml-2 text-left">Telefone</h1>
+                  <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Telefone: e.target.value })} value={doadorEditado.Telefone || ''} />
+                </div>
               </div>
-            </div>
-            <h1 className="mt-5 text-left">Complemento</h1>
-            <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Complemento: e.target.value })} value={doadorEditado.Complemento || ''} />
+              <h1 className="mt-5 text-left">E-mail</h1>
+              <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Email: e.target.value })} value={doadorEditado.Email || ''} />
 
-            <hr className="mt-4"></hr>
+              <hr className="mt-4"></hr>
 
-            <div className="flex mt-4">
-              <div>
-                <h1 className="text-left">Nome do Contato</h1>
-                <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Contato: e.target.value })} value={doadorEditado.Contato || ''} />
+              <div className="flex justify-between mt-3">
+                <Button
+                  className={verMaisContatosInformacoes == 1 ? "bg-slate-500 hover:bg-slate-600" : "bg-slate-400 hover:bg-slate-500"}
+                  onClick={() => {
+                    setVerMaisContatosInformacoes(verMaisContatosInformacoes * -1);
+                    fetchPegarContatos()
+                  }}
+                >
+                  Mostrar Outros Contatos
+                </Button>
+                <div>
+                  <Button
+                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                    onClick={fetchEditarDoador}
+                  >
+                    Confirmar
+                  </Button>
+
+                  <Button
+                    className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                    onClick={() => {
+                      setPopupEditarDoador(false)
+                      setDoadorEditado({
+                        IdDoador: " ",
+                        CPFCNPJ: " ",
+                        Nome: " ",
+                        CEP: " ",
+                        Numero: " ",
+                        Complemento: " ",
+                        IdContato: " ",
+                        Contato: " ",
+                        Telefone: " ",
+                        Email: " "
+                      })
+                      setVerMaisContatosInformacoes(-1)
+                      setIdDoadorContato(-1)
+                      setContatos([])
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
               </div>
-              <div className="ml-5">
-                <h1 className="ml-2 text-left">Telefone</h1>
-                <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Telefone: e.target.value })} value={doadorEditado.Telefone || ''} />
-              </div>
-            </div>
-            <h1 className="mt-5 text-left">E-mail</h1>
-            <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Email: e.target.value })} value={doadorEditado.Email || ''} />
-
-            <hr className="mt-4"></hr>
-
-            <div className="flex justify-end mt-3">
-              <Button
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                onClick={fetchEditarDoador}
-              >
-                Confirmar
-              </Button>
-
-              <Button
-                className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
-                onClick={() => {
-                  setPopupEditarDoador(false)
-                  setDoadorEditado({
-                    IdDoador: " ",
-                    CPFCNPJ: " ",
-                    Nome: " ",
-                    CEP: " ",
-                    Numero: " ",
-                    Complemento: " ",
-                    Contato: " ",
-                    Telefone: " ",
-                    Email: " "
-                  })
-                }}
-              >
-                Cancelar
-              </Button>
             </div>
           </div>
         </div>
@@ -1035,6 +1082,7 @@ export default function Home() {
                       CEP: " ",
                       Numero: " ",
                       Complemento: " ",
+                      IdDoador: " ",
                       Contato: " ",
                       Telefone: " ",
                       Email: " "

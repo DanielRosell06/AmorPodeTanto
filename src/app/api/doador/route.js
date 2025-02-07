@@ -145,7 +145,7 @@ export async function POST(req, res) {
 }
 
 export async function PUT(req) {
-    const { IdDoador, CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email } = await req.json()
+    const { IdDoador, CPFCNPJ, Nome, CEP, Numero, Complemento, Contato, Telefone, Email, IdContato } = await req.json()
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
@@ -166,22 +166,9 @@ export async function PUT(req) {
             }
         })
 
-        const contato = await prisma.contato.findFirst({
-            where: { IdDoador: IdDoador }
-        });
-
-        // Verifica se o doador existe e extrai o ID
-        if (!contato) {
-            throw new Error('Doador não encontrado.');
-        }
-
-        const _IdContato = contato.IdContato;
-
-
         const resultContato = await prisma.contato.update({
-            where: { IdContato: _IdContato },
+            where: { IdContato: IdContato },
             data: {
-                IdDoador,
                 Contato,
                 Telefone,
                 Email
