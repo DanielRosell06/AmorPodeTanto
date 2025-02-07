@@ -18,6 +18,8 @@ model Doador {
   Complemento String?
   Status      Int     @default(1) @db.SmallInt
   DataDoador DateTime @default(now())
+  Sexo        Int?
+  DataAniversario DateTime? 
 }
 
 model Contato {
@@ -26,6 +28,7 @@ model Contato {
   Contato   String?
   Telefone  String?
   Email     String?
+  TipoContato Int @default(0)
 }
 
 model Produto {

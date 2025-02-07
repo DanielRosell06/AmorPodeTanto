@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development && next dev",
+    "dev": "next dev",
+    "migrate": "npm run migrate:dev && npm run migrate:prod",
+    "migrate:dev": "dotenv -e .env.development -- npx prisma db push",
+    "migrate:prod": "dotenv -e .env.production -- npx prisma db push",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
