@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale'; // Importando a localidade do Brasil
 import { toast } from "sonner"
 import CustomDateInput from "@/components/CustomDateInput"
+import { isValid } from "date-fns";
 
 import { cn } from "@/lib/utils"
 
@@ -205,6 +206,9 @@ export default function Home() {
   const handleDateChange = (date) => {
     setNovoDoador({ ...novoDoador, DataAniversario: date })
   }
+  const handleEditarDateChange = (date) => {
+    setDoadorEditado({ ...doadorEditado, DataAniversario: date })
+  }
 
 
   //Funções de Fetch
@@ -281,6 +285,8 @@ export default function Home() {
         CPFCNPJ: " ",
         Nome: " ",
         CEP: " ",
+        Sexo: " ",
+        DataAniversario: " ",
         Numero: " ",
         Complemento: " ",
         Contato: " ",
@@ -681,7 +687,7 @@ export default function Home() {
               <div>
                 <h1>Sexo</h1>
                 <Select onValueChange={(value) => {
-                  setNovoDoador({...novoDoador, Sexo : parseInt(value, 10)});
+                  setNovoDoador({ ...novoDoador, Sexo: parseInt(value, 10) });
                 }}>
                   <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
                     <i className="fas fa-sort"></i>
@@ -792,6 +798,33 @@ export default function Home() {
                   <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Nome: e.target.value })} value={doadorEditado.Nome || ''} />
                 </div>
               </div>
+
+              <div className="flex text-left mt-1">
+              <div>
+                <h1>Sexo</h1>
+                <Select 
+                onValueChange={(value) => {
+                  setDoadorEditado({ ...doadorEditado, Sexo: parseInt(value, 10) });
+                  console.log(doadorEditado.DataAniversario)
+                }}
+                value={String(doadorEditado?.Sexo ?? "")}
+                >
+                  <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
+                    <i className="fas fa-sort"></i>
+                    <SelectValue placeholder="Sexo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Masculino</SelectItem>
+                    <SelectItem value="1">Feminino</SelectItem>
+                    <SelectItem value="2">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="ml-2">
+                <h1>Data de aniversário</h1>
+                <CustomDateInput onChange={handleEditarDateChange} initialValue={doadorEditado.DataAniversario != " " && doadorEditado.DataAniversario} />
+              </div>
+            </div>
 
               <hr className="mt-4"></hr>
 
@@ -1038,6 +1071,26 @@ export default function Home() {
                 <div className="ml-10">
                   <h1 className=" font-bold">Nome:</h1>
                   <h1>{doadorEditado.Nome}</h1>
+                </div>
+              </div>
+
+              <div className="flex text-left mt-2">
+                <div>
+                  <h1 className=" font-bold">Sexo:</h1>
+                  <h1>{doadorEditado.Sexo == 0 ? "Masculino" :
+                    (doadorEditado.Sexo == 1 ? "Feminino" : 
+                      (doadorEditado.Sexo == 2 ? "Outro" : "")
+                    )
+                  }</h1>
+                </div>
+                <div className="ml-10">
+                  <h1 className=" font-bold">Data de Aniversário:</h1>
+                  <h1>
+                    {doadorEditado.DataAniversario &&
+                      isValid(new Date(doadorEditado.DataAniversario))
+                      ? format(new Date(doadorEditado.DataAniversario), "dd 'de' MMMM", { locale: ptBR })
+                      : ""}
+                  </h1>
                 </div>
               </div>
 

@@ -1,15 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
-export default function CustomDateInput({ onChange }) {
-  const [inputValue, setInputValue] = useState("")
-  const [previewDate, setPreviewDate] = useState(null)
+export default function CustomDateInput({ onChange, initialValue }) {
+  const formatDate = (dateString) => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    if (isNaN(date)) return ""
+    return format(date, "dd/MM")
+  }
+
+  const [inputValue, setInputValue] = useState(formatDate(initialValue))
+  const [previewDate, setPreviewDate] = useState(initialValue ? new Date(initialValue) : null)
+
+  useEffect(() => {
+    setInputValue(formatDate(initialValue))
+    setPreviewDate(initialValue ? new Date(initialValue) : null)
+  }, [initialValue])
 
   const handleInputChange = (e) => {
-    let value = e.target.value.replace(/\D/g, "") // Remove não-dígitos
+    let value = e.target.value.replace(/\D/g, "")
 
     if (value.length > 2) {
       value = value.slice(0, 2) + "/" + value.slice(2)
@@ -20,26 +32,17 @@ export default function CustomDateInput({ onChange }) {
 
       if (value.length === 5) {
         const [day, month] = value.split("/")
-        const dayNum = Number.parseInt(day, 10)
-        const monthNum = Number.parseInt(month, 10)
-
-        if (dayNum > 0 && dayNum <= 31 && monthNum > 0 && monthNum <= 12) {
-          const date = new Date(2000, monthNum - 1, dayNum)
+        const date = new Date(2000, Number(month) - 1, Number(day))
+        if (!isNaN(date)) {
           setPreviewDate(date)
-          if (typeof onChange === "function") {
-            onChange(date)
-          }
+          onChange?.(date)
         } else {
           setPreviewDate(null)
-          if (typeof onChange === "function") {
-            onChange(null)
-          }
+          onChange?.(null)
         }
       } else {
         setPreviewDate(null)
-        if (typeof onChange === "function") {
-          onChange(null)
-        }
+        onChange?.(null)
       }
     }
   }
