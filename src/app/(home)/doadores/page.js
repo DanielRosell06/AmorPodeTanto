@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale'; // Importando a localidade do Brasil
 import { toast } from "sonner"
+import CustomDateInput from "@/components/CustomDateInput"
 
 import { cn } from "@/lib/utils"
 
@@ -160,6 +161,8 @@ export default function Home() {
     CPFCNPJ: "",
     Nome: "",
     CEP: "",
+    Sexo: "",
+    DataAniversario: "",
     Numero: "",
     Contato: "",
     Telefone: "",
@@ -197,6 +200,10 @@ export default function Home() {
   const alteraSwitchDesativos = () => {
     setSwitchDesativos(switchDesativos * -1)
     atualizarLista()
+  }
+
+  const handleDateChange = (date) => {
+    setNovoDoador({ ...novoDoador, DataAniversario: date })
   }
 
 
@@ -239,7 +246,7 @@ export default function Home() {
         Email: ""
       })
     } catch (error) {
-      console.error('Erro ao adicionar doador:', error)
+      console.error('Erro ao adicionar contato:', error)
     }
   }
 
@@ -254,7 +261,7 @@ export default function Home() {
       const data = await response.json();
       setContatos(data)
     } catch (error) {
-      console.error('Erro ao adicionar doador:', error)
+      console.error('Erro ao pegar contato:', error)
     }
   }
 
@@ -280,14 +287,14 @@ export default function Home() {
         Telefone: " ",
         Email: " "
       })
-      
+
       setVerMaisContatosInformacoes(-1)
       setIdDoadorContato(-1)
       setContatos([])
       atualizarLista()
 
     } catch (error) {
-      console.error('Erro ao adicionar doador:', error)
+      console.error('Erro ao editar doador:', error)
     }
   }
 
@@ -334,7 +341,7 @@ export default function Home() {
       })
       atualizarLista()
     } catch (error) {
-      console.error('Erro ao adicionar doador:', error)
+      console.error('Erro ao adicionar produto:', error)
     }
   }
 
@@ -367,7 +374,7 @@ export default function Home() {
       setDestino("");
       setDate(null)
     } catch (error) {
-      console.error('Erro ao adicionar doador:', error)
+      console.error('Erro ao adicionar doacao:', error)
     }
   }
 
@@ -655,7 +662,7 @@ export default function Home() {
 
       {popupAdicionarDoador && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-lg shadow-lg pl-6 pr-6 pt-4 pb-4 max-w-md w-full">
             <h1 className="text-xl font-bold mb-4">Adicionar Doador</h1>
 
 
@@ -667,6 +674,29 @@ export default function Home() {
               <div>
                 <h1 className="ml-2">Nome</h1>
                 <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="flex text-left mt-1">
+              <div>
+                <h1>Sexo</h1>
+                <Select onValueChange={(value) => {
+                  setNovoDoador({...novoDoador, Sexo : parseInt(value, 10)});
+                }}>
+                  <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
+                    <i className="fas fa-sort"></i>
+                    <SelectValue placeholder="Sexo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Masculino</SelectItem>
+                    <SelectItem value="1">Feminino</SelectItem>
+                    <SelectItem value="2">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="ml-2">
+                <h1>Data de aniversário</h1>
+                <CustomDateInput onChange={handleDateChange} />
               </div>
             </div>
 
