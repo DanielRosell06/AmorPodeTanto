@@ -9,10 +9,15 @@ export async function GET(req) {
     const searchBy = searchParams.get('searchBy')
     const input = searchParams.get('searchIn');
     const ordenarPor = searchParams.get('ordenarPor');
+    const tipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
 
     const where = {};
     let orderBy = {};
     let doadoresList;
+
+    if (tipoDoador != null) {
+        where.TipoDoador = tipoDoador
+    }
 
     // Filtra por status se 'desativados' não for '1'
     if (desativados !== '1') {
@@ -68,8 +73,8 @@ export async function GET(req) {
                 doadoresList = await prisma.doador.findMany({ where: where, orderBy: orderBy });
                 break;
         }
-    }else{
-        doadoresList = await prisma.doador.findMany({where : where})
+    } else {
+        doadoresList = await prisma.doador.findMany({ where: where })
     }
 
 
@@ -92,13 +97,25 @@ export async function GET(req) {
 }
 
 export async function POST(req, res) {
-    const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email } = await req.json()
-
+    
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
-        const data = await response.json();
-        const Rua = data.logradouro
-        const Bairro = data.bairro
+        const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email } = await req.json()
+
+        const url = new URL(req.url);
+        const searchParams = url.searchParams;
+        const TipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
+
+        let response = "";
+        let data = "";
+        let Rua = "";
+        let Bairro = "";
+
+        if (CEP) {
+            response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
+            data = await response.json();
+            Rua = data.logradouro
+            Bairro = data.bairro
+        }
 
         const resultDoador = await prisma.doador.create({
             data: {
@@ -110,7 +127,8 @@ export async function POST(req, res) {
                 Bairro,
                 Complemento,
                 Sexo,
-                DataAniversario
+                DataAniversario,
+                TipoDoador
             }
         })
 

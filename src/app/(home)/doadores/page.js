@@ -432,7 +432,7 @@ export default function Home() {
   useEffect(() => {
     const fetchLoadDoadores = async () => {
       try {
-        const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}&ordenarPor=${ordenacao}`,
+        const response = await fetch(`/api/doador?&tipoDoador="1"&desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}&ordenarPor=${ordenacao}`,
           { method: 'GET' }
         );
         const data = await response.json();
@@ -606,7 +606,7 @@ export default function Home() {
                 <TableCell className="border-slut-100 border">{doador.Nome}</TableCell>
                 <TableCell className="border-slut-100 border">{doador.Rua}, {doador.Numero}, {doador.Bairro}</TableCell>
                 <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
-                <TableCell className="border-slut-100 border flex">
+                <TableCell className="border-slut-100 border-r flex">
                   <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
                     onClick={() => {
                       setPopupAdicionarDoacao(true);
