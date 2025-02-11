@@ -35,6 +35,29 @@ export async function GET(req) {
                 };
                 break
 
+            case 'telefone':
+                // Primeiro busca os contatos com o telefone
+                const contatos = await prisma.contato.findMany({
+                    where: {
+                        Telefone: {
+                            contains: input,
+                            mode: 'insensitive'
+                        }
+                    },
+                    select: {
+                        IdDoador: true
+                    }
+                });
+
+                // Pega apenas os IDs dos doadores encontrados
+                const idsDoadores = contatos.map(c => c.IdDoador);
+
+                // Busca os doadores com esses IDs
+                where.IdDoador = {
+                    in: idsDoadores
+                };
+                break;
+
             case 'rua':
                 where.Rua = {
                     contains: input,
@@ -49,7 +72,6 @@ export async function GET(req) {
                 };
                 break
         }
-
     }
 
     if (ordenarPor) {
@@ -68,8 +90,8 @@ export async function GET(req) {
                 doadoresList = await prisma.doador.findMany({ where: where, orderBy: orderBy });
                 break;
         }
-    }else{
-        doadoresList = await prisma.doador.findMany({where : where})
+    } else {
+        doadoresList = await prisma.doador.findMany({ where: where })
     }
 
 

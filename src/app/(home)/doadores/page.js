@@ -78,6 +78,11 @@ const frameworks = [
   },
 
   {
+    value: "telefone",
+    label: "Telefone",
+  },
+
+  {
     value: "rua",
     label: "Rua",
   },
@@ -209,6 +214,26 @@ export default function Home() {
   const handleEditarDateChange = (date) => {
     setDoadorEditado({ ...doadorEditado, DataAniversario: date })
   }
+
+
+  const timeoutRef = useRef(null); // Referência para o timeout
+  const [inputValue, setInputValue] = useState("");
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+
+    // Reseta o timer a cada nova digitação
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Inicia um novo timer para atualizar searchIn após 1 segundo
+    timeoutRef.current = setTimeout(() => {
+      setPesquisaInput(value); // Atualiza searchIn após 1 segundo
+      atualizarLista()
+    }, 1000);
+  };
 
 
   //Funções de Fetch
@@ -478,10 +503,8 @@ export default function Home() {
       <div className="flex mt-6 justify-between w-[95%] ml-auto mr-auto">
         <div className="flex">
           <Input className="w-[230px] mr-2" placeholder="Pesquisar"
-            onChange={(e) => {
-              setPesquisaInput(e.target.value)
-              atualizarLista()
-            }}
+            value={inputValue}
+            onChange={handleInputChange}
           ></Input>
 
           <Popover open={open} onOpenChange={setOpen} className="w-10">
@@ -800,31 +823,31 @@ export default function Home() {
               </div>
 
               <div className="flex text-left mt-1">
-              <div>
-                <h1>Sexo</h1>
-                <Select 
-                onValueChange={(value) => {
-                  setDoadorEditado({ ...doadorEditado, Sexo: parseInt(value, 10) });
-                  console.log(doadorEditado.DataAniversario)
-                }}
-                value={String(doadorEditado?.Sexo ?? "")}
-                >
-                  <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
-                    <i className="fas fa-sort"></i>
-                    <SelectValue placeholder="Sexo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Masculino</SelectItem>
-                    <SelectItem value="1">Feminino</SelectItem>
-                    <SelectItem value="2">Outro</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div>
+                  <h1>Sexo</h1>
+                  <Select
+                    onValueChange={(value) => {
+                      setDoadorEditado({ ...doadorEditado, Sexo: parseInt(value, 10) });
+                      console.log(doadorEditado.DataAniversario)
+                    }}
+                    value={String(doadorEditado?.Sexo ?? "")}
+                  >
+                    <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
+                      <i className="fas fa-sort"></i>
+                      <SelectValue placeholder="Sexo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Masculino</SelectItem>
+                      <SelectItem value="1">Feminino</SelectItem>
+                      <SelectItem value="2">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="ml-2">
+                  <h1>Data de aniversário</h1>
+                  <CustomDateInput onChange={handleEditarDateChange} initialValue={doadorEditado.DataAniversario != " " && doadorEditado.DataAniversario} />
+                </div>
               </div>
-              <div className="ml-2">
-                <h1>Data de aniversário</h1>
-                <CustomDateInput onChange={handleEditarDateChange} initialValue={doadorEditado.DataAniversario != " " && doadorEditado.DataAniversario} />
-              </div>
-            </div>
 
               <hr className="mt-4"></hr>
 
@@ -1078,7 +1101,7 @@ export default function Home() {
                 <div>
                   <h1 className=" font-bold">Sexo:</h1>
                   <h1>{doadorEditado.Sexo == 0 ? "Masculino" :
-                    (doadorEditado.Sexo == 1 ? "Feminino" : 
+                    (doadorEditado.Sexo == 1 ? "Feminino" :
                       (doadorEditado.Sexo == 2 ? "Outro" : "")
                     )
                   }</h1>

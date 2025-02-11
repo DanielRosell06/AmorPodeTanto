@@ -8,27 +8,28 @@ datasource db {
 }
 
 model Doador {
-  IdDoador    Int     @id @default(autoincrement())
-  CPFCNPJ     String  @unique
-  Nome        String
-  CEP         String
-  Rua         String
-  Numero      String
-  Bairro      String
-  Complemento String?
-  Status      Int     @default(1) @db.SmallInt
-  DataDoador DateTime @default(now())
-  Sexo        Int?
-  DataAniversario DateTime? 
+  IdDoador        Int       @id @default(autoincrement())
+  CPFCNPJ         String?    @unique
+  Nome            String
+  CEP             String?
+  Rua             String?
+  Numero          String?
+  Bairro          String?
+  Complemento     String?
+  Status          Int       @default(1) @db.SmallInt
+  DataDoador      DateTime  @default(now())
+  Sexo            Int?
+  DataAniversario DateTime?
+  TipoDoador      Int       @default(0)
 }
 
 model Contato {
-  IdContato Int     @id @default(autoincrement())
-  IdDoador  Int
-  Contato   String?
-  Telefone  String?
-  Email     String?
-  TipoContato Int @default(0)
+  IdContato   Int     @id @default(autoincrement())
+  IdDoador    Int
+  Contato     String?
+  Telefone    String?
+  Email       String?
+  TipoContato Int     @default(0)
 }
 
 model Produto {
@@ -38,18 +39,18 @@ model Produto {
 }
 
 model Doacao {
-  IdDoacao   Int      @id @default(autoincrement())
-  IdDoador   Int
-  DataDoacao DateTime @default(now())
-  StatusDoacao Int @default(0)
+  IdDoacao     Int       @id @default(autoincrement())
+  IdDoador     Int
+  DataDoacao   DateTime  @default(now())
+  StatusDoacao Int       @default(0)
   DataAgendada DateTime?
   DataRetirada DateTime?
-  Observacao String?
-  Destino String?
+  Observacao   String?
+  Destino      String?
 }
 
 model DoacaoItem {
-  IdDoacaoItem Int @id @default(autoincrement())
+  IdDoacaoItem Int     @id @default(autoincrement())
   IdDoacao     Int
   IdProduto    Int
   Quantidade   Int
@@ -57,9 +58,9 @@ model DoacaoItem {
 }
 
 model Usuario {
-  IdUsuario Int @id @default(autoincrement())
-  NomeUsuario String
+  IdUsuario    Int    @id @default(autoincrement())
+  NomeUsuario  String
   EmailUsuario String @unique
   SenhaUsuario String
-  TipoUsuario Int @default(0)
+  TipoUsuario  Int    @default(0)
 }
