@@ -13,9 +13,9 @@ import React, { useEffect, useState, useRef, setOpen } from "react";
 
 
 export default function Diretoria() {
-    
+
     const [activeSection, setActiveSection] = useState(0)
-    
+
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -39,7 +39,7 @@ export default function Diretoria() {
         <div className="text-center">
             <BotaoInicio>Área da Diretoria</BotaoInicio>
             <div className="w-full h-[80px] flex flex-col items-center relative">
-                <div className="flex gap-[10px]">
+                <div className="flex gap-[40px]">
                     <Button
                         className="bg-white shadow-none text-black rounded-none w-[200px] hover:bg-pink-100 text-lg"
                         onClick={() => setActiveSection(0)}
@@ -50,6 +50,12 @@ export default function Diretoria() {
                         className="bg-white shadow-none text-black rounded-none w-[200px] hover:bg-pink-100 text-lg"
                         onClick={() => setActiveSection(1)}
                     >
+                        Doações em Potencial
+                    </Button>
+                    <Button
+                        className="bg-white shadow-none text-black rounded-none w-[200px] hover:bg-pink-100 text-lg"
+                        onClick={() => setActiveSection(2)}
+                    >
                         Eventos
                     </Button>
                 </div>
@@ -59,7 +65,7 @@ export default function Diretoria() {
                     className="w-[200px] h-[2px] bg-pink-200 absolute mt-[35px]"
                     initial={false}
                     animate={{
-                        x: activeSection === 0 ? "-105px" : "105px", // Movimenta de um botão para o outro
+                        x: activeSection === 0 ? "-240px" : (activeSection === 1? "0" : "240px"), // Movimenta de um botão para o outro
                     }}
                     transition={{ type: "spring", stiffness: 1000, damping: 100 }}
                 />
