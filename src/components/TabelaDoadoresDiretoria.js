@@ -580,7 +580,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                     className="rounded-lg ml-8 px-3 py-1 bg-emerald-400 border-none hover:bg-emerald-500"
                     onClick={() => setPopupAdicionarDoador(true)}
                 >
-                    + Adicionar Doador em Potencial
+                    {tipoDoadores == 1 ?"+ Adicionar Doador em Potencial" : "+ Adicionar Doador"}
                 </Button>
             </div>
 
