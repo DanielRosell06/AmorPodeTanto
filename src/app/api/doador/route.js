@@ -9,10 +9,15 @@ export async function GET(req) {
     const searchBy = searchParams.get('searchBy')
     const input = searchParams.get('searchIn');
     const ordenarPor = searchParams.get('ordenarPor');
+    const tipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
 
     const where = {};
     let orderBy = {};
     let doadoresList;
+
+    if (tipoDoador != null) {
+        where.TipoDoador = tipoDoador
+    }
 
     // Filtra por status se 'desativados' não for '1'
     if (desativados !== '1') {
