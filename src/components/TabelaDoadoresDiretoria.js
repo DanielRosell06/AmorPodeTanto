@@ -70,6 +70,11 @@ const frameworks = [
     },
 
     {
+        value: "telefone",
+        label: "Telefone",
+    },
+
+    {
         value: "rua",
         label: "Rua",
     },
@@ -80,8 +85,12 @@ const frameworks = [
     },
 ]
 
-export default function TabelaDoadoresDiretoria() {
+export default function TabelaDoadoresDiretoria({ children }) {
+
     const [brRealInputValue, setBrRealInputValue] = useState("")
+    const [valorFinalDoacaoDinheiro, setValorFinalDoacaoDinheiro] = useState("")
+
+    const [tipoDoadores, setTipoDoadores] = useState(children)
 
     //Variavel de ordenar
     const [ordenacao, setOrdenacao] = useState('');
@@ -103,6 +112,8 @@ export default function TabelaDoadoresDiretoria() {
     const [popupAdicionarDoacao, setPopupAdicionarDoacao] = useState(false)
     const [popupAdicionarProduto, setPopupAdicionarProduto] = useState(false)
     const [popupAdicionarContato, setPopupAdicionarContato] = useState(false)
+    const [popupDesativarDoador, setPopupDesativarDoador] = useState(false)
+    const [popupReativarDoador, setPopupReativarDoador] = useState(false)
 
     //Variaveis de loading
     const [loading, setLoading] = useState(true)
@@ -197,6 +208,26 @@ export default function TabelaDoadoresDiretoria() {
     const handleEditarDateChange = (date) => {
         setDoadorEditado({ ...doadorEditado, DataAniversario: date })
     }
+
+    const timeoutRef = useRef(null); // Referência para o timeout
+    const [inputValue, setInputValue] = useState("");
+
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // Reseta o timer a cada nova digitação
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        // Inicia um novo timer para atualizar searchIn após 1 segundo
+        timeoutRef.current = setTimeout(() => {
+            setPesquisaInput(value); // Atualiza searchIn após 1 segundo
+            atualizarLista()
+        }, 1000);
+    };
+
     //#endregion 
 
     //#region Funções de Fetch
@@ -319,7 +350,8 @@ export default function TabelaDoadoresDiretoria() {
                 itens: Itens,
                 date: date,
                 observacao: observacao,
-                destino: destino
+                destino: destino,
+                valorDinheiro: valorFinalDoacaoDinheiro
             };
 
             const response = await fetch(`/api/doacao?IdDoador=${IdDoadorDoando}`, {
@@ -339,8 +371,38 @@ export default function TabelaDoadoresDiretoria() {
             setObservacao("");
             setDestino("");
             setDate(null)
+            setAdicionarDinheiro(false)
+            setValorFinalDoacaoDinheiro("")
+            setBrRealInputValue("")
+
         } catch (error) {
             console.error('Erro ao adicionar doacao:', error)
+        }
+    }
+
+    const fetchDesativarDoador = async () => {
+        try {
+            const response = await fetch(`api/doadorById?action=1&id=${idToDesativar}`, {
+                method: 'PUT'
+            })
+            setPopupDesativarDoador(false) // Fecha o popup após adicionar
+            setIdToDesativar(-1)
+            atualizarLista()
+        } catch (error) {
+            console.error('Erro ao desativar doador:', error)
+        }
+    }
+
+    const fetchReativarDoador = async () => {
+        try {
+            const response = await fetch(`api/doadorById?action=2&id=${idToReativar}`, {
+                method: 'PUT'
+            })
+            setPopupReativarDoador(false) // Fecha o popup após adicionar
+            setIdToReativar(-1)
+            atualizarLista()
+        } catch (error) {
+            console.error('Erro ao desativar doador:', error)
         }
     }
 
@@ -392,7 +454,7 @@ export default function TabelaDoadoresDiretoria() {
     useEffect(() => {
         const fetchLoadDoadores = async () => {
             try {
-                const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}&ordenarPor=${ordenacao}&tipoDoador=1`,
+                const response = await fetch(`/api/doador?desativados=${switchDesativos}&searchBy=${pesquisa}&searchIn=${pesquisaInput}&ordenarPor=${ordenacao}&tipoDoador=${tipoDoadores}`,
                     { method: 'GET' }
                 );
                 const data = await response.json();
@@ -404,7 +466,7 @@ export default function TabelaDoadoresDiretoria() {
         }
 
         fetchLoadDoadores();
-    }, [varAtualizarLista, switchDesativos, pesquisa, pesquisaInput, ordenacao]);
+    }, [varAtualizarLista, switchDesativos, pesquisa, pesquisaInput, ordenacao, tipoDoadores]);
 
     //#endregion 
 
@@ -417,9 +479,15 @@ export default function TabelaDoadoresDiretoria() {
         const brRealNumberValue = Number(brRealDigitsOnly) / 100
 
         const ValorFinal = brRealNumberValue * 100
+        setValorFinalDoacaoDinheiro(ValorFinal)
 
         // Formata o número para a moeda brasileira
-        return ValorFinal
+        return brRealNumberValue.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })
     }
 
     const brRealHandleInputChange = (brRealEvent) => {
@@ -433,11 +501,9 @@ export default function TabelaDoadoresDiretoria() {
         <>
             <div className="flex mt-6 justify-between w-[95%] ml-auto mr-auto">
                 <div className="flex">
-                    <Input className="w-[230px] mr-2" placeholder="Pesquisar"
-                        onChange={(e) => {
-                            setPesquisaInput(e.target.value)
-                            atualizarLista()
-                        }}
+                    <Input className="w-[66%] mr-2" placeholder="Pesquisar"
+                        value={inputValue}
+                        onChange={handleInputChange}
                     ></Input>
 
                     <Popover open={open} onOpenChange={setOpen} className="w-10">
@@ -504,6 +570,11 @@ export default function TabelaDoadoresDiretoria() {
                     </Select>
                 </div>
 
+                <div className="mt-auto mb-auto flex">
+                    <p className="mr-1">Mostrar Desativos</p>
+                    <Switch onClick={alteraSwitchDesativos} />
+                </div>
+
                 <Button
                     variant="outline"
                     className="rounded-lg ml-8 px-3 py-1 bg-emerald-400 border-none hover:bg-emerald-500"
@@ -516,7 +587,7 @@ export default function TabelaDoadoresDiretoria() {
 
 
             <Table className="ml-auto mr-auto w-[95%] mt-3">
-                <TableHeader className="bg-pink-400 ">
+                <TableHeader className={tipoDoadores == 1 ? "bg-pink-400 " : "bg-sky-400"}>
                     <TableRow>
                         <TableHead className="border-slut-100 border text-white text-center">CPF / CNPJ</TableHead>
                         <TableHead className="border-slut-100 border text-white text-center">Nome</TableHead>
@@ -594,6 +665,19 @@ export default function TabelaDoadoresDiretoria() {
                                         }}
                                     >
                                         <i className="fas fa-user-plus"></i>
+                                    </Button>
+                                    <Button
+                                        className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-green-300 hover:bg-green-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                                        onClick={doador.Status ? () => {
+                                            setIdToDesativar(doador.IdDoador)
+                                            setPopupDesativarDoador(true)
+                                        } : () => {
+                                            setIdToReativar(doador.IdDoador)
+                                            setPopupReativarDoador(true)
+                                        }
+                                        }
+                                    >
+                                        <i className={doador.Status ? ' fas fa-ban' : ' fas fa-sync'}></i>
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -1208,6 +1292,7 @@ export default function TabelaDoadoresDiretoria() {
                                             />
                                             <Button className="bg-red-400 ml-5"
                                                 onClick={() => {
+                                                    setBrRealInputValue("")
                                                     setAdicionarDinheiro(false)
                                                 }}
                                             >Cancelar</Button>
@@ -1269,11 +1354,96 @@ export default function TabelaDoadoresDiretoria() {
 
                                 <Button
                                     className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
-                                    onClick={() => { setPopupAdicionarDoacao(false); setPopupAdicionarProduto(false); setItens([]); setObservacao(""); setDate(null) }}
+                                    onClick={() => {
+                                        setPopupAdicionarDoacao(false);
+                                        setPopupAdicionarProduto(false);
+                                        setItens([]); setObservacao("");
+                                        setDate(null)
+                                        setBrRealInputValue("")
+                                        setAdicionarDinheiro(false)
+                                    }}
                                 >
                                     Cancelar
                                 </Button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {popupDesativarDoador && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+
+                        <h1 className=" text-2xl mb-5">
+                            Desativar Doador
+                        </h1>
+
+                        <div className="text-left flex flex-col gap-5">
+                            <p>- Ao desativar este doador, não será permitido que voce adicione doações a ele.</p>
+                            <p>- Este doador não irá aparecer na lista de doadores, a não ser que voce habilite a opção de mostrar doadores inativos.</p>
+                            <p>- Você pode reverter esta ação à qualquer momento.</p>
+
+                            <hr></hr>
+                        </div>
+
+                        <p className="mt-4">Tem certeza que deseja confirmar esta ação?</p>
+
+                        <div className="flex justify-center mt-3">
+                            <Button
+                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                                onClick={fetchDesativarDoador}
+                            >
+                                Confirmar
+                            </Button>
+
+                            <Button
+                                className="px-4 py-2 bg-red-500 text-white rounded  transition"
+                                onClick={() => {
+                                    setPopupDesativarDoador(false)
+                                }}
+                            >
+                                Cancelar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {popupReativarDoador && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+
+                        <h1 className=" text-2xl mb-5">
+                            Reativar Doador
+                        </h1>
+
+                        <div className="text-left flex flex-col gap-5">
+                            <p>- Ao reativar este doador, Ele voltará a aparecer na lista de doadores e em todas as outras listas.</p>
+                            <p>- Poderá ser adicionado doações à este doador.</p>
+                            <p>- Você pode reverter esta ação à qualquer momento.</p>
+
+                            <hr></hr>
+                        </div>
+
+                        <p className="mt-4">Tem certeza que deseja confirmar esta ação?</p>
+
+                        <div className="flex justify-center mt-3">
+                            <Button
+                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                                onClick={fetchReativarDoador}
+                            >
+                                Confirmar
+                            </Button>
+
+                            <Button
+                                className="px-4 py-2 bg-red-500 text-white rounded  transition"
+                                onClick={() => {
+                                    setPopupReativarDoador(false)
+                                }}
+                            >
+                                Cancelar
+                            </Button>
                         </div>
                     </div>
                 </div>

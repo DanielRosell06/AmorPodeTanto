@@ -40,6 +40,29 @@ export async function GET(req) {
                 };
                 break
 
+            case 'telefone':
+                // Primeiro busca os contatos com o telefone
+                const contatos = await prisma.contato.findMany({
+                    where: {
+                        Telefone: {
+                            contains: input,
+                            mode: 'insensitive'
+                        }
+                    },
+                    select: {
+                        IdDoador: true
+                    }
+                });
+
+                // Pega apenas os IDs dos doadores encontrados
+                const idsDoadores = contatos.map(c => c.IdDoador);
+
+                // Busca os doadores com esses IDs
+                where.IdDoador = {
+                    in: idsDoadores
+                };
+                break;
+
             case 'rua':
                 where.Rua = {
                     contains: input,
@@ -54,7 +77,6 @@ export async function GET(req) {
                 };
                 break
         }
-
     }
 
     if (ordenarPor) {
@@ -97,25 +119,13 @@ export async function GET(req) {
 }
 
 export async function POST(req, res) {
-    
+    const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email } = await req.json()
+
     try {
-        const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email } = await req.json()
-
-        const url = new URL(req.url);
-        const searchParams = url.searchParams;
-        const TipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
-
-        let response = "";
-        let data = "";
-        let Rua = "";
-        let Bairro = "";
-
-        if (CEP) {
-            response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
-            data = await response.json();
-            Rua = data.logradouro
-            Bairro = data.bairro
-        }
+        const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
+        const data = await response.json();
+        const Rua = data.logradouro
+        const Bairro = data.bairro
 
         const resultDoador = await prisma.doador.create({
             data: {
@@ -127,8 +137,7 @@ export async function POST(req, res) {
                 Bairro,
                 Complemento,
                 Sexo,
-                DataAniversario,
-                TipoDoador
+                DataAniversario
             }
         })
 

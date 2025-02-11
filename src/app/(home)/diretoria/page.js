@@ -67,7 +67,7 @@ export default function Diretoria() {
 
             {activeSection == 0 &&
                 <>
-                    <TabelaDoadoresDiretoria></TabelaDoadoresDiretoria>
+                    <TabelaDoadoresDiretoria>{1}</TabelaDoadoresDiretoria>
                 </>
             }
         </div>

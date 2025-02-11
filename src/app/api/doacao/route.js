@@ -3,13 +3,10 @@ let prisma = new PrismaClient()
 
 export async function GET(req) {
     try {
-        const now = new Date(); // Data e hora atual
+        const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const todayEnd = new Date(todayStart);
-        todayEnd.setDate(todayEnd.getDate() + 1); // Fim do dia de hoje
-
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1)); // Segunda-feira da semana atual
-        const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7)); // Domingo da semana atual
+        todayEnd.setDate(todayEnd.getDate() + 1);
 
         const url = new URL(req.url);
         const searchParams = url.searchParams;
@@ -18,166 +15,137 @@ export async function GET(req) {
         const searchIn = searchParams.get('searchIn');
         const orderBy = searchParams.get('orderBy');
         const filterBy = searchParams.get('filterBy');
+        const tipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
 
         let doacoes;
         let whereFilter = {};
 
+        // Aplicar filtros de status e datas
         if (filterBy && filterBy !== "Nenhum") {
             switch (filterBy) {
                 case "agendado":
-                    whereFilter = { 
-                        StatusDoacao: 0,
-                        DataAgendada: {
-                            gte: todayStart,
-                        }
-                     };
+                    whereFilter.StatusDoacao = 0;
+                    whereFilter.DataAgendada = { gte: todayStart };
                     break;
                 case "pendente":
-                    whereFilter = {
-                        StatusDoacao: 0,
-                        DataAgendada: { lt: todayEnd },
-                    };
+                    whereFilter.StatusDoacao = 0;
+                    whereFilter.DataAgendada = { lt: todayEnd };
                     break;
                 case "agendadoHoje":
-                    whereFilter = {
-                        StatusDoacao: 0,
-                        DataAgendada: {
-                            gte: todayStart,
-                            lt: todayEnd,
-                        },
+                    whereFilter.StatusDoacao = 0;
+                    whereFilter.DataAgendada = {
+                        gte: todayStart,
+                        lt: todayEnd,
                     };
                     break;
                 case "agendadoSemana":
-                    whereFilter = {
-                        StatusDoacao: 0,
-                        DataAgendada: {
-                            gte: startOfWeek,
-                            lt: endOfWeek,
-                        },
+                    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+                    const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7));
+                    whereFilter.StatusDoacao = 0;
+                    whereFilter.DataAgendada = {
+                        gte: startOfWeek,
+                        lt: endOfWeek,
                     };
                     break;
                 case "retirado":
-                    whereFilter = { StatusDoacao: 1 };
+                    whereFilter.StatusDoacao = 1;
                     break;
-
                 case "cancelado":
-                    whereFilter = { StatusDoacao: 3 };
+                    whereFilter.StatusDoacao = 3;
                     break;
             }
         }
 
-        // Definindo o filtro para pesquisa
+        // Filtro de pesquisa
         if (searchBy && searchIn) {
+            let idsDoadores = [];
+            
             if (searchBy === 'Nome') {
-                whereFilter = {
-                    ...whereFilter,
-                    IdDoador: {
-                        in: await prisma.doador.findMany({
-                            where: {
-                                Nome: {
-                                    contains: searchIn,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            select: {
-                                IdDoador: true,
-                            },
-                        }).then(donors => donors.map(d => d.IdDoador)),
-                    },
-                };
-            } else if (searchBy === 'Telefone') {
-                whereFilter = {
-                    ...whereFilter,
-                    IdDoador: {
-                        in: await prisma.contato.findMany({
-                            where: {
-                                Telefone: {
-                                    contains: searchIn,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            select: {
-                                IdDoador: true,
-                            },
-                        }).then(contacts => contacts.map(c => c.IdDoador)),
-                    },
-                };
-            } else if (searchBy === 'CPFCNPJ') {
-                whereFilter = {
-                    ...whereFilter,
-                    IdDoador: {
-                        in: await prisma.doador.findMany({
-                            where: {
-                                CPFCNPJ: {
-                                    contains: searchIn,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            select: {
-                                IdDoador: true,
-                            },
-                        }).then(donors => donors.map(d => d.IdDoador)),
-                    },
-                };
+                idsDoadores = await prisma.doador.findMany({
+                    where: { Nome: { contains: searchIn, mode: 'insensitive' } },
+                    select: { IdDoador: true },
+                }).then(d => d.map(({ IdDoador }) => IdDoador));
+            }
+            else if (searchBy === 'Telefone') {
+                idsDoadores = await prisma.contato.findMany({
+                    where: { Telefone: { contains: searchIn, mode: 'insensitive' } },
+                    select: { IdDoador: true },
+                }).then(c => c.map(({ IdDoador }) => IdDoador));
+            }
+            else if (searchBy === 'CPFCNPJ') {
+                idsDoadores = await prisma.doador.findMany({
+                    where: { CPFCNPJ: { contains: searchIn, mode: 'insensitive' } },
+                    select: { IdDoador: true },
+                }).then(d => d.map(({ IdDoador }) => IdDoador));
+            }
+
+            if (idsDoadores.length > 0) {
+                whereFilter.IdDoador = { in: idsDoadores };
+            } else {
+                // Retorna vazio se não encontrar na pesquisa
+                return new Response(JSON.stringify([]), { status: 200 });
             }
         }
 
-        // Lógica para ordenação das doações
+        // Filtro de tipo de doador combinado com outros filtros
+        const doadoresFiltrados = await prisma.doador.findMany({
+            where: { TipoDoador: tipoDoador },
+            select: { IdDoador: true },
+        });
+
+        const idsPorTipo = doadoresFiltrados.map(d => d.IdDoador);
+
+        if (whereFilter.IdDoador) {
+            // Interseção entre IDs da pesquisa e IDs do tipo
+            const idsIntersecao = whereFilter.IdDoador.in.filter(id => 
+                idsPorTipo.includes(id)
+            );
+            whereFilter.IdDoador.in = idsIntersecao;
+        } else {
+            whereFilter.IdDoador = { in: idsPorTipo };
+        }
+
+        // Ordenação
+        let orderByClause = {};
         if (orderBy) {
             switch (orderBy) {
                 case "adicionadoRecente":
-                    doacoes = await prisma.doacao.findMany({
-                        orderBy: { DataDoacao: 'desc' },
-                        where: whereFilter,
-                    });
+                    orderByClause = { DataDoacao: 'desc' };
                     break;
                 case "adicionadoAntigo":
-                    doacoes = await prisma.doacao.findMany({
-                        orderBy: { DataDoacao: 'asc' },
-                        where: whereFilter,
-                    });
+                    orderByClause = { DataDoacao: 'asc' };
                     break;
                 case "agendamentoMaisProximo":
-                    doacoes = await prisma.doacao.findMany({
-                        where: {
-                            DataAgendada: { gte: todayStart },
-                            ...whereFilter,
-                        },
-                        orderBy: { DataAgendada: 'asc' },
-                    });
+                    orderByClause = { DataAgendada: 'asc' };
+                    whereFilter.DataAgendada = { ...whereFilter.DataAgendada, gte: todayStart };
                     break;
                 case "agendamentoMaisLonge":
-                    doacoes = await prisma.doacao.findMany({
-                        where: {
-                            DataAgendada: { gte: todayStart },
-                            ...whereFilter,
-                        },
-                        orderBy: { DataAgendada: 'desc' },
-                    });
-                    break;
-                default:
-                    doacoes = await prisma.doacao.findMany({ where: whereFilter });
+                    orderByClause = { DataAgendada: 'desc' };
+                    whereFilter.DataAgendada = { ...whereFilter.DataAgendada, gte: todayStart };
                     break;
             }
-        } else {
-            doacoes = await prisma.doacao.findMany({ where: whereFilter });
         }
 
+        doacoes = await prisma.doacao.findMany({
+            where: whereFilter,
+            orderBy: orderByClause,
+        });
+
+        // Popular dados relacionados
         const doacoesCompletas = await Promise.all(
-            doacoes.map(async (doacao) => {
-                const doador = await prisma.doador.findUnique({
+            doacoes.map(async (doacao) => ({
+                ...doacao,
+                doador: await prisma.doador.findUnique({
                     where: { IdDoador: doacao.IdDoador },
-                });
-
-                const contato = await prisma.contato.findMany({
+                }),
+                contato: await prisma.contato.findMany({
                     where: { IdDoador: doacao.IdDoador },
-                });
-
-                return { ...doacao, doador, contato };
-            })
+                }),
+            }))
         );
 
         return new Response(JSON.stringify(doacoesCompletas), { status: 200 });
+        
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
         console.error('Erro ao processar a requisição:', errorMessage);
@@ -191,6 +159,7 @@ export async function POST(req) {
     let observacao;
     let destino;
     let date;
+    let valorDinheiro;
 
     try {
         // Tenta interpretar o corpo da requisição
@@ -200,6 +169,8 @@ export async function POST(req) {
         observacao = Itens.observacao || ""; // Atribui uma string vazia caso não tenha observação
         destino = Itens.destino || ""; // Atribui uma string vazia caso não tenha observação
         date = Itens.date ? new Date(Itens.date) : null; // Usa a data fornecida ou a data atual
+        valorDinheiro = Itens.valorDinheiro || null;
+        console.log(valorDinheiro)
 
         // Verifica se Itens.itens é um array
         if (!Array.isArray(Itens.itens)) {
@@ -217,7 +188,7 @@ export async function POST(req) {
             data: {
                 IdDoador: IdDoador,
                 Observacao: observacao,
-                Destino: destino, 
+                Destino: destino,
                 DataAgendada: date, // Salva a data no formato Date
                 StatusDoacao: 0
             }
@@ -235,8 +206,21 @@ export async function POST(req) {
             });
         });
 
+        let resultado;
+
         // Aguarda a criação de todos os itens
         await Promise.all(itemPromises);
+
+        if (valorDinheiro != null) {
+            resultado = await prisma.doacaoItem.create({
+                data: {
+                    IdDoacao: resultDoacao.IdDoacao,
+                    IdProduto: 100,
+                    Quantidade: valorDinheiro,
+                    UNItem: "Reais"
+                }
+            })
+        }
 
         // Retorna uma resposta bem-sucedida
         return new Response(JSON.stringify({ message: 'Doação e itens criados com sucesso!' }), { status: 200 });
@@ -276,7 +260,7 @@ export async function PUT(req) {
         const updateData = {};
 
         updateData.Observacao = novaObservacao
-        if (novoDestino != "null" && novoDestino != null){
+        if (novoDestino != "null" && novoDestino != null) {
             updateData.Destino = novoDestino
         }
 

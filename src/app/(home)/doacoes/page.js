@@ -332,7 +332,6 @@ export default function Home() {
                         </Select>
                     </div>
                     <div className="flex justify-between mb-3">
-
                         <Input className="w-[66%] mr-2" placeholder="Pesquisar"
                             value={inputValue}
                             onChange={handleInputChange}
