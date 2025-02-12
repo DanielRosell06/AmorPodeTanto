@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 import React, { useEffect, useState, useRef, setOpen } from "react";
+import Calendar from "@/components/calendario/Calendar";
 
 
 export default function Diretoria() {
@@ -75,6 +76,9 @@ export default function Diretoria() {
                 <>
                     <TabelaDoadoresDiretoria>{1}</TabelaDoadoresDiretoria>
                 </>
+            }
+            {activeSection == 2 &&
+                <Calendar></Calendar>
             }
         </div>
     )
