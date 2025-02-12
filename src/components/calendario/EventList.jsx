@@ -9,12 +9,14 @@ export default function EventList({ events }) {
       <h3 className="text-xl font-bold mb-4">Próximos Eventos</h3>
       {sortedEvents.length > 0 ? (
         <ul className="space-y-2">
-          {sortedEvents.map((event) => (
-            <li key={event.id} className="bg-gray-50 p-2 rounded">
-              <div className="font-semibold">{event.title}</div>
-              <div className="text-sm text-gray-600">{format(event.date, "d 'de' MMMM", { locale: ptBR })}</div>
-            </li>
-          ))}
+          {sortedEvents
+            .filter(event => new Date(event.DataEvento) > new Date()) // Filtra eventos futuros
+            .map((event) => (
+              <li key={event.IdEvento} className="bg-gray-50 p-2 rounded">
+                <div className="font-semibold">{event.TituloEvento}</div>
+                <div className="text-sm text-gray-600">{format(event.DataEvento, "d 'de' MMMM", { locale: ptBR })}</div>
+              </li>
+            ))}
         </ul>
       ) : (
         <p className="text-gray-500">Nenhum evento programado.</p>

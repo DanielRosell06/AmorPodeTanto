@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { format, addMonths, subMonths } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -10,19 +10,43 @@ import MonthView from "./MonthView"
 import EventList from "./EventList"
 import AddEventButton from "./AddEventButton"
 import AddEventModal from "./AddEventModal"
-
-const mockEvents = [
-  { id: "1", title: "Reunião de Equipe", date: new Date(2025, 1, 15), color: "pink"},
-  { id: "2", title: "Entrega do Projeto", date: new Date(2025, 1, 20), color: "blue"},
-  { id: "3", title: "Aniversário do João", date: new Date(2025, 1, 25), color: "green"},
-]
+import { addDays } from "date-fns"
 
 export default function Calendar() {
+
+  const [mockEvents, setMockEvents] = useState([])
+
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [atualizarCalendarioVar, setAtualizarCalendarioVar] = useState(-1)
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1))
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1))
+
+  const atualizarCalendario = () => {
+    setAtualizarCalendarioVar(atualizarCalendarioVar * -1)
+  }
+
+  useEffect(() => {
+    const fetchLoadEventos = async () => {
+      try {
+        const response = await fetch(`/api/evento`, { method: 'GET' });
+        const data = await response.json();
+  
+        // Corrige a data de cada evento, adicionando 1 dia
+        const correctedData = data.map(evento => ({
+          ...evento,
+          DataEvento: addDays(new Date(evento.DataEvento), 1),
+        }));
+  
+        setMockEvents(correctedData);
+      } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+      }
+    };
+  
+    fetchLoadEventos();
+  }, [atualizarCalendarioVar]);
 
   return (
     <div className="flex gap-8 h-[calc(100vh-100px)] w-[90%] ml-auto mr-auto mb-4">
@@ -31,7 +55,12 @@ export default function Calendar() {
           <Button onClick={prevMonth} variant="outline">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-2xl font-bold">{format(currentDate, "MMMM yyyy", { locale: ptBR })}</h2>
+          <div className="flex">
+            <h2 className="text-2xl font-bold">{format(currentDate, "MMMM yyyy", { locale: ptBR })}</h2>
+            <Button className="ml-3 w-8 h-8" onClick={atualizarCalendario} variant="outline">
+              <i className="fas fa-sync-alt"></i>
+            </Button>
+          </div>
           <Button onClick={nextMonth} variant="outline">
             <ChevronRight className="h-4 w-4" />
           </Button>

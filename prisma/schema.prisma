@@ -9,7 +9,7 @@ datasource db {
 
 model Doador {
   IdDoador        Int       @id @default(autoincrement())
-  CPFCNPJ         String?    @unique
+  CPFCNPJ         String?   @unique
   Nome            String
   CEP             String?
   Rua             String?
@@ -63,4 +63,12 @@ model Usuario {
   EmailUsuario String @unique
   SenhaUsuario String
   TipoUsuario  Int    @default(0)
+}
+
+model Evento {
+  IdEvento      Int      @id @default(autoincrement())
+  TituloEvento  String
+  DetalheEvento String?
+  DataEvento    DateTime
+  CorEvento     String?
 }
