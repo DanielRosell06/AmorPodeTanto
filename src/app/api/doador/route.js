@@ -10,6 +10,7 @@ export async function GET(req) {
     const input = searchParams.get('searchIn');
     const ordenarPor = searchParams.get('ordenarPor');
     const tipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
+    console.log(tipoDoador)
 
     const where = {};
     let orderBy = {};
@@ -121,11 +122,28 @@ export async function GET(req) {
 export async function POST(req, res) {
     const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email } = await req.json()
 
+    const url = new URL(req.url);
+    const searchParams = url.searchParams;
+    const TipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0
+
     try {
         const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
         const data = await response.json();
         const Rua = data.logradouro
         const Bairro = data.bairro
+
+        const jsonDadosDoadores = {
+            CPFCNPJ,
+            Nome,
+            CEP,
+            Rua,
+            Numero,
+            Bairro,
+            Complemento,
+            Sexo,
+            DataAniversario,
+            TipoDoador
+        }
 
         const resultDoador = await prisma.doador.create({
             data: {

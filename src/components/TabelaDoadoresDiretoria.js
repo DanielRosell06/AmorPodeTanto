@@ -167,8 +167,8 @@ export default function TabelaDoadoresDiretoria({ children }) {
         CPFCNPJ: "",
         Nome: "",
         CEP: "",
-        Sexo: "",
-        DataAniversario: "",
+        Sexo: null,
+        DataAniversario: null,
         Numero: "",
         Contato: "",
         Telefone: "",
@@ -239,7 +239,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
     //#region Funções de Fetch
     const fetchAdicionarDoador = async () => {
         try {
-            const response = await fetch('/api/doador?tipoDoador=1', {
+            const response = await fetch(`/api/doador?tipoDoador=${children? children : 0}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

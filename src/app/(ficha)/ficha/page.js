@@ -86,7 +86,11 @@ export default function NoLayoutPage() {
                     Itens:{doacao.itensComProduto.map((item, index) => {
                       return (
                         <div key={index}>
-                          {index == 0 ? "" : ","}ㅤ{item.Quantidade} {item.UNItem} {item.UNItem != "" ? "de" : ""} {item.produto.Nome}
+                          {
+                          //Na linha de baixo, to só tentando arrumar a sintaxe da frase. No final dela, tem um negocio tentando ajeitar pra ficar certo com dinheiro também
+                          //Até ia pensar em separar ela em varias linhas, mas to com medo de ficar mais confuso ainda pra formular as frases
+                          }
+                          {index == 0 ? "" : ","}ㅤ{item.produto.IdProduto == 100 ? (parseFloat(item.Quantidade, 10) / 100).toFixed(2) : item.Quantidade} {item.UNItem} {item.UNItem != ""  && item.produto.IdProduto != 100? "de" : ""} {item.produto.IdProduto != 100 && item.produto.Nome}
                         </div>
                       );
                     })}
