@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -161,8 +167,8 @@ export default function TabelaDoadoresDiretoria({ children }) {
         CPFCNPJ: "",
         Nome: "",
         CEP: "",
-        Sexo: "",
-        DataAniversario: "",
+        Sexo: null,
+        DataAniversario: null,
         Numero: "",
         Contato: "",
         Telefone: "",
@@ -233,7 +239,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
     //#region Funções de Fetch
     const fetchAdicionarDoador = async () => {
         try {
-            const response = await fetch('/api/doador?tipoDoador=1', {
+            const response = await fetch(`/api/doador?tipoDoador=${children? children : 0}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -580,7 +586,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                     className="rounded-lg ml-8 px-3 py-1 bg-emerald-400 border-none hover:bg-emerald-500"
                     onClick={() => setPopupAdicionarDoador(true)}
                 >
-                    {tipoDoadores == 1 ?"+ Adicionar Doador em Potencial" : "+ Adicionar Doador"}
+                    {tipoDoadores == 1 ? "+ Adicionar Doador em Potencial" : "+ Adicionar Doador"}
                 </Button>
             </div>
 
@@ -629,56 +635,99 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                 <TableCell className="border-slut-100 border">{doador.Rua}, {doador.Numero}, {doador.Bairro}</TableCell>
                                 <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
                                 <TableCell className="border-slut-100 border flex">
-                                    <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
-                                        onClick={() => {
-                                            setPopupAdicionarDoacao(true);
-                                            setNomeDoadorAdicionado(doador.Nome)
-                                            fetchLoadProdutos()
-                                            setIdDoadorDoando(doador.IdDoador)
-                                        }}
-                                    ><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
-                                    <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
-                                        onClick={() => {
-                                            setPopupInformacoes(true);
-                                            setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador });
-                                            setIdDoadorContato(doador.IdDoador)
-                                            setIdToFind(doador.IdDoador);
-                                        }}
-                                    ><i className="fas fa-info-circle"></i></Button>
-                                    <Button
-                                        className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
-                                        onClick={() => {
-                                            setPopupEditarDoador(true);
-                                            setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador });
-                                            setIdToFind(doador.IdDoador);
-                                            setIdDoadorContato(doador.IdDoador)
-                                        }}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </Button>
-                                    <Button
-                                        className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
-                                        onClick={() => {
-                                            setPopupAdicionarContato(true);
-                                            setNomeDoadorAdicionarContato(doador.Nome)
-                                            setNovoContato({ ...novoContato, IdDoador: doador.IdDoador })
-                                        }}
-                                    >
-                                        <i className="fas fa-user-plus"></i>
-                                    </Button>
-                                    <Button
-                                        className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-green-300 hover:bg-green-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
-                                        onClick={doador.Status ? () => {
-                                            setIdToDesativar(doador.IdDoador)
-                                            setPopupDesativarDoador(true)
-                                        } : () => {
-                                            setIdToReativar(doador.IdDoador)
-                                            setPopupReativarDoador(true)
-                                        }
-                                        }
-                                    >
-                                        <i className={doador.Status ? ' fas fa-ban' : ' fas fa-sync'}></i>
-                                    </Button>
+
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                                                    onClick={() => {
+                                                        setPopupAdicionarDoacao(true);
+                                                        setNomeDoadorAdicionado(doador.Nome)
+                                                        fetchLoadProdutos()
+                                                        setIdDoadorDoando(doador.IdDoador)
+                                                    }}
+                                                ><i className="fas fa-hand-holding-heart text-[10px]"></i></Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Adicionar doação à {doador.Nome}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                                                    onClick={() => {
+                                                        setPopupInformacoes(true);
+                                                        setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador });
+                                                        setIdDoadorContato(doador.IdDoador);
+                                                        setIdToFind(doador.IdDoador);
+                                                    }}
+                                                >
+                                                    <i className="fas fa-info-circle"></i>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Informações do Doador</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                                                    onClick={() => {
+                                                        setPopupEditarDoador(true);
+                                                        setDoadorEditado({ ...doadorEditado, IdDoador: doador.IdDoador });
+                                                        setIdToFind(doador.IdDoador);
+                                                        setIdDoadorContato(doador.IdDoador);
+                                                    }}
+                                                >
+                                                    <i className="fas fa-edit"></i>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Editar Doador</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-red-300 hover:bg-red-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                                                    onClick={() => {
+                                                        setPopupAdicionarContato(true);
+                                                        setNomeDoadorAdicionarContato(doador.Nome);
+                                                        setNovoContato({ ...novoContato, IdDoador: doador.IdDoador });
+                                                    }}
+                                                >
+                                                    <i className="fas fa-user-plus"></i>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Adicionar Contato</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    className={(doador.Status ? 'bg-slate-300 hover:bg-slate-400' : 'bg-green-300 hover:bg-green-400') + ' rounded-full  w-[35px] h-[35px] flex ml-1 mr-1 mt-1 mb-1'}
+                                                    onClick={doador.Status ? () => {
+                                                        setIdToDesativar(doador.IdDoador);
+                                                        setPopupDesativarDoador(true);
+                                                    } : () => {
+                                                        setIdToReativar(doador.IdDoador);
+                                                        setPopupReativarDoador(true);
+                                                    }}
+                                                >
+                                                    <i className={doador.Status ? 'fas fa-ban' : 'fas fa-sync'}></i>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{doador.Status ? 'Desativar Doador' : 'Reativar Doador'}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 </TableCell>
                             </TableRow>
                         ))

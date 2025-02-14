@@ -10,6 +10,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 import React, { useEffect, useState, useRef, setOpen } from "react";
+import Calendar from "@/components/calendario/Calendar";
+import InterfaceDoacoes from "@/components/InterfaceDoacoes";
 
 
 export default function Diretoria() {
@@ -65,7 +67,7 @@ export default function Diretoria() {
                     className="w-[200px] h-[2px] bg-pink-200 absolute mt-[35px]"
                     initial={false}
                     animate={{
-                        x: activeSection === 0 ? "-240px" : (activeSection === 1? "0" : "240px"), // Movimenta de um botão para o outro
+                        x: activeSection === 0 ? "-240px" : (activeSection === 1 ? "0" : "240px"), // Movimenta de um botão para o outro
                     }}
                     transition={{ type: "spring", stiffness: 1000, damping: 100 }}
                 />
@@ -75,6 +77,14 @@ export default function Diretoria() {
                 <>
                     <TabelaDoadoresDiretoria>{1}</TabelaDoadoresDiretoria>
                 </>
+            }
+            {activeSection == 1 &&
+                <div className="ml-8 text-left">
+                    <InterfaceDoacoes>{1}</InterfaceDoacoes>
+                </div>
+            }
+            {activeSection == 2 &&
+                <Calendar></Calendar>
             }
         </div>
     )

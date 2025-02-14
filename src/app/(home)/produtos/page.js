@@ -115,6 +115,7 @@ export default function Home() {
                 Nome: "",
                 UN: ""
             })
+            atualizarLista()
         } catch (error) {
             console.error('Erro ao carregar doadores:', error); // Adicione um tratamento de erro
         }

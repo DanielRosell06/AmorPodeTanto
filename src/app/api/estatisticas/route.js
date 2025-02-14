@@ -4,7 +4,11 @@ let prisma = new PrismaClient();
 export async function GET(req) {
     try {
         // Pegando todos os itens de doação
-        const doacaoItens = await prisma.doacaoItem.findMany();
+        const doacaoItens = await prisma.doacaoItem.findMany({
+            where : {
+                NOT : { IdProduto : 100}
+            }
+        });
 
         // Pegando os IDs dos produtos dos itens de doação
         const produtoIds = [...new Set(doacaoItens.map(item => item.IdProduto))];
