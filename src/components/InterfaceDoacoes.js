@@ -231,7 +231,7 @@ export default function InterfaceDoacoes( {children} ) {
         }
 
         fetchLoadDoacoes()
-    }, [varLista, orderBy, searchBy, searchIn, filterBy])
+    }, [varLista, orderBy, searchBy, searchIn, filterBy, children])
 
     useEffect(() => {
         const fetchLoadItens = async () => {
