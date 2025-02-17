@@ -47,6 +47,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import DownloadButton from "./DownloadButton";
 
 const frameworks = [
     {
@@ -65,7 +66,7 @@ const frameworks = [
 
 
 
-export default function InterfaceDoacoes( {children} ) {
+export default function InterfaceDoacoes({ children }) {
 
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState("")
@@ -263,9 +264,9 @@ export default function InterfaceDoacoes( {children} ) {
     return (
         <div className="flex justify-between">
             <div className="w-[60%]">
-                <Link href="/ficha" target="_blank">
-                    <Button className={(IdDoacoesFicha.length > 0 ? "bg-green-400 hover:bg-green-500" : "bg-slate-200 text-slate-400 hover:bg-slate-200 cursor-default") + " mr-8 mt-6 w-full mb-3"}>Imprimir Ficha de Retirada ({IdDoacoesFicha.length} Doações)</Button>
-                </Link>
+                <DownloadButton IdDoações={IdDoacoesFicha}>
+
+                </DownloadButton>
                 <div className="flex justify-between mb-3">
                     <Select onValueChange={(value) => {
                         setOrderBy(value);
