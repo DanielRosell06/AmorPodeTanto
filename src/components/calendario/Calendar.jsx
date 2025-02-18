@@ -11,10 +11,15 @@ import EventList from "./EventList"
 import AddEventButton from "./AddEventButton"
 import AddEventModal from "./AddEventModal"
 import { addDays } from "date-fns"
+import { Value } from "@radix-ui/react-select"
+import ViewEventDetails from "./ViewEventDetails"
 
 export default function Calendar() {
 
   const [mockEvents, setMockEvents] = useState([])
+
+  const [popupViewEvent, setPopupViewEvent] = useState(false)
+  const [eventData, setEventData] = useState([])
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -32,19 +37,19 @@ export default function Calendar() {
       try {
         const response = await fetch(`/api/evento`, { method: 'GET' });
         const data = await response.json();
-  
+
         // Corrige a data de cada evento, adicionando 1 dia
         const correctedData = data.map(evento => ({
           ...evento,
           DataEvento: addDays(new Date(evento.DataEvento), 1),
         }));
-  
+
         setMockEvents(correctedData);
       } catch (error) {
         console.error('Erro ao carregar eventos:', error);
       }
     };
-  
+
     fetchLoadEventos();
   }, [atualizarCalendarioVar]);
 
@@ -57,23 +62,27 @@ export default function Calendar() {
           </Button>
           <div className="flex">
             <h2 className="text-2xl font-bold">{format(currentDate, "MMMM yyyy", { locale: ptBR })}</h2>
-            <Button className="ml-3 w-8 h-8" onClick={atualizarCalendario} variant="outline">
-              <i className="fas fa-sync-alt"></i>
-            </Button>
           </div>
           <Button onClick={nextMonth} variant="outline">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <MonthView currentDate={currentDate} events={mockEvents} />
+        <MonthView currentDate={currentDate} events={mockEvents} onOpenView={(e) => {
+          setEventData(e)
+          setPopupViewEvent(true)
+        }} />
       </div>
       <div className="w-80 flex flex-col">
         <AddEventButton onClick={() => setIsModalOpen(true)} className="mb-4" />
         <ScrollArea className="flex-1">
-          <EventList events={mockEvents} />
+          <EventList events={mockEvents} onOpenView={(e) => {
+            setEventData(e)
+            setPopupViewEvent(true)
+          }} />
         </ScrollArea>
       </div>
-      {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario}/>}
+      {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) } } atualizarCalendario={atualizarCalendario}></ViewEventDetails>) : ""}
     </div>
   )
 }

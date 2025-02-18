@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
     },
     logoSpace: {
         position: 'absolute',
-        top: 5,
+        top: 0,
         marginLeft: 5,
         width: 84,
         height: 50,
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     header: {
         textAlign: "center",
         marginBottom: 10,
-        paddingTop: 60,
+        paddingTop: 50,
         paddingBottom: 8,
         borderBottomWidth: 1,
         borderBottomColor: '#333',
@@ -30,12 +30,14 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "black",
         marginBottom: 4,
-        color: '#2c3e50'
+        color: '#2c3e50',
+        lineHeight: 1.2
     },
     headerText: {
         fontSize: 8,
         marginBottom: 2,
-        color: '#666'
+        color: '#666',
+        lineHeight: 1.2
     },
     section: {
         marginBottom: 6,
@@ -89,12 +91,20 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#999',
         borderStyle: 'dashed',
-        marginVertical: 25,
-        position: 'relative',
-        height: 10 // Altura aumentada para o texto
+        marginVertical: 10,
+        position: 'relative'
     },
     copyLabel: {
-        top: 10, // Texto POSICIONADO ABAIXO DA LINHA
+        marginTop: 15,
+        textAlign: 'center',
+        backgroundColor: '#f5f5f5',
+        fontSize: 7,
+        color: '#666',
+        paddingHorizontal: 4
+    },
+    corteText: {
+        position: 'absolute',
+        top: 10,
         left: 0,
         right: 0,
         textAlign: 'center',
@@ -110,6 +120,10 @@ const styles = StyleSheet.create({
         borderTopColor: '#ddd',
         fontStyle: 'italic',
         color: '#666'
+    },
+    label: {
+        fontWeight: "bold",
+        color: '#2c3e50'
     }
 });
 
@@ -139,11 +153,15 @@ const DonationSection = ({ donation, isCopy }) => (
             </View>
         )}
 
-        {/* Cabeçalho Institucional */}
+        {/* Cabeçalho Institucional Completo */}
         {!isCopy && (
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>INSTITUTO BENEFICENTE E SOCIAL EU NÃO SABIA QUE MEU AMOR PODIA TANTO</Text>
-                <Text style={styles.headerText}>CNPJ: 28.417.972/0001-03 | Sede: Rua Heloisa Penteado, 317 Vila Esperança - SP</Text>
+                <Text style={styles.headerTitle}>
+                    INSTITUTO BENEFICENTE E SOCIAL EU NÃO SABIA QUE MEU AMOR PODIA TANTO
+                </Text>
+                <Text style={styles.headerText}>CNPJ: 28 417 972 0001/03 | Sede: Rua Heloisa Penteado, 317 Vila Esperança - SP</Text>
+                <Text style={styles.headerText}>Telefone: 11 2791-3224 / 11 98998-8133 | E-mail: contato@oamorpodetanto.org.br</Text>
+                <Text style={styles.headerText}>Conheça tudo sobre nosso trabalho através do @oamorpodetanto</Text>
             </View>
         )}
 
@@ -151,9 +169,9 @@ const DonationSection = ({ donation, isCopy }) => (
         <View style={[styles.section, isCopy && { padding: 4 }]}>
             <Text style={styles.title}>COMPROVANTE DE RETIRADA</Text>
             <View style={styles.dateRow}>
-                <Text>Agendada: {formatDate(donation.DataAgendada)}</Text>
-                {isCopy && <Text>Gerada: {formatDate(new Date())}</Text>}
                 <Text>Registrada: {formatDate(donation.DataDoacao)}</Text>
+                {isCopy && <Text>Gerada: {formatDate(new Date())}</Text>}
+                <Text>Agendada: {formatDate(donation.DataAgendada)}</Text>
             </View>
         </View>
 
@@ -210,7 +228,7 @@ const DonationPDF = ({ data }) => (
                 <DonationSection donation={donation} isCopy={false} />
 
                 <View style={styles.separator}>
-                    <Text style={styles.copyLabel}>CORTE AQUI | DOCUMENTO VÁLIDO APENAS COM AMBAS AS VIAS</Text>
+                    <Text style={styles.corteText}>CORTE AQUI | DOCUMENTO VÁLIDO APENAS COM AMBAS AS VIAS</Text>
                 </View>
 
                 <DonationSection donation={donation} isCopy={true} />

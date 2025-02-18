@@ -408,7 +408,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
             setIdToReativar(-1)
             atualizarLista()
         } catch (error) {
-            console.error('Erro ao desativar doador:', error)
+            console.error('Erro ao inativar doador:', error)
         }
     }
 
@@ -577,7 +577,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 </div>
 
                 <div className="mt-auto mb-auto flex">
-                    <p className="mr-1">Mostrar Desativos</p>
+                    <p className="mr-1">Mostrar Inativos</p>
                     <Switch onClick={alteraSwitchDesativos} />
                 </div>
 
@@ -592,7 +592,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
 
 
 
-            <Table className="ml-auto mr-auto w-[95%] mt-3">
+            <Table className="ml-auto mr-auto w-[95%] mt-3 text-center">
                 <TableHeader className={tipoDoadores == 1 ? "bg-pink-400 " : "bg-sky-400"}>
                     <TableRow>
                         <TableHead className="border-slut-100 border text-white text-center">CPF / CNPJ</TableHead>
@@ -724,7 +724,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>{doador.Status ? 'Desativar Doador' : 'Reativar Doador'}</p>
+                                                <p>{doador.Status ? 'Inativar Doador' : 'Reativar Doador'}</p>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -1425,7 +1425,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                     <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
 
                         <h1 className=" text-2xl mb-5">
-                            Desativar Doador
+                            Inativar Doador
                         </h1>
 
                         <div className="text-left flex flex-col gap-5">
