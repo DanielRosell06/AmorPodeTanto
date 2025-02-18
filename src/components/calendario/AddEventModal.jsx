@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
 
-export default function AddEventModal({ onClose }) {
+export default function AddEventModal({ onClose, atualizarCalendario }) {
   const [title, setTitle] = useState("")
   const [detalhes, setDetalhes] = useState("")
   const [date, setDate] = useState("")
@@ -32,6 +32,7 @@ export default function AddEventModal({ onClose }) {
       setDetalhes("")
       setDate("")
       setColor("slate")
+      atualizarCalendario()
       onClose()
 
     } catch (error) {

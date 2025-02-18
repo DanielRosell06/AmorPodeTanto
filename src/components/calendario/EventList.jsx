@@ -1,7 +1,10 @@
 import { format, compareAsc } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import ViewEventDetails from "./ViewEventDetails"
 
-export default function EventList({ events }) {
+export default function EventList({ events, onOpenView }) {
   const sortedEvents = [...events].sort((a, b) => compareAsc(a.date, b.date))
 
   return (
@@ -12,10 +15,14 @@ export default function EventList({ events }) {
           {sortedEvents
             .filter(event => new Date(event.DataEvento) > new Date()) // Filtra eventos futuros
             .map((event) => (
-              <li key={event.IdEvento} className="bg-gray-50 p-2 rounded">
+              <Button key={event.IdEvento} className="bg-gray-50 p-2 rounded flex flex-col text-black text-lg h-20 w-full hover:bg-slate-300"
+                onClick={() => {
+                  onOpenView(event)
+                }}
+              >
                 <div className="font-semibold">{event.TituloEvento}</div>
                 <div className="text-sm text-gray-600">{format(event.DataEvento, "d 'de' MMMM", { locale: ptBR })}</div>
-              </li>
+              </Button>
             ))}
         </ul>
       ) : (
