@@ -1,10 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { toast } from "sonner"
 
 export default function AddEventModal({ onClose, eventData, atualizarCalendario }) {
     const [title, setTitle] = useState(eventData.TituloEvento)
@@ -38,6 +56,17 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario 
         yellow: "bg-yellow-400",
     };
 
+    const [pesquisa, setPesquisa] = useState("")
+    const [pesquisaInput, setPesquisaInput] = useState("")
+
+    const [doador, setDoador] = useState([])
+
+    const [doadorConvite, setDoadorConvite] = useState("")
+    const [doadorConviteNome, setDoadorConviteNome] = useState("")
+
+
+    const [quantidadeConvites, setQuantidadeConvites] = useState("");
+
 
     const formatCurrency = (value) => {
         if (value == null) {
@@ -54,9 +83,56 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario 
         });
     };
 
+    const [statusPagamentoConvite, setStatusPagamentoConvite] = useState(1);
+
+    const handleCheckboxChange = (checked) => {
+        checked ? setStatusPagamentoConvite(1) : setStatusPagamentoConvite(0);
+    };
+
+    const timeoutRef = useRef(null); // Referência para o timeout
+    const [inputValue, setInputValue] = useState("");
+
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // Reseta o timer a cada nova digitação
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        // Inicia um novo timer para atualizar searchIn após 1 segundo
+        timeoutRef.current = setTimeout(() => {
+            setPesquisaInput(value); // Atualiza searchIn após 1 segundo
+        }, 1000);
+    };
+
+    const handleChangeQuantidadeConvites = (e) => {
+        const novoValor = e.target.value;
+        setQuantidadeConvites(novoValor);
+    };
+
+
     useEffect(() => {
         setBrRealInputValue(formatCurrency(brRealInputValue));
     }, [])
+
+    useEffect(() => {
+        const fetchLoadDoadores = async () => {
+            try {
+                const response = await fetch(`/api/doador?searchBy=${pesquisa}&searchIn=${pesquisaInput}`,
+                    { method: 'GET' }
+                );
+                const data = await response.json();
+                setDoador(data);
+            } catch (error) {
+                console.error('Erro ao carregar doadores:', error);
+            }
+        }
+
+        fetchLoadDoadores()
+
+    }, [pesquisaInput])
 
     const fetchEditarEvento = async () => {
         try {
@@ -84,6 +160,40 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario 
             setValorConvite(null)
             atualizarCalendario()
             onClose()
+
+        } catch (error) {
+            console.error('Erro ao adicionar doacao:', error)
+        }
+    }
+
+    const fetchAdicionarConvite = async () => {
+        try {
+
+            const bodyData = {
+                IdEvento_: eventData.IdEvento,
+                IdDoador_: doadorConvite,
+                Quantidade: quantidadeConvites,
+                Status: statusPagamentoConvite
+            };
+
+            const response = await fetch(`/api/convite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bodyData)
+            })
+
+            setQuantidadeConvites(0)
+            setDoador([])
+            setStatusPagamentoConvite(0)
+            setDoadorConvite("")
+            setDoadorConviteNome("")
+            setAdicionarConvite(-1)
+
+            toast("Convite Adicionado!", {
+                description: `Convite adicionado com sucesso.`,
+            })
 
         } catch (error) {
             console.error('Erro ao adicionar doacao:', error)
@@ -164,10 +274,83 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario 
                                 </div>
                             </div>
                             {adicionarConvite == 1 ?
-                                <div className="ml-4 pt-5">
+                                <div className="ml-4 pt-5 flex">
                                     <div className="w-[2px] h-full bg-slate-200"></div>
-                                    <div className="ml-4">
-                                        
+                                    <div className="ml-4 text-center">
+                                        <div>
+                                            <h1 className="font-bold text-xl">Registrar Compra de Convite</h1>
+                                        </div>
+                                        <div className="flex mt-4">
+                                            <Input className="w-[250px]" placeholder="Pesquisar doador..."
+                                                value={inputValue}
+                                                onChange={handleInputChange}
+                                            />
+                                            <Select value={pesquisa} onValueChange={setPesquisa}>
+                                                <SelectTrigger className="w-[120px] ml-1">
+                                                    <SelectValue placeholder="Por:" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="nome">Nome</SelectItem>
+                                                    <SelectItem value="CPFCNPJ">CPF / CNPJ</SelectItem>
+                                                    <SelectItem value="telefone">Telefone</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div>
+                                            <ScrollArea className="h-[120px]">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead className="text-center">Nome</TableHead>
+                                                            <TableHead className="w-[100px] text-center"><i className="fas fa-caret-down"></i></TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {doador.map((doador) => (
+                                                            <TableRow key={doador.IdDoador} className={doador.Status ? 'bg-white' : 'bg-red-100 hover:bg-red-200'}>
+                                                                <TableCell className="">{doador.Nome}</TableCell>
+                                                                <Button className="bg-slate-400 hover:bg-green-500"
+                                                                    onClick={() => {
+                                                                        setDoadorConvite(doador.IdDoador)
+                                                                        setDoadorConviteNome(doador.Nome)
+                                                                    }}
+                                                                ><i className="fas fa-check "></i></Button>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </ScrollArea>
+                                        </div>
+                                        <div className="mt-4">
+                                            Adicionar Compra à: {doadorConviteNome}
+                                        </div>
+                                        <div className="mt-4 flex justify-between">
+                                            <div>
+                                                <div className="flex h-[36px]">
+                                                    <h1 className="mt-auto mb-auto">Quantidade:</h1>
+                                                    <Input
+                                                        type="number"
+                                                        min="0"
+                                                        className="w-[80px]"
+                                                        value={quantidadeConvites}
+                                                        onChange={handleChangeQuantidadeConvites}
+                                                    />
+                                                </div>
+                                                <div className="flex h-[30px]">
+                                                    <h1 className="mt-auto mb-auto">Foi pago?</h1>
+                                                    <Checkbox
+                                                        checked={statusPagamentoConvite}
+                                                        onCheckedChange={handleCheckboxChange}
+                                                        className="ml-2 mt-auto mb-auto"
+                                                    />
+                                                    <p className="ml-1 mt-auto mb-auto">{statusPagamentoConvite ? "Sim" : "Não"}</p>
+                                                </div>
+                                            </div>
+                                            <Button className="bg-green-400 hover:bg-green-500"
+                                                onClick={fetchAdicionarConvite}
+                                            >Confirmar</Button>
+                                        </div>
+
                                     </div>
                                 </div>
                                 : ""}
@@ -260,7 +443,7 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario 
                     </>
                 }
             </div>
-        </div>
+        </div >
     )
 }
 
