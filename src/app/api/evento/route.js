@@ -34,7 +34,8 @@ export async function POST(req) {
             TituloEvento: evento.Titulo,
             DetalheEvento: evento.Detalhe || "",
             DataEvento: new Date(evento.Data),
-            CorEvento: evento.Cor || "slate"
+            CorEvento: evento.Cor || "slate",
+            ValorConviteEvento: evento.ValorConvite || null
         }
 
         const result = await prisma.evento.create({ data: dados });
@@ -62,7 +63,8 @@ export async function PUT(req) {
             TituloEvento: evento.Titulo,
             DetalheEvento: evento.Detalhe || "",
             DataEvento: new Date(evento.Data),
-            CorEvento: evento.Cor || "slate"
+            CorEvento: evento.Cor || "slate",
+            ValorConviteEvento: evento.ValorConvite || null
         }
 
         const result = await prisma.evento.update({ 

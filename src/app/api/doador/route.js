@@ -10,7 +10,6 @@ export async function GET(req) {
     const input = searchParams.get('searchIn');
     const ordenarPor = searchParams.get('ordenarPor');
     const tipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0;
-    console.log(tipoDoador)
 
     const where = {};
     let orderBy = {};

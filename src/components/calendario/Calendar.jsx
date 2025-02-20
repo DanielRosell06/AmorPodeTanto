@@ -13,12 +13,14 @@ import AddEventModal from "./AddEventModal"
 import { addDays } from "date-fns"
 import { Value } from "@radix-ui/react-select"
 import ViewEventDetails from "./ViewEventDetails"
+import AddResults from "./AddResults"
 
 export default function Calendar() {
 
   const [mockEvents, setMockEvents] = useState([])
 
   const [popupViewEvent, setPopupViewEvent] = useState(false)
+  const [popupResults, setPopupResults] = useState(false)
   const [eventData, setEventData] = useState([])
 
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -70,19 +72,25 @@ export default function Calendar() {
         <MonthView currentDate={currentDate} events={mockEvents} onOpenView={(e) => {
           setEventData(e)
           setPopupViewEvent(true)
-        }} />
+        }}
+        />
       </div>
       <div className="w-80 flex flex-col">
         <AddEventButton onClick={() => setIsModalOpen(true)} className="mb-4" />
-        <ScrollArea className="flex-1">
-          <EventList events={mockEvents} onOpenView={(e) => {
+        <EventList events={mockEvents} onOpenView={(e) => {
+          setEventData(e)
+          console.log(e)
+          setPopupViewEvent(true)
+        }}
+          onOpenResults={(e) => {
             setEventData(e)
-            setPopupViewEvent(true)
-          }} />
-        </ScrollArea>
+            setPopupResults(true)
+          }}
+        />
       </div>
-      {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario}/>}
-      {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) } } atualizarCalendario={atualizarCalendario}></ViewEventDetails>) : ""}
+      {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario} />}
+      {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) }} atualizarCalendario={atualizarCalendario}></ViewEventDetails>) : ""}
+      {popupResults ? (<AddResults eventData={eventData} onClose={() => { setPopupResults(false) }}></AddResults>) : ""}
     </div>
   )
 }
