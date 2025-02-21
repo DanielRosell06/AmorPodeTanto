@@ -430,7 +430,6 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 })
                 const data = await response.json();
                 setDoadorEditado(data)
-                console.log(data)
                 setIdToFind(-1)
             } catch (error) {
                 console.error('Erro ao buscar doador:', error)
@@ -874,7 +873,6 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                     <Select
                                         onValueChange={(value) => {
                                             setDoadorEditado({ ...doadorEditado, Sexo: parseInt(value, 10) });
-                                            console.log(doadorEditado.DataAniversario)
                                         }}
                                         value={String(doadorEditado?.Sexo ?? "")}
                                     >
