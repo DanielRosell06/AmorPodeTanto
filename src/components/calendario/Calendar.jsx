@@ -16,6 +16,7 @@ import ViewEventDetails from "./ViewEventDetails"
 import AddResults from "./AddResults"
 import ConvitesNaoPagos from "./ConvitesNaoPagos"
 import { isValid } from "date-fns";
+import { toast } from "sonner"
 
 export default function Calendar() {
 
@@ -24,17 +25,22 @@ export default function Calendar() {
   const [popupViewEvent, setPopupViewEvent] = useState(false)
   const [popupResults, setPopupResults] = useState(false)
   const [popupInformacoes, setPopupInformacoes] = useState(false)
+  const [popupPagarConvite, setPopupPagarConvite] = useState(false)
 
   const [eventData, setEventData] = useState([])
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [atualizarCalendarioVar, setAtualizarCalendarioVar] = useState(-1)
+  const [atualizarConvitesNaoPagosVar, setAtualizarConvitesNaoPagosVar] = useState(-1)
 
+  const [idConvitePago, setIdConvitePago] = useState(-1)
+  const [idConvitePagoTemp, setIdConvitePagoTemp] = useState(-1)
   const [idToFind, setIdToFind] = useState(-1)
   const [verMaisContatosInformacoes, setVerMaisContatosInformacoes] = useState(-1)
 
   const [contatos, setContatos] = useState([])
+  const [convitesNaoPagos, setConvitesNaoPagos] = useState([])  
   const [idDoadorContato, setIdDoadorContato] = useState("")
   const [doadorEditado, setDoadorEditado] = useState({
     IdDoador: " ",
@@ -54,6 +60,10 @@ export default function Calendar() {
 
   const atualizarCalendario = () => {
     setAtualizarCalendarioVar(atualizarCalendarioVar * -1)
+  }
+
+  const atualizarConvitesNaoPagos = () => {
+    setAtualizarConvitesNaoPagosVar(atualizarConvitesNaoPagosVar * -1)
   }
 
 
@@ -116,6 +126,54 @@ export default function Calendar() {
     fetchLoadEventos();
   }, [atualizarCalendarioVar]);
 
+  useEffect(() => {
+    const fetchConvitePago = async () => {
+      try {
+        const response = await fetch(`/api/convite?IdConvite=${idConvitePago}`,
+          {
+            method: 'PUT'
+          });
+        const data = await response.json();
+        toast("Convite Pago!", {
+          description: `Pagamento do convite cadastrado com sucesso.`,
+        })
+
+      } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+      }
+      atualizarConvitesNaoPagos()
+      setPopupPagarConvite(false)
+    };
+
+    if (idConvitePago != -1) {
+      fetchConvitePago();
+    }
+
+  }, [idConvitePago]);
+
+
+  useEffect(() => {
+    const fetchGetConvitesNaoPagos = async () => {
+      try {
+        const response = await fetch(`/api/convite?Status=0`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+        setConvitesNaoPagos(data)
+
+      } catch (error) {
+        console.error('Erro ao adicionar usuário:', error);
+      }
+    };
+
+    fetchGetConvitesNaoPagos()
+
+  }, [atualizarConvitesNaoPagosVar]);
+
   return (
     <div>
       <div className="flex gap-8 h-[calc(100vh-100px)] w-[90%] ml-auto mr-auto mb-4">
@@ -152,14 +210,19 @@ export default function Calendar() {
         </div>
       </div>
       <div>
-        <ConvitesNaoPagos onOpenContato={(e) => {
+        <ConvitesNaoPagos convitesNaoPagos={convitesNaoPagos} onOpenContato={(e) => {
           setIdToFind(e)
           setIdDoadorContato(e)
-        }}></ConvitesNaoPagos>
+        }}
+          onConvitePago={(e) => {
+            setIdConvitePagoTemp(e)
+            setPopupPagarConvite(true)
+          }}
+        ></ConvitesNaoPagos>
       </div>
 
       {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario} />}
-      {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) }} atualizarCalendario={atualizarCalendario}></ViewEventDetails>) : ""}
+      {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) }} atualizarCalendario={atualizarCalendario} atualizarConvitesNaoPagos={atualizarConvitesNaoPagos}></ViewEventDetails>) : ""}
       {popupResults ? (<AddResults eventData={eventData} onClose={() => { setPopupResults(false) }}></AddResults>) : ""}
       {popupInformacoes && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -310,7 +373,36 @@ export default function Calendar() {
           </div>
         </div>
       )}
-    </div>
+      {popupPagarConvite && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div>
+          </div>
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[370px]">
+            <h1>Tem certeza que deseja marcar este convite como pago?</h1>
+            <div className="flex w-full justify-center mt-4">
+              <Button
+                className={"bg-slate-400 hover:bg-green-500 mr-4"}
+                onClick={() => {
+                  setIdConvitePago(idConvitePagoTemp)
+                }}
+              >
+                Confirmar
+              </Button>
+
+              <Button
+                className="px-4 py-2 bg-red-400 text-white rounded hover:bg-red-500 transition"
+                onClick={() => {
+                  setPopupPagarConvite(false)
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )
+      }
+    </div >
   )
 }
 

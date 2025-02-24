@@ -24,7 +24,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
 
-export default function AddEventModal({ onClose, eventData, atualizarCalendario }) {
+export default function AddEventModal({ onClose, eventData, atualizarCalendario, atualizarConvitesNaoPagos }) {
     const [title, setTitle] = useState(eventData.TituloEvento)
     const [detalhes, setDetalhes] = useState(eventData.DetalheEvento)
     const [valorConvite, setValorConvite] = useState(eventData.ValorConviteEvento)
@@ -190,6 +190,7 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario 
             setDoadorConvite("")
             setDoadorConviteNome("")
             setAdicionarConvite(-1)
+            atualizarConvitesNaoPagos()
 
             toast("Convite Adicionado!", {
                 description: `Convite adicionado com sucesso.`,

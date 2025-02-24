@@ -43,9 +43,6 @@ export async function GET(req) {
             doador: dadosDoadores.find(doador => doador.IdDoador === convite.IdDoador) || null,
             evento: dadosEventos.find(evento => evento.IdEvento === convite.IdEvento) || null
         }));
-
-        console.log(dadosCompletos)
-
         return new Response(JSON.stringify(dadosCompletos), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
@@ -75,6 +72,29 @@ export async function POST(req) {
 
         const result = await prisma.convite.create({
             data: dados
+        })
+
+        return new Response(JSON.stringify({ result }), { status: 201 });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+        console.error('Erro ao processar a requisição:', errorMessage);
+        return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+    }
+}
+
+export async function PUT(req) {
+    try {
+        const url = new URL(req.url);
+        const searchParams = url.searchParams;
+        const IdConvitePago = parseInt(searchParams.get('IdConvite'), 10);
+
+        if (!IdConvitePago) {
+            throw new Error('Falta de Dados.');
+        }
+
+        const result = await prisma.convite.update({
+            where: { IdConvite: IdConvitePago },
+            data: { StatusConvite: 1 }
         })
 
         return new Response(JSON.stringify({ result }), { status: 201 });
