@@ -27,7 +27,7 @@ export default function ConvitesNaoPagos({ onOpenContato, onConvitePago, convite
                 <h2 className="text-left mt-10 mb-2 text-lg font-semibold">Convites Não Pagos</h2>
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-sky-300">
+                        <TableRow className="bg-sky-300 hover:bg-sky-700">
                             <TableHead className="text-center text-black">Nome do Doador</TableHead>
                             <TableHead className="text-center text-black">Evento</TableHead>
                             <TableHead className="text-center text-black w-[20%]">Quantidade de Convites</TableHead>

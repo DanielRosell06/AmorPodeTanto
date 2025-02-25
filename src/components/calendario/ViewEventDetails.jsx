@@ -64,7 +64,6 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
     const [doadorConvite, setDoadorConvite] = useState("")
     const [doadorConviteNome, setDoadorConviteNome] = useState("")
 
-
     const [quantidadeConvites, setQuantidadeConvites] = useState("");
 
 
@@ -201,6 +200,34 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
         }
     }
 
+    const [dadosConvites, setDadosConvites] = useState([])
+    const [atualizarConvitesVar, setAtualizarConvitesVar] = useState(-1)
+
+    const atualizarConvites = function() {
+        setAtualizarConvitesVar(atualizarConvitesVar * -1)
+    }
+
+    useEffect(() => {
+        const fetchGetDadosConvite = async () => {
+            try {
+                const response = await fetch(`/api/convite?IdEvento=${eventData.IdEvento}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                const data = await response.json();
+                setDadosConvites(data)
+            } catch (error) {
+                console.error('Erro ao buscar dados dos convites:', error)
+            }
+        }
+
+        if (eventData?.IdEvento) {
+            fetchGetDadosConvite()
+        }
+    }, [eventData, atualizarConvitesVar])
+
     const brRealFormatCurrency = (brRealRawValue) => {
         // Remove tudo que não for dígito
         const brRealDigitsOnly = brRealRawValue.replace(/\D/g, "")
@@ -246,6 +273,32 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                 {!editEvent ?
                     <>
                         <div className="flex">
+                            <div className="mr-10">
+                                <h1 className="font-bold mb-[30px]">Convites já Comprados</h1>
+                                <ScrollArea className="h-[240px]">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="text-center">Doador</TableHead>
+                                                <TableHead className="w-[100px] text-center">Quantidade</TableHead>
+                                                <TableHead className="w-[100px] text-center">Pago</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {dadosConvites != -1 && (
+                                                dadosConvites.map((convite) => (
+                                                    <TableRow key={convite.IdConvite} className={convite.StatusConvite == 1 ? 'bg-white' : 'bg-red-100 hover:bg-red-200'}>
+                                                        <TableCell className="">{convite.doador.Nome}</TableCell>
+                                                        <TableCell className="">{convite.QuantidadeConvite}</TableCell>
+                                                        <TableCell className="">{convite.StatusConvite == 1 ? "Sim" : "Não"}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )
+                                            }
+                                        </TableBody>
+                                    </Table>
+                                </ScrollArea>
+                            </div>
                             <div>
                                 <div>
                                     <h1 className="text-2xl mt-5 font-bold">{eventData.TituloEvento}</h1>
@@ -348,7 +401,10 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                                                 </div>
                                             </div>
                                             <Button className="bg-green-400 hover:bg-green-500"
-                                                onClick={fetchAdicionarConvite}
+                                                onClick={() => {
+                                                    fetchAdicionarConvite()
+                                                    atualizarConvites()
+                                                }}
                                             >Confirmar</Button>
                                         </div>
 

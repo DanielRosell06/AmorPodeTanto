@@ -5,7 +5,8 @@ export async function GET(req) {
     try {
         const url = new URL(req.url);
         const searchParams = url.searchParams;
-        const Status = searchParams.get('Status');
+        const IdEvento_ = parseInt(searchParams.get('IdEvento'), 10) || null;
+        const Status = searchParams.get('Status') || null;
 
         let whereConditions = {};
 
@@ -13,6 +14,12 @@ export async function GET(req) {
             const statusInt = parseInt(Status);
             if (!isNaN(statusInt)) {
                 whereConditions.StatusConvite = statusInt;
+            }
+        }
+
+        if (IdEvento_ !== null) {
+            if (!isNaN(IdEvento_)) {
+                whereConditions.IdEvento = IdEvento_;
             }
         }
 
@@ -43,6 +50,9 @@ export async function GET(req) {
             doador: dadosDoadores.find(doador => doador.IdDoador === convite.IdDoador) || null,
             evento: dadosEventos.find(evento => evento.IdEvento === convite.IdEvento) || null
         }));
+
+        console.log(dadosCompletos)
+
         return new Response(JSON.stringify(dadosCompletos), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },

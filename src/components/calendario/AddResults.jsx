@@ -1,34 +1,68 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 
-export default function AddResults({ onClose, eventData, atualizarCalendario }) {
+export default function AddResults({ onClose, eventData, onAtualizarCalendario }) {
     const [valorGasto, setValorGasto] = useState(0)
     const [valorRecebido, setValorRecebido] = useState(0)
+    const [dadosConvites, setDadosConvites] = useState([])
+    const [valorGanhoConvites, setValorGanhoConvites] = useState(0)
+
+    useEffect(() => {
+        const fetchGetDadosConvite = async () => {
+            try {
+                const response = await fetch(`/api/convite?IdEvento=${eventData.IdEvento}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                const data = await response.json();
+                setDadosConvites(data)
+            } catch (error) {
+                console.error('Erro ao buscar dados dos convites:', error)
+            }
+        }
+
+        if (eventData?.IdEvento) {
+            fetchGetDadosConvite()
+        }
+    }, [eventData])
+
+    useEffect(() => {
+        if (dadosConvites.length > 0) {
+            let valor = 0
+            let valorConvite = eventData.ValorConviteEvento
+
+            for (let i = 0; i < dadosConvites.length; i++) {
+                valor += valorConvite * dadosConvites[i].QuantidadeConvite
+            }
+
+            setValorGanhoConvites(valor)
+        }
+    }, [dadosConvites, eventData])
 
     const fetchAdicionarEvento = async () => {
         try {
             const bodyData = {
                 Id: eventData.IdEvento,
-                ValorArrecadado: valorRecebido, // Já salvo como inteiro
-                ValorGasto: valorGasto // Já salvo como inteiro
+                ValorArrecadado: valorRecebido,
+                ValorGasto: valorGasto
             };
 
-            const response = await fetch(`/api/evento?SomenteResultado=1`, {
+            await fetch(`/api/evento?SomenteResultado=1`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyData)
             })
 
             toast("Resultados Adicionados!", {
                 description: `Os resultados do evento foram registrados.`,
             })
-            atualizarCalendario()
+            onAtualizarCalendario()
             onClose()
         } catch (error) {
             console.error('Erro ao adicionar resultados:', error)
@@ -45,12 +79,12 @@ export default function AddResults({ onClose, eventData, atualizarCalendario }) 
     }
 
     const handleValorChange = (event, setValor) => {
-        const rawValue = event.target.value.replace(/\D/g, "") // Remove tudo que não for número
-        const intValue = Number(rawValue) // Converte para número inteiro
-        setValor(intValue) // Armazena o valor multiplicado por 100
+        const rawValue = event.target.value.replace(/\D/g, "")
+        const intValue = Number(rawValue)
+        setValor(intValue)
     }
 
-    const lucroTotal = valorRecebido - valorGasto // Cálculo do lucro
+    const lucroTotal = valorRecebido + valorGanhoConvites - valorGasto
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -71,7 +105,7 @@ export default function AddResults({ onClose, eventData, atualizarCalendario }) 
                         />
                     </div>
                     <div className="text-left">
-                        <h1 className="font-bold mb-4">Valor recebido com convites: {formatarValorParaMoeda(0)}</h1>
+                        <h1 className="font-bold mb-4">Valor recebido com convites: {formatarValorParaMoeda(valorGanhoConvites)}</h1>
                         <h1 className="font-bold text-xl">Lucro total: {formatarValorParaMoeda(lucroTotal)}</h1>
                     </div>
                 </div>

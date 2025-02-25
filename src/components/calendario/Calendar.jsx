@@ -223,7 +223,7 @@ export default function Calendar() {
 
       {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario} />}
       {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) }} atualizarCalendario={atualizarCalendario} atualizarConvitesNaoPagos={atualizarConvitesNaoPagos}></ViewEventDetails>) : ""}
-      {popupResults ? (<AddResults eventData={eventData} onClose={() => { setPopupResults(false) }}></AddResults>) : ""}
+      {popupResults ? (<AddResults eventData={eventData} onClose={() => { setPopupResults(false) }} onAtualizarCalendario={atualizarCalendario}></AddResults>) : "" }
       {popupInformacoes && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg p-6  flex">
