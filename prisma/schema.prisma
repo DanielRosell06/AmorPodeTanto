@@ -66,9 +66,20 @@ model Usuario {
 }
 
 model Evento {
-  IdEvento      Int      @id @default(autoincrement())
-  TituloEvento  String
-  DetalheEvento String?
-  DataEvento    DateTime
-  CorEvento     String?
+  IdEvento           Int      @id @default(autoincrement())
+  TituloEvento       String
+  DetalheEvento      String?
+  DataEvento         DateTime
+  CorEvento          String?
+  ValorConviteEvento Int?
+  ValorArrecadado    Int?
+  ValorGasto         Int?
+}
+
+model Convite {
+  IdConvite         Int  @id @default(autoincrement())
+  IdEvento          Int
+  IdDoador          Int?
+  QuantidadeConvite Int  @default(1)
+  StatusConvite     Int  @default(0)
 }

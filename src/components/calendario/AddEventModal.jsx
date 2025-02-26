@@ -10,6 +10,9 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
   const [detalhes, setDetalhes] = useState("")
   const [date, setDate] = useState("")
   const [color, setColor] = useState("slate")
+  const [valorConvite, setValorConvite] = useState("")
+
+  const [brRealInputValue, setBrRealInputValue] = useState("")
 
   const fetchAdicionarEvento = async () => {
     try {
@@ -19,6 +22,7 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
         Detalhe: detalhes,
         Data: date,
         Cor: color,
+        ValorConvite: valorConvite
       };
 
       const response = await fetch(`/api/evento`, {
@@ -38,6 +42,31 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
     } catch (error) {
       console.error('Erro ao adicionar doacao:', error)
     }
+  }
+
+  const brRealFormatCurrency = (brRealRawValue) => {
+    // Remove tudo que não for dígito
+    const brRealDigitsOnly = brRealRawValue.replace(/\D/g, "")
+
+    // Converte para número e divide por 100 para ter os centavos
+    const brRealNumberValue = Number(brRealDigitsOnly) / 100
+
+    const ValorFinal = brRealNumberValue * 100
+    setValorConvite(ValorFinal)
+
+    // Formata o número para a moeda brasileira
+    return brRealNumberValue.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
+  const brRealHandleInputChange = (brRealEvent) => {
+    const brRealCurrentInputValue = brRealEvent.target.value
+    const brRealFormattedValue = brRealFormatCurrency(brRealCurrentInputValue)
+    setBrRealInputValue(brRealFormattedValue)
   }
 
   return (
@@ -107,6 +136,17 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
 
             </div>
           </div>
+        </div>
+        <div className="w-full mt-4 mb-6">
+          <h1 className="ml-auto mr-auto">Valor do Convite:</h1>
+          <Input
+            id="brReal-input"
+            type="text"
+            value={brRealInputValue}
+            onChange={brRealHandleInputChange}
+            placeholder="R$ 0,00"
+            className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
+          />
         </div>
         <div className="flex justify-end space-x-2 mt-4">
           <Button type="button" variant="outline" onClick={onClose}>
