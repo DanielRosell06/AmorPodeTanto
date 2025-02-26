@@ -19,14 +19,14 @@ export default function EventList({ events, onOpenView, onOpenResults }) {
   };
 
   return (
-    <div className="h-full">
+    <div className="ml-[2vw] w-[35vw] h-full">
       <div className="bg-white rounded-lg shadow p-4 h-[54%]">
-        <h3 className="text-xl font-bold mb-4">Próximos Eventos</h3>
+        <h3 className="text-xl font-bold mb-4">Eventos Passados</h3>
         {sortedEvents.length > 0 ? (
           <ScrollArea className="h-[90%]">
             <ul className="space-y-2">
               {sortedEvents
-                .filter(event => new Date(event.DataEvento) > new Date()) // Filtra eventos futuros
+                .filter(event => new Date(event.DataEvento) < new Date() && event.ValorGasto != null) // Filtra eventos futuros
                 .map((event) => (
                   <Button key={event.IdEvento} className={`${colorClasses[event.CorEvento] || "bg-gray-100 text-gray-800"} p-2 rounded flex flex-col text-black text-lg h-20 w-full`}
                     onClick={() => {
@@ -36,29 +36,6 @@ export default function EventList({ events, onOpenView, onOpenResults }) {
                     <div className="font-semibold">{event.TituloEvento}</div>
                     <div className="text-sm text-gray-600">{format(event.DataEvento, "d 'de' MMMM", { locale: ptBR })}</div>
                   </Button>
-                ))}
-            </ul>
-          </ScrollArea>
-        ) : (
-          <p className="text-gray-500">Nenhum evento programado.</p>
-        )}
-      </div>
-      <div className="bg-white rounded-lg shadow p-4 h-[38%] mt-[5%]">
-        <h3 className="text-xl font-bold mb-4">Adicionar Resultados</h3>
-        {sortedEvents.length > 0 ? (
-          <ScrollArea className="h-[90%]">
-            <ul className="space-y-2">
-              {sortedEvents
-                .filter(event => event.ValorGasto == null && new Date(event.DataEvento) < new Date()) // Filtra eventos futuros
-                .map((event) => (
-                    <Button key={event.IdEvento} className={`${colorClasses[event.CorEvento] || "bg-gray-100 text-gray-800"} p-2 rounded flex flex-col text-black text-lg h-20 w-full`}
-                      onClick={() => {
-                        onOpenResults(event)
-                      }}
-                    >
-                      <div className="font-semibold">{event.TituloEvento}</div>
-                      <div className="text-sm text-gray-600">{format(event.DataEvento, "d 'de' MMMM", { locale: ptBR })}</div>
-                    </Button>
                 ))}
             </ul>
           </ScrollArea>

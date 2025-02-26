@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import MonthView from "./MonthView"
 import EventList from "./EventList"
 import AddEventButton from "./AddEventButton"
+import PastEvents from "./PastEvents"
 import AddEventModal from "./AddEventModal"
 import { addDays } from "date-fns"
 import { Value } from "@radix-ui/react-select"
@@ -40,7 +41,7 @@ export default function Calendar() {
   const [verMaisContatosInformacoes, setVerMaisContatosInformacoes] = useState(-1)
 
   const [contatos, setContatos] = useState([])
-  const [convitesNaoPagos, setConvitesNaoPagos] = useState([])  
+  const [convitesNaoPagos, setConvitesNaoPagos] = useState([])
   const [idDoadorContato, setIdDoadorContato] = useState("")
   const [doadorEditado, setDoadorEditado] = useState({
     IdDoador: " ",
@@ -199,7 +200,6 @@ export default function Calendar() {
           <AddEventButton onClick={() => setIsModalOpen(true)} className="mb-4" />
           <EventList events={mockEvents} onOpenView={(e) => {
             setEventData(e)
-            console.log(e)
             setPopupViewEvent(true)
           }}
             onOpenResults={(e) => {
@@ -209,7 +209,7 @@ export default function Calendar() {
           />
         </div>
       </div>
-      <div>
+      <div className="flex w-[90%] ml-auto mr-auto">
         <ConvitesNaoPagos convitesNaoPagos={convitesNaoPagos} onOpenContato={(e) => {
           setIdToFind(e)
           setIdDoadorContato(e)
@@ -219,11 +219,20 @@ export default function Calendar() {
             setPopupPagarConvite(true)
           }}
         ></ConvitesNaoPagos>
+        <PastEvents events={mockEvents} onOpenView={(e) => {
+          setEventData(e)
+          setPopupViewEvent(true)
+        }}
+          onOpenResults={(e) => {
+            setEventData(e)
+            setPopupResults(true)
+          }}
+        />
       </div>
 
       {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario} />}
       {popupViewEvent ? (<ViewEventDetails eventData={eventData} onClose={() => { setPopupViewEvent(false) }} atualizarCalendario={atualizarCalendario} atualizarConvitesNaoPagos={atualizarConvitesNaoPagos}></ViewEventDetails>) : ""}
-      {popupResults ? (<AddResults eventData={eventData} onClose={() => { setPopupResults(false) }} onAtualizarCalendario={atualizarCalendario}></AddResults>) : "" }
+      {popupResults ? (<AddResults eventData={eventData} onClose={() => { setPopupResults(false) }} onAtualizarCalendario={atualizarCalendario}></AddResults>) : ""}
       {popupInformacoes && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg p-6  flex">
