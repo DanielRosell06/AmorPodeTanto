@@ -76,7 +76,6 @@ export default function Calendar() {
         })
         const data = await response.json();
         setDoadorEditado(data)
-        console.log(data)
         setIdToFind(-1)
         setPopupInformacoes(true)
 

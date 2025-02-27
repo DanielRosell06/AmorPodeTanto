@@ -51,8 +51,6 @@ export async function GET(req) {
             evento: dadosEventos.find(evento => evento.IdEvento === convite.IdEvento) || null
         }));
 
-        console.log(dadosCompletos)
-
         return new Response(JSON.stringify(dadosCompletos), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
