@@ -8,19 +8,21 @@ datasource db {
 }
 
 model Doador {
-  IdDoador        Int       @id @default(autoincrement())
-  CPFCNPJ         String?   @unique
-  Nome            String
-  CEP             String?
-  Rua             String?
-  Numero          String?
-  Bairro          String?
-  Complemento     String?
-  Status          Int       @default(1) @db.SmallInt
-  DataDoador      DateTime  @default(now())
-  Sexo            Int?
-  DataAniversario DateTime?
-  TipoDoador      Int       @default(0)
+  IdDoador         Int       @id @default(autoincrement())
+  CPFCNPJ          String?   @unique
+  Nome             String
+  CEP              String?
+  Rua              String?
+  Numero           String?
+  Bairro           String?
+  Complemento      String?
+  ObservacaoDoador String?
+  OrigemDoador     String?
+  Status           Int       @default(1) @db.SmallInt
+  DataDoador       DateTime  @default(now())
+  Sexo             Int?
+  DataAniversario  DateTime?
+  TipoDoador       Int       @default(0)
 }
 
 model Contato {

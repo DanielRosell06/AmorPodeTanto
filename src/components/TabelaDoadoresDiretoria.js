@@ -169,6 +169,8 @@ export default function TabelaDoadoresDiretoria({ children }) {
         CEP: "",
         Sexo: null,
         DataAniversario: null,
+        OrigemDoador: "",
+        ObservacaoDoador: "",
         Numero: "",
         Contato: "",
         Telefone: "",
@@ -239,7 +241,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
     //#region Funções de Fetch
     const fetchAdicionarDoador = async () => {
         try {
-            const response = await fetch(`/api/doador?tipoDoador=${children? children : 0}`, {
+            const response = await fetch(`/api/doador?tipoDoador=${children ? children : 0}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -429,6 +431,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                     method: 'GET',
                 })
                 const data = await response.json();
+                console.log(data)
                 setDoadorEditado(data)
                 setIdToFind(-1)
             } catch (error) {
@@ -736,75 +739,103 @@ export default function TabelaDoadoresDiretoria({ children }) {
 
             {popupAdicionarDoador && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-lg pl-6 pr-6 pt-4 pb-4 max-w-md w-full">
-                        <h1 className="text-xl font-bold mb-4">Adicionar Doador</h1>
+                    <div className="bg-white rounded-lg shadow-lg pl-6 pr-6 pt-4 pb-4">
+                        <h1 className="text-2xl font-bold mb-6">Adicionar Doador</h1>
 
+                        <div className="flex">
+                            <div>
+                                <h1 className=" font-bold text-xl mb-4">Informações principais</h1>
+                                <div className="flex text-left">
+                                    <div>
+                                        <h1>CPF/CNPJ</h1>
+                                        <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setNovoDoador({ ...novoDoador, CPFCNPJ: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <h1 className="ml-2">Nome</h1>
+                                        <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })} />
+                                    </div>
+                                </div>
 
-                        <div className="flex text-left">
-                            <div>
-                                <h1>CPF/CNPJ</h1>
-                                <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setNovoDoador({ ...novoDoador, CPFCNPJ: e.target.value })} />
+                                <div className="flex text-left mt-1">
+                                    <div>
+                                        <h1>Sexo</h1>
+                                        <Select onValueChange={(value) => {
+                                            setNovoDoador({ ...novoDoador, Sexo: parseInt(value, 10) });
+                                        }}>
+                                            <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
+                                                <i className="fas fa-sort"></i>
+                                                <SelectValue placeholder="Sexo" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="0">Masculino</SelectItem>
+                                                <SelectItem value="1">Feminino</SelectItem>
+                                                <SelectItem value="2">Outro</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="ml-2">
+                                        <h1>Data de aniversário</h1>
+                                        <CustomDateInput onChange={handleDateChange} />
+                                    </div>
+                                </div>
+
+                                <hr className="mt-4"></hr>
+
+                                <h1 className=" font-bold text-xl mb-4 mt-4">Endereço</h1>
+
+                                <div className="flex mt-4">
+                                    <div>
+                                        <h1 className="text-left">CEP</h1>
+                                        <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setNovoDoador({ ...novoDoador, CEP: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <h1 className="ml-2 text-left">Número</h1>
+                                        <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Numero: e.target.value })} />
+                                    </div>
+                                </div>
+                                <h1 className="mt-5 text-left">Complemento</h1>
+                                <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Complemento: e.target.value })} />
                             </div>
+
+                            <div className="w-[1px] h-auto bg-slate-200 ml-5 mr-5"></div>
+
                             <div>
-                                <h1 className="ml-2">Nome</h1>
-                                <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })} />
+                                <div>
+                                    <h1 className=" font-bold text-xl mb-4">Contato</h1>
+
+                                    <div className="flex">
+                                        <div>
+                                            <h1 className="text-left">Nome do Contato</h1>
+                                            <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setNovoDoador({ ...novoDoador, Contato: e.target.value })} />
+                                        </div>
+                                        <div className="ml-5">
+                                            <h1 className="ml-2 text-left">Telefone</h1>
+                                            <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Telefone: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <h1 className="mt-5 text-left">E-mail</h1>
+                                    <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Email: e.target.value })} />
+                                </div>
+
+                                <hr className="mt-4"></hr>
+
+                                <h1 className=" font-bold text-xl mb-4 mt-4">Outras Informações</h1>
+
+                                <div className="mt-4">
+                                    <div>
+                                        <h1 className="text-left">Origem</h1>
+                                        <Input type="Origem do Doador" placeholder="Origem do Doador" className="" onChange={(e) => setNovoDoador({ ...novoDoador, OrigemDoador: e.target.value })} />
+                                    </div>
+                                    <h1 className="mt-5 text-left">Observações</h1>
+                                    <Textarea
+                                        placeholder="Observações do Doador"
+                                        className="w-[400px] h-[80px] p-2 border rounded-md resize-none"
+                                        onChange={(e) => setNovoDoador({ ...novoDoador, ObservacaoDoador: e.target.value })}
+                                    />
+                                </div>
                             </div>
+
                         </div>
-
-                        <div className="flex text-left mt-1">
-                            <div>
-                                <h1>Sexo</h1>
-                                <Select onValueChange={(value) => {
-                                    setNovoDoador({ ...novoDoador, Sexo: parseInt(value, 10) });
-                                }}>
-                                    <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
-                                        <i className="fas fa-sort"></i>
-                                        <SelectValue placeholder="Sexo" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="0">Masculino</SelectItem>
-                                        <SelectItem value="1">Feminino</SelectItem>
-                                        <SelectItem value="2">Outro</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="ml-2">
-                                <h1>Data de aniversário</h1>
-                                <CustomDateInput onChange={handleDateChange} />
-                            </div>
-                        </div>
-
-                        <hr className="mt-4"></hr>
-
-                        <div className="flex mt-4">
-                            <div>
-                                <h1 className="text-left">CEP</h1>
-                                <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setNovoDoador({ ...novoDoador, CEP: e.target.value })} />
-                            </div>
-                            <div>
-                                <h1 className="ml-2 text-left">Número</h1>
-                                <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Numero: e.target.value })} />
-                            </div>
-                        </div>
-                        <h1 className="mt-5 text-left">Complemento</h1>
-                        <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Complemento: e.target.value })} />
-
-                        <hr className="mt-4"></hr>
-
-                        <div className="flex mt-4">
-                            <div>
-                                <h1 className="text-left">Nome do Contato</h1>
-                                <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setNovoDoador({ ...novoDoador, Contato: e.target.value })} />
-                            </div>
-                            <div className="ml-5">
-                                <h1 className="ml-2 text-left">Telefone</h1>
-                                <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Telefone: e.target.value })} />
-                            </div>
-                        </div>
-                        <h1 className="mt-5 text-left">E-mail</h1>
-                        <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Email: e.target.value })} />
-
-                        <hr className="mt-4"></hr>
 
                         <div className="flex justify-end mt-3">
                             <Button

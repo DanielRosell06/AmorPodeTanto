@@ -38,6 +38,8 @@ export async function GET(req) {
       Numero: doador.Numero,
       Bairro: doador.Bairro,
       Complemento: doador.Complemento,
+      ObservacaoDoador: doador.ObservacaoDoador,
+      OrigemDoador: doador.OrigemDoador,
       Sexo: doador.Sexo,
       DataAniversario: doador.DataAniversario,
       IdContato: contato?.IdContato || null,
