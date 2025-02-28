@@ -22,9 +22,9 @@ export default function ConvitesNaoPagos({ onOpenContato, onConvitePago, convite
     }, [convitesNaoPagos]);
 
     return (
-        <div >
-            <div className="w-[63vw] mb-10">
-                <h2 className="text-left mt-10 mb-2 text-lg font-semibold">Convites Não Pagos</h2>
+        <div className="w-[80%] mr-8">
+            <div className="mb-10">
+                <h2 className="text-left mt-4 mb-2 text-lg font-semibold">Convites Não Pagos</h2>
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-sky-300 hover:bg-sky-700">

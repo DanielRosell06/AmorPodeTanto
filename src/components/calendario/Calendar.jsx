@@ -76,7 +76,6 @@ export default function Calendar() {
         })
         const data = await response.json();
         setDoadorEditado(data)
-        console.log(data)
         setIdToFind(-1)
         setPopupInformacoes(true)
 
@@ -219,15 +218,17 @@ export default function Calendar() {
             setPopupPagarConvite(true)
           }}
         ></ConvitesNaoPagos>
-        <PastEvents events={mockEvents} onOpenView={(e) => {
-          setEventData(e)
-          setPopupViewEvent(true)
-        }}
-          onOpenResults={(e) => {
+        <div className="w-80 h-[800px]">
+          <PastEvents events={mockEvents} onOpenView={(e) => {
             setEventData(e)
-            setPopupResults(true)
+            setPopupViewEvent(true)
           }}
-        />
+            onOpenResults={(e) => {
+              setEventData(e)
+              setPopupResults(true)
+            }}
+          />
+        </div>
       </div>
 
       {isModalOpen && <AddEventModal onClose={() => setIsModalOpen(false)} atualizarCalendario={atualizarCalendario} />}

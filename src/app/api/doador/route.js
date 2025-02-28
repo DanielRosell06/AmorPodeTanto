@@ -119,7 +119,7 @@ export async function GET(req) {
 }
 
 export async function POST(req, res) {
-    const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email } = await req.json()
+    const { CPFCNPJ, Nome, CEP, Sexo, DataAniversario, OrigemDoador, ObservacaoDoador, Numero, Complemento, Contato, Telefone, Email } = await req.json()
 
     const url = new URL(req.url);
     const searchParams = url.searchParams;
@@ -131,19 +131,6 @@ export async function POST(req, res) {
         const Rua = data.logradouro
         const Bairro = data.bairro
 
-        const jsonDadosDoadores = {
-            CPFCNPJ,
-            Nome,
-            CEP,
-            Rua,
-            Numero,
-            Bairro,
-            Complemento,
-            Sexo,
-            DataAniversario,
-            TipoDoador
-        }
-
         const resultDoador = await prisma.doador.create({
             data: {
                 CPFCNPJ,
@@ -153,21 +140,15 @@ export async function POST(req, res) {
                 Numero,
                 Bairro,
                 Complemento,
+                ObservacaoDoador,
+                OrigemDoador,
                 Sexo,
-                DataAniversario
+                DataAniversario,
+                TipoDoador
             }
         })
 
-        const doador = await prisma.doador.findUnique({
-            where: { CPFCNPJ: CPFCNPJ }
-        });
-
-        // Verifica se o doador existe e extrai o ID
-        if (!doador) {
-            throw new Error('Doador não encontrado.');
-        }
-
-        const IdDoador = doador.IdDoador;
+        const IdDoador = resultDoador.IdDoador;
 
         const resultContato = await prisma.contato.create({
             data: {
@@ -191,7 +172,7 @@ export async function POST(req, res) {
 }
 
 export async function PUT(req) {
-    const { IdDoador, CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email, IdContato } = await req.json()
+    const { IdDoador, CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, ObservacaoDoador, OrigemDoador, Contato, Telefone, Email, IdContato } = await req.json()
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
@@ -209,6 +190,8 @@ export async function PUT(req) {
                 Numero,
                 Bairro,
                 Complemento,
+                ObservacaoDoador,
+                OrigemDoador,
                 Sexo,
                 DataAniversario
             }

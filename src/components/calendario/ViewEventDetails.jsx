@@ -184,7 +184,6 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
             })
 
             setQuantidadeConvites(0)
-            setDoador([])
             setStatusPagamentoConvite(0)
             setDoadorConvite("")
             setDoadorConviteNome("")
@@ -202,8 +201,9 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
 
     const [dadosConvites, setDadosConvites] = useState([])
     const [atualizarConvitesVar, setAtualizarConvitesVar] = useState(-1)
+    const [valorTotalArrecadado, setValorTotalArrecadado] = useState(-1)
 
-    const atualizarConvites = function() {
+    const atualizarConvites = function () {
         setAtualizarConvitesVar(atualizarConvitesVar * -1)
     }
 
@@ -218,6 +218,16 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                 })
                 const data = await response.json();
                 setDadosConvites(data)
+
+                let novoValorArrecadado;
+
+                if (data.length > 0) {
+                    const totalConvites = data.reduce((sum, convite) => sum + convite.QuantidadeConvite, 0);
+                    novoValorArrecadado = eventData.ValorArrecadado + (totalConvites * eventData.ValorConviteEvento);
+                } else {
+                    novoValorArrecadado = eventData.ValorArrecadado
+                }
+                setValorTotalArrecadado(novoValorArrecadado);
             } catch (error) {
                 console.error('Erro ao buscar dados dos convites:', error)
             }
@@ -227,6 +237,7 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
             fetchGetDadosConvite()
         }
     }, [eventData, atualizarConvitesVar])
+
 
     const brRealFormatCurrency = (brRealRawValue) => {
         // Remove tudo que não for dígito
@@ -310,6 +321,37 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                                     <h1 className="font-bold mt-auto mb-auto">Cor: </h1>
                                     <div className={`w-[30px] h-[30px] ml-2 ${colorClasses[eventData.CorEvento]}`}></div>
                                 </div>
+                                {eventData.ValorGasto != null && <div className="mt-4">
+                                    <div className="flex">
+                                        <h1 className="font-bold">Total Arrecadado: ....</h1>
+                                        <h1>
+                                            {new Intl.NumberFormat("pt-BR", {
+                                                style: "currency",
+                                                currency: "BRL",
+                                            }).format(valorTotalArrecadado / 100)}
+                                        </h1>
+                                    </div>
+                                    <div className="flex">
+                                        <h1 className="font-bold">Valor Gasto: .............</h1>
+                                        <h1>
+                                            {new Intl.NumberFormat("pt-BR", {
+                                                style: "currency",
+                                                currency: "BRL",
+                                            }).format(eventData.ValorGasto / 100)}
+                                        </h1>
+                                    </div>
+                                    <div className="flex">
+                                        <h1 className="font-bold">Lucro Total: ..............</h1>
+                                        <h1>
+                                            {new Intl.NumberFormat("pt-BR", {
+                                                style: "currency",
+                                                currency: "BRL",
+                                            }).format((valorTotalArrecadado - eventData.ValorGasto) / 100)}
+                                        </h1>
+                                    </div>
+                                </div>
+
+                                }
                                 <div>
                                     <h1 className="text-left mt-6 mb-0 text-lg font-bold">
                                         Detalhes:
@@ -446,7 +488,12 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                                 <label htmlFor="date" className="block mb-1 font-medium">
                                     Data do Evento
                                 </label>
-                                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                                {new Date(date) < new Date() ?
+                                    new Date(date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
+                                    :
+                                    <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                                }
+
                             </div>
                             <div className="ml-9">
                                 <label htmlFor="date" className="block mb-1 font-medium">
