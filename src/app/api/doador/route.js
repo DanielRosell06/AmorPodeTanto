@@ -172,7 +172,7 @@ export async function POST(req, res) {
 }
 
 export async function PUT(req) {
-    const { IdDoador, CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, Contato, Telefone, Email, IdContato } = await req.json()
+    const { IdDoador, CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, ObservacaoDoador, OrigemDoador, Contato, Telefone, Email, IdContato } = await req.json()
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
@@ -190,6 +190,8 @@ export async function PUT(req) {
                 Numero,
                 Bairro,
                 Complemento,
+                ObservacaoDoador,
+                OrigemDoador,
                 Sexo,
                 DataAniversario
             }
