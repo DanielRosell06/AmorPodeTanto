@@ -71,6 +71,32 @@ export async function POST(req) {
             throw new Error('Falta de Dados.');
         }
 
+        const procuraConviteJaCriado = await prisma.convite.findFirst({
+            where : {
+                IdEvento : IdEvento_,
+                IdDoador : IdDoador_
+            }
+        }) || null
+
+        if(procuraConviteJaCriado != null) {
+
+            const novaQuantidade = parseInt(procuraConviteJaCriado.QuantidadeConvite, 10) + parseInt(Quantidade, 10)
+            let novoStatus
+            procuraConviteJaCriado.StatusConvite == 1 ? novoStatus = Status : novoStatus = procuraConviteJaCriado.StatusConvite
+
+            const resultUpdate = await prisma.convite.update({
+                where : {
+                    IdConvite: procuraConviteJaCriado.IdConvite
+                },
+                data : {
+                    QuantidadeConvite: novaQuantidade,
+                    StatusConvite: novoStatus
+                }
+            })
+
+            return new Response(JSON.stringify({ resultUpdate }), { status: 201 });
+        }
+
         const dados = {
             IdEvento: IdEvento_,
             IdDoador: IdDoador_,

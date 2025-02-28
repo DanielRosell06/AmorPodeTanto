@@ -184,7 +184,6 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
             })
 
             setQuantidadeConvites(0)
-            setDoador([])
             setStatusPagamentoConvite(0)
             setDoadorConvite("")
             setDoadorConviteNome("")
