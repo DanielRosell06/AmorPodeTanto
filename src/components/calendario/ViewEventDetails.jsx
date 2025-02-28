@@ -220,11 +220,15 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                 const data = await response.json();
                 setDadosConvites(data)
 
+                let novoValorArrecadado;
+
                 if (data.length > 0) {
                     const totalConvites = data.reduce((sum, convite) => sum + convite.QuantidadeConvite, 0);
-                    const novoValorArrecadado = eventData.ValorArrecadado + (totalConvites * eventData.ValorConviteEvento);
-                    setValorTotalArrecadado(novoValorArrecadado);
+                    novoValorArrecadado = eventData.ValorArrecadado + (totalConvites * eventData.ValorConviteEvento);
+                } else {
+                    novoValorArrecadado = eventData.ValorArrecadado
                 }
+                setValorTotalArrecadado(novoValorArrecadado);
             } catch (error) {
                 console.error('Erro ao buscar dados dos convites:', error)
             }

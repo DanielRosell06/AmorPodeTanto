@@ -21,7 +21,7 @@ export default function EventList({ events, onOpenView }) {
   };
 
   return (
-    <div className="ml-[2vw] w-[35vw] h-full mb-[50px] mt-4">
+    <div className="h-full mb-[50px] mt-4 w-full">
       <div className="bg-white rounded-lg shadow p-4 h-[54%]">
         <h3 className="text-xl font-bold mb-4">Eventos Passados</h3>
 
