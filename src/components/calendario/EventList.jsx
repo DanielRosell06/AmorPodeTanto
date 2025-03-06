@@ -24,7 +24,7 @@ export default function EventList({ events, onOpenView, onOpenResults }) {
         <h3 className="text-xl font-bold mb-4">Próximos Eventos</h3>
         {sortedEvents.length > 0 ? (
           <ScrollArea className="h-[90%]">
-            <ul className="space-y-2">
+            <ul className="space-y-2 max-w-[300px]">
               {sortedEvents
                 .filter(event => new Date(event.DataEvento) > new Date()) // Filtra eventos futuros
                 .map((event) => (
@@ -47,7 +47,7 @@ export default function EventList({ events, onOpenView, onOpenResults }) {
         <h3 className="text-xl font-bold mb-4">Adicionar Resultados</h3>
         {sortedEvents.length > 0 ? (
           <ScrollArea className="h-[90%]">
-            <ul className="space-y-2">
+            <ul className="space-y-2 max-w-[300px]">
               {sortedEvents
                 .filter(event => event.ValorGasto == null && new Date(event.DataEvento) < new Date()) // Filtra eventos futuros
                 .map((event) => (

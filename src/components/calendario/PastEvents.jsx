@@ -35,7 +35,7 @@ export default function EventList({ events, onOpenView }) {
 
         {sortedEvents.length > 0 ? (
           <ScrollArea className="h-[300px]">
-            <ul className="space-y-2">
+            <ul className="space-y-2 max-w-[300px]">
               {sortedEvents
                 .filter(
                   (event) =>
