@@ -135,6 +135,11 @@ export async function POST(req, res) {
         } else {
             const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
             const data = await response.json();
+
+            if (data.erro) {
+                throw new Error("Erro ao buscar o CEP");
+            }
+
             Rua = data.logradouro
             Bairro = data.bairro
         }

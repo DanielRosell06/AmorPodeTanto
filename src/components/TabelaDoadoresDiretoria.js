@@ -248,14 +248,47 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(novoDoador) // Envia os dados do novo doador
+                body: JSON.stringify(novoDoador)
+            });
+    
+            const data = await response.json(); // Extrai os dados em ambos os casos (sucesso/erro)
+    
+            if (!response.ok) {
+                throw new Error(data.error || "Erro ao adicionar doador");
+            }
+    
+            // Se chegou aqui foi sucesso
+            setPopupAdicionarDoador(false);
+            atualizarLista();
+
+            setNovoDoador({
+                CPFCNPJ: "",
+                Nome: "",
+                CEP: "",
+                Sexo: null,
+                DataAniversario: null,
+                OrigemDoador: "",
+                ObservacaoDoador: "",
+                Numero: "",
+                Contato: "",
+                Telefone: "",
+                Email: ""
             })
-            setPopupAdicionarDoador(false) // Fecha o popup após adicionar
-            atualizarLista()
+    
         } catch (error) {
-            console.error('Erro ao adicionar doador:', error)
+            console.error("Erro ao adicionar doador:", error);
+            
+            if (error.message === "Erro ao buscar o CEP") {
+                toast("CEP digitado não encontrado", {
+                    description: "Por favor, verifique o CEP e tente novamente",
+                });
+            } else {
+                toast("Erro ao processar solicitação", {
+                    description: error.message,
+                });
+            }
         }
-    }
+    };
 
     const fetchAdicionarContato = async () => {
         try {
