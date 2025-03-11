@@ -126,10 +126,19 @@ export async function POST(req, res) {
     const TipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0
 
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
-        const data = await response.json();
-        const Rua = data.logradouro
-        const Bairro = data.bairro
+        let Rua
+        let Bairro
+
+        if (!CEP || CEP == null || CEP == "") {
+            Rua = null
+            Bairro = null
+        } else {
+            const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
+            const data = await response.json();
+            Rua = data.logradouro
+            Bairro = data.bairro
+        }
+
 
         const resultDoador = await prisma.doador.create({
             data: {

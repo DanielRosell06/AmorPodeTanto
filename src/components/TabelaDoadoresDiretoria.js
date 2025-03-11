@@ -637,7 +637,11 @@ export default function TabelaDoadoresDiretoria({ children }) {
                             <TableRow key={doador.IdDoador} className={doador.Status ? 'bg-white' : 'bg-red-100 hover:bg-red-200'}>
                                 <TableCell className="font-medium border-slut-100 border">{doador.CPFCNPJ}</TableCell>
                                 <TableCell className="border-slut-100 border">{doador.Nome}</TableCell>
-                                <TableCell className="border-slut-100 border">{doador.Rua}, {doador.Numero}, {doador.Bairro}</TableCell>
+                                <TableCell className="border-slut-100 border">{
+                                    doador.Rua ?
+                                        `${doador.Rua}, ${doador.Numero}, ${doador.Bairro}`
+                                        : "Sem endereço registrado"}
+                                </TableCell>
                                 <TableCell className="border-slut-100 border">{doador.Telefone}</TableCell>
                                 <TableCell className="border-slut-100 border flex">
 
