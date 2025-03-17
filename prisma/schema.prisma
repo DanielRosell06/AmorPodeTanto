@@ -9,7 +9,7 @@ datasource db {
 
 model Doador {
   IdDoador         Int       @id @default(autoincrement())
-  CPFCNPJ          String?   @unique
+  CPFCNPJ          String?   
   Nome             String
   CEP              String?
   Rua              String?
