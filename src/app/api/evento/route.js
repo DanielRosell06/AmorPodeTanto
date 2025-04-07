@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client'
-import { stringify } from 'postcss';
+import { v2 as cloudinary } from 'cloudinary';
 const prisma = new PrismaClient()
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET() {
     try {
@@ -24,19 +30,45 @@ export async function GET() {
 
 export async function POST(req) {
     try {
-        const evento = await req.json();
+        const formData = await req.formData();
 
-        if (!evento.Titulo || !evento.Data) {
-            return new Response(JSON.stringify({ error: 'Todos os campos são obrigatórios.' }), { status: 400 });
+        const Titulo = formData.get("Titulo");
+        const Detalhe = formData.get("Detalhe") || "";
+        const Data = formData.get("Data");
+        const Cor = formData.get("Cor") || "slate";
+        const ValorConvite = parseInt(formData.get("ValorConvite"), 10) || null;
+        const ImagemEvento = formData.get("ImagemEvento");
+
+        if (!Titulo || !Data) {
+            return new Response(JSON.stringify({ error: 'Todos os campos obrigatórios devem ser preenchidos.' }), { status: 400 });
         }
+
+        let imagemUrl = null;
+
+        if (ImagemEvento && typeof ImagemEvento === "object") {
+            const arrayBuffer = await ImagemEvento.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            const uploadResponse = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream({ folder: "eventos" }, (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }).end(buffer);
+            });
+
+            imagemUrl = uploadResponse.secure_url;
+        }
+
+        console.log("Imagem do evento:", imagemUrl);
 
         const dados = {
-            TituloEvento: evento.Titulo,
-            DetalheEvento: evento.Detalhe || "",
-            DataEvento: new Date(evento.Data),
-            CorEvento: evento.Cor || "slate",
-            ValorConviteEvento: evento.ValorConvite || null
-        }
+            TituloEvento: Titulo,
+            DetalheEvento: Detalhe,
+            DataEvento: new Date(Data),
+            CorEvento: Cor,
+            ValorConviteEvento: ValorConvite,
+        };
+
 
         const result = await prisma.evento.create({ data: dados });
 

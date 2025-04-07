@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
+import { se } from "date-fns/locale"
 
 export default function AddEventModal({ onClose, atualizarCalendario }) {
   const [title, setTitle] = useState("")
@@ -11,38 +12,40 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
   const [date, setDate] = useState("")
   const [color, setColor] = useState("slate")
   const [valorConvite, setValorConvite] = useState("")
+  const [imagemEvento, setImagemEvento] = useState("")
 
   const [brRealInputValue, setBrRealInputValue] = useState("")
 
   const fetchAdicionarEvento = async () => {
     try {
+      console.log("Imagem do evento:", imagemEvento);
 
-      const bodyData = {
-        Titulo: title,
-        Detalhe: detalhes,
-        Data: date,
-        Cor: color,
-        ValorConvite: valorConvite
-      };
+      const formData = new FormData();
+      formData.append("Titulo", title);
+      formData.append("Detalhe", detalhes);
+      formData.append("Data", date);
+      formData.append("Cor", color);
+      formData.append("ValorConvite", valorConvite);
+      if (imagemEvento) {
+        formData.append("ImagemEvento", imagemEvento);
+      }
 
-      const response = await fetch(`/api/evento`, {
+      const response = await fetch(`http://localhost:3000/api/evento`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyData)
-      })
-      setTitle("")
-      setDetalhes("")
-      setDate("")
-      setColor("slate")
-      atualizarCalendario()
-      onClose()
+        body: formData,
+      });
 
+      setTitle("");
+      setDetalhes("");
+      setDate("");
+      setColor("slate");
+      setImagemEvento("");
+      atualizarCalendario();
+      onClose();
     } catch (error) {
-      console.error('Erro ao adicionar doacao:', error)
+      console.error('Erro ao adicionar evento:', error);
     }
-  }
+  };
 
   const brRealFormatCurrency = (brRealRawValue) => {
     // Remove tudo que não for dígito
@@ -106,34 +109,17 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </div>
           <div className="ml-9">
-            <label htmlFor="date" className="block mb-1 font-medium">
+            <label htmlFor="color" className="block mb-1 font-medium">
               Cor do evento
             </label>
             <div>
-              <Button className={`${color === "slate" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-slate-300 hover:bg-slate-400 rounded-none`}
-                onClick={() => setColor("slate")}>
-              </Button>
-
-              <Button className={`${color === "green" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-green-500 hover:bg-green-600 rounded-none`}
-                onClick={() => setColor("green")}>
-              </Button>
-
-              <Button className={`${color === "blue" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-blue-500 hover:bg-blue-600 rounded-none`}
-                onClick={() => setColor("blue")}>
-              </Button>
-
-              <Button className={`${color === "pink" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-pink-500 hover:bg-pink-600 rounded-none`}
-                onClick={() => setColor("pink")}>
-              </Button>
-
-              <Button className={`${color === "red" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-red-500 hover:bg-red-600 rounded-none`}
-                onClick={() => setColor("red")}>
-              </Button>
-
-              <Button className={`${color === "yellow" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-yellow-500 hover:bg-yellow-600 rounded-none`}
-                onClick={() => setColor("yellow")}>
-              </Button>
-
+              {["slate", "green", "blue", "pink", "red", "yellow"].map((colorOption) => (
+                <Button
+                  key={colorOption}
+                  className={`${color === colorOption ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-${colorOption}-500 hover:bg-${colorOption}-600 rounded-none`}
+                  onClick={() => setColor(colorOption)}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -148,6 +134,35 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
             className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
           />
         </div>
+
+        <div className="relative">
+          <Input
+            type="file"
+            id="file-input"
+            className="h-[50px] file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors pr-9"
+            onChange={(e) => {
+              const fileName = e.target.files[0]?.name || "";
+              document.getElementById("remove-btn").style.display = fileName ? "block" : "none";
+              setImagemEvento(e.target.files[0]);
+            }}
+          />
+
+          <button
+            id="remove-btn"
+            onClick={() => {
+              const fileInput = document.getElementById("file-input");
+              fileInput.value = "";
+              document.getElementById("remove-btn").style.display = "none";
+            }}
+            className=" mt-[7px] hidden absolute top-1 right-1 bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition-colors mr-2"
+            aria-label="Remover arquivo"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
         <div className="flex justify-end space-x-2 mt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancelar
@@ -156,6 +171,6 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
