@@ -59,14 +59,13 @@ export async function POST(req) {
             imagemUrl = uploadResponse.secure_url;
         }
 
-        console.log("Imagem do evento:", imagemUrl);
-
         const dados = {
             TituloEvento: Titulo,
             DetalheEvento: Detalhe,
             DataEvento: new Date(Data),
             CorEvento: Cor,
             ValorConviteEvento: ValorConvite,
+            URLImagemEvento: imagemUrl
         };
 
 

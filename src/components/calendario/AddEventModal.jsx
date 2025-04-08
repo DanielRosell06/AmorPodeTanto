@@ -18,8 +18,6 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
 
   const fetchAdicionarEvento = async () => {
     try {
-      console.log("Imagem do evento:", imagemEvento);
-
       const formData = new FormData();
       formData.append("Titulo", title);
       formData.append("Detalhe", detalhes);
@@ -30,7 +28,7 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
         formData.append("ImagemEvento", imagemEvento);
       }
 
-      const response = await fetch(`http://localhost:3000/api/evento`, {
+      const response = await fetch(`/api/evento`, {
         method: 'POST',
         body: formData,
       });

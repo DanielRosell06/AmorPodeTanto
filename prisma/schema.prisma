@@ -9,20 +9,20 @@ datasource db {
 
 model Doador {
   IdDoador         Int       @id @default(autoincrement())
-  CPFCNPJ          String?   
+  CPFCNPJ          String?
   Nome             String
   CEP              String?
   Rua              String?
   Numero           String?
   Bairro           String?
   Complemento      String?
-  ObservacaoDoador String?
-  OrigemDoador     String?
   Status           Int       @default(1) @db.SmallInt
   DataDoador       DateTime  @default(now())
-  Sexo             Int?
   DataAniversario  DateTime?
+  Sexo             Int?
   TipoDoador       Int       @default(0)
+  ObservacaoDoador String?
+  OrigemDoador     String?
 }
 
 model Contato {
@@ -44,9 +44,9 @@ model Doacao {
   IdDoacao     Int       @id @default(autoincrement())
   IdDoador     Int
   DataDoacao   DateTime  @default(now())
-  StatusDoacao Int       @default(0)
   DataAgendada DateTime?
   DataRetirada DateTime?
+  StatusDoacao Int       @default(0)
   Observacao   String?
   Destino      String?
 }
@@ -55,8 +55,8 @@ model DoacaoItem {
   IdDoacaoItem Int     @id @default(autoincrement())
   IdDoacao     Int
   IdProduto    Int
-  Quantidade   Int
   UNItem       String? @db.VarChar(20)
+  Quantidade   Int
 }
 
 model Usuario {
@@ -70,12 +70,13 @@ model Usuario {
 model Evento {
   IdEvento           Int      @id @default(autoincrement())
   TituloEvento       String
-  DetalheEvento      String?
   DataEvento         DateTime
   CorEvento          String?
-  ValorConviteEvento Int?
+  DetalheEvento      String?
   ValorArrecadado    Int?
+  ValorConviteEvento Int?
   ValorGasto         Int?
+  URLImagemEvento    String?
 }
 
 model Convite {
