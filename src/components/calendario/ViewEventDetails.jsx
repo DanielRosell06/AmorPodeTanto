@@ -29,6 +29,9 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
     const [title, setTitle] = useState(eventData.TituloEvento)
     const [detalhes, setDetalhes] = useState(eventData.DetalheEvento)
     const [valorConvite, setValorConvite] = useState(eventData.ValorConviteEvento)
+    const [urlImagem, setUrlImagem] = useState(eventData.URLImagemEvento)
+    const [alterandoImagem, setAlterandoImagem] = useState(false)
+    const [imagemEvento, setImagemEvento] = useState("")
     const [date, setDate] = useState(() => {
         if (eventData?.DataEvento) {
             const adjustedDate = new Date(eventData.DataEvento);
@@ -136,35 +139,34 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
 
     const fetchEditarEvento = async () => {
         try {
-
-            const bodyData = {
-                Id: eventData.IdEvento,
-                Titulo: title,
-                Detalhe: detalhes,
-                Data: date,
-                Cor: color,
-                ValorConvite: valorConvite
-            };
+            const formData = new FormData();
+            formData.append("Id", eventData.IdEvento);
+            formData.append("Titulo", title);
+            formData.append("Detalhe", detalhes);
+            formData.append("Data", date);
+            formData.append("Cor", color);
+            formData.append("ValorConvite", valorConvite);
+            if (imagemEvento) {
+                formData.append("ImagemEvento", imagemEvento);
+            }
 
             const response = await fetch(`/api/evento`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(bodyData)
-            })
-            setTitle("")
-            setDetalhes("")
-            setDate("")
-            setColor("slate")
-            setValorConvite(null)
-            atualizarCalendario()
-            onClose()
+                body: formData
+            });
+
+            setTitle("");
+            setDetalhes("");
+            setDate("");
+            setColor("slate");
+            setValorConvite(null);
+            atualizarCalendario();
+            onClose();
 
         } catch (error) {
-            console.error('Erro ao adicionar doacao:', error)
+            console.error('Erro ao editar evento:', error);
         }
-    }
+    };
 
     const fetchAdicionarConvite = async () => {
         try {
@@ -545,6 +547,47 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                                 className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
                             />
                         </div>
+                        {!alterandoImagem ?
+                            <div className="flex">
+                                <h1 className="mt-auto mb-auto text-lg">Imagem:</h1>
+                                <Image src={urlImagem} alt="Imagem do Evento" width={100} height={100} className="ml-3 rounded-lg mt-4"></Image>
+                                <Button className="mt-auto mb-auto ml-3 bg-slate-400 hover:bg-red-500"
+                                    onClick={() => {
+                                        setAlterandoImagem(true)
+                                    }}
+                                >Alterar Imagem</Button>
+
+                            </div>
+                            :
+                            <>
+                                <h1>Imagem:</h1>
+                                <Input
+                                    type="file"
+                                    id="file-input"
+                                    className="h-[50px] file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors pr-9"
+                                    onChange={(e) => {
+                                        const fileName = e.target.files[0]?.name || "";
+                                        document.getElementById("remove-btn").style.display = imagemEvento != "" ? "block" : "none";
+                                        setImagemEvento(e.target.files[0]);
+                                    }}
+                                />
+                                <button
+                                    id="remove-btn"
+                                    onClick={() => {
+                                        const fileInput = document.getElementById("file-input");
+                                        fileInput.value = "";
+                                        document.getElementById("remove-btn").style.display = "none";
+                                    }}
+                                    className=" mt-[7px] hidden absolute top-1 right-1 bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition-colors mr-2"
+                                    aria-label="Remover arquivo"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </>
+                        }
                         <div className="flex justify-end space-x-2 mt-4">
                             <Button type="button" variant="outline" onClick={onClose}>
                                 Cancelar
