@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import Image from "next/image"
 import {
     Select,
     SelectContent,
@@ -360,6 +361,12 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                                         {eventData.DetalheEvento}
                                     </ScrollArea>
                                 </div>
+                                {eventData.URLImagemEvento != null && eventData.URLImagemEvento != "" ?
+                                    <div className="flex w-full mb-3">
+                                        <p className="ml-auto mt-auto mb-auto font-bold">Imagem: </p>
+                                        <Image src={`${eventData.URLImagemEvento}`} alt="Imagem do Evento" width={100} height={100} className="ml-3 rounded-lg mt-4 mr-auto"></Image>
+                                    </div>
+                                    : ""}
                                 <div className="mt-4 flex justify-between">
                                     <h1 className="font-bold">Valor do Convite: {eventData.ValorConviteEvento ? `R$${(eventData.ValorConviteEvento / 100).toFixed(2)}` : "Indisponível"}</h1>
                                     <Button className="bg-green-400 hover:bg-green-500"
