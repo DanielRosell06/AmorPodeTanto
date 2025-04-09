@@ -77,6 +77,8 @@ model Evento {
   ValorConviteEvento Int?
   ValorGasto         Int?
   URLImagemEvento    String?
+  TituloSiteEvento   String?
+  DescricaoSiteEvento String?
 }
 
 model Convite {
