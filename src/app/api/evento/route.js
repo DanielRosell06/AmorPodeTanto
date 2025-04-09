@@ -37,6 +37,8 @@ export async function POST(req) {
         const Data = formData.get("Data");
         const Cor = formData.get("Cor") || "slate";
         const ValorConvite = parseInt(formData.get("ValorConvite"), 10) || null;
+        const TituloSite = formData.get("TituloSite");
+        const DetalhesSite = formData.get("DetalhesSite");
         const ImagemEvento = formData.get("ImagemEvento");
 
         if (!Titulo || !Data) {
@@ -65,7 +67,9 @@ export async function POST(req) {
             DataEvento: new Date(Data),
             CorEvento: Cor,
             ValorConviteEvento: ValorConvite,
-            URLImagemEvento: imagemUrl
+            URLImagemEvento: imagemUrl,
+            TituloSiteEvento: TituloSite,
+            DescricaoSiteEvento: DetalhesSite
         };
 
 

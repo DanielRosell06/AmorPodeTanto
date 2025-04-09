@@ -12,6 +12,8 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
   const [date, setDate] = useState("")
   const [color, setColor] = useState("slate")
   const [valorConvite, setValorConvite] = useState("")
+  const [tituloSite, setTituloSite] = useState("")
+  const [detalhesSite, setDetalhesSite] = useState("")
   const [imagemEvento, setImagemEvento] = useState("")
 
   const [brRealInputValue, setBrRealInputValue] = useState("")
@@ -26,6 +28,12 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
       formData.append("ValorConvite", valorConvite);
       if (imagemEvento) {
         formData.append("ImagemEvento", imagemEvento);
+      }
+      if (tituloSite) {
+        formData.append("TituloSite", tituloSite);
+      }
+      if (detalhesSite) {
+        formData.append("DetalhesSite", detalhesSite);
       }
 
       const response = await fetch(`/api/evento`, {
@@ -72,94 +80,110 @@ export default function AddEventModal({ onClose, atualizarCalendario }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+      <div className="bg-white p-6 rounded-lg shadow-xl  w-auto">
         <h2 className="text-2xl font-bold mb-4">Adicionar Novo Evento</h2>
-        <div>
-          <label htmlFor="title" className="block mb-1 font-medium">
-            Título do Evento
-          </label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            placeholder="Digite o título do evento"
-          />
-        </div>
-        <div className="mt-4">
-          <label>
-            Detalhes do Evento
-          </label>
-          <Textarea
-            id="detalhes"
-            value={detalhes}
-            onChange={(e) => setDetalhes(e.target.value)}
-            required
-            placeholder="Digite detalhes sobre o evento"
-            className=" resize-none "
-          />
-        </div>
-        <div className="flex mt-4">
+        <div className="flex">
           <div>
-            <label htmlFor="date" className="block mb-1 font-medium">
-              Data do Evento
-            </label>
-            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-          </div>
-          <div className="ml-9">
-            <label htmlFor="color" className="block mb-1 font-medium">
-              Cor do evento
-            </label>
             <div>
-              {["slate", "green", "blue", "pink", "red", "yellow"].map((colorOption) => (
-                <Button
-                  key={colorOption}
-                  className={`${color === colorOption ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-${colorOption}-500 hover:bg-${colorOption}-600 rounded-none`}
-                  onClick={() => setColor(colorOption)}
-                />
-              ))}
+              <label htmlFor="title" className="block mb-1 font-medium">
+                Título do Evento
+              </label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                placeholder="Digite o título do evento"
+              />
+            </div>
+            <div className="mt-4">
+              <label>
+                Detalhes do Evento
+              </label>
+              <Textarea
+                id="detalhes"
+                value={detalhes}
+                onChange={(e) => setDetalhes(e.target.value)}
+                required
+                placeholder="Digite detalhes sobre o evento"
+                className=" resize-none "
+              />
+            </div>
+            <div className="flex mt-4">
+              <div>
+                <label htmlFor="date" className="block mb-1 font-medium">
+                  Data do Evento
+                </label>
+                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+              </div>
+              <div className="ml-9">
+                <label htmlFor="color" className="block mb-1 font-medium">
+                  Cor do evento
+                </label>
+                <div className="flex">
+                  {["slate", "green", "blue", "pink", "red", "yellow"].map((colorOption) => (
+                    <Button
+                      key={colorOption}
+                      className={`${color === colorOption ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-${colorOption}-500 hover:bg-${colorOption}-600 rounded-none`}
+                      onClick={() => setColor(colorOption)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="w-full mt-4 mb-6">
+              <h1 className="ml-auto mr-auto">Valor do Convite:</h1>
+              <Input
+                id="brReal-input"
+                type="text"
+                value={brRealInputValue}
+                onChange={brRealHandleInputChange}
+                placeholder="R$ 0,00"
+                className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
+              />
             </div>
           </div>
-        </div>
-        <div className="w-full mt-4 mb-6">
-          <h1 className="ml-auto mr-auto">Valor do Convite:</h1>
-          <Input
-            id="brReal-input"
-            type="text"
-            value={brRealInputValue}
-            onChange={brRealHandleInputChange}
-            placeholder="R$ 0,00"
-            className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
-          />
-        </div>
+          <div className="h-full w-[2px] bg-slate-300 ml-4 mr-4"></div>
+          <div>
+            <h2 className="font-bold text-xl mb-3">Para o Site</h2>
+            <div className="mb-4">
+              <h2>Título do evento no site:</h2>
+              <Input placeholder="Título no Site" value={tituloSite} onChange={(e) => setTituloSite(e.target.value)}></Input>
+            </div>
+            <div className="mb-4">
+              <h2>Descrição do evento no site:</h2>
+              <Textarea className="resize-none" placeholder="Descrição no Site" value={detalhesSite} onChange={(e) => setDetalhesSite(e.target.value)}></Textarea>
+            </div>
+            <div className="relative">
+              <h2>Imagem do evento no site:</h2>
+              <Input
+                type="file"
+                id="file-input"
+                className="h-[50px] file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors pr-9"
+                onChange={(e) => {
+                  const fileName = e.target.files[0]?.name || "";
+                  document.getElementById("remove-btn").style.display = fileName ? "block" : "none";
+                  setImagemEvento(e.target.files[0]);
+                }}
+              />
 
-        <div className="relative">
-          <Input
-            type="file"
-            id="file-input"
-            className="h-[50px] file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors pr-9"
-            onChange={(e) => {
-              const fileName = e.target.files[0]?.name || "";
-              document.getElementById("remove-btn").style.display = fileName ? "block" : "none";
-              setImagemEvento(e.target.files[0]);
-            }}
-          />
-
-          <button
-            id="remove-btn"
-            onClick={() => {
-              const fileInput = document.getElementById("file-input");
-              fileInput.value = "";
-              document.getElementById("remove-btn").style.display = "none";
-            }}
-            className=" mt-[7px] hidden absolute top-1 right-1 bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition-colors mr-2"
-            aria-label="Remover arquivo"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+              <button
+                id="remove-btn"
+                onClick={() => {
+                  const fileInput = document.getElementById("file-input");
+                  fileInput.value = "";
+                  document.getElementById("remove-btn").style.display = "none";
+                }}
+                className=" mt-[7px] hidden absolute top-1 right-1 bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition-colors mr-2"
+                aria-label="Remover arquivo"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
         <div className="flex justify-end space-x-2 mt-4">
           <Button type="button" variant="outline" onClick={onClose}>
