@@ -31,6 +31,8 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
     const [valorConvite, setValorConvite] = useState(eventData.ValorConviteEvento)
     const [urlImagem, setUrlImagem] = useState(eventData.URLImagemEvento)
     const [alterandoImagem, setAlterandoImagem] = useState(false)
+    const [tituloSite, setTituloSite] = useState(eventData.TituloSiteEvento)
+    const [detalhesSite, setDetalhesSite] = useState(eventData.DescricaoSiteEvento)
     const [imagemEvento, setImagemEvento] = useState("")
     const [date, setDate] = useState(() => {
         if (eventData?.DataEvento) {
@@ -148,6 +150,12 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
             formData.append("ValorConvite", valorConvite);
             if (imagemEvento) {
                 formData.append("ImagemEvento", imagemEvento);
+            }
+            if (tituloSite) {
+                formData.append("TituloSite", tituloSite);
+            }
+            if (detalhesSite) {
+                formData.append("DetalhesSite", detalhesSite);
             }
 
             const response = await fetch(`/api/evento`, {
@@ -363,12 +371,21 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                                         {eventData.DetalheEvento}
                                     </ScrollArea>
                                 </div>
-                                {eventData.URLImagemEvento != null && eventData.URLImagemEvento != "" ?
-                                    <div className="flex w-full mb-3">
-                                        <p className="ml-auto mt-auto mb-auto font-bold">Imagem: </p>
-                                        <Image src={`${eventData.URLImagemEvento}`} alt="Imagem do Evento" width={100} height={100} className="ml-3 rounded-lg mt-4 mr-auto"></Image>
-                                    </div>
-                                    : ""}
+                                <div>
+                                    <h2 className="font-bold text-xl mb-3">Site:</h2>
+                                    {eventData.TituloSiteEvento != null ?
+                                        <div className=" w-full mb-3">
+                                            <p className="ml-auto"><span className="font-bold">Título:</span> {eventData.TituloSiteEvento}</p>
+                                            <p className="ml-auto"><span className="font-bold">Descrição:</span> {eventData.DescricaoSiteEvento}</p>
+                                        </div>
+                                        : ""}
+                                    {eventData.URLImagemEvento != null && eventData.URLImagemEvento != "" ?
+                                        <div className="flex w-full mb-3">
+                                            <p className="ml-auto mt-auto mb-auto font-bold">Imagem: </p>
+                                            <Image src={`${eventData.URLImagemEvento}`} alt="Imagem do Evento" width={100} height={100} className="ml-3 rounded-lg mr-auto"></Image>
+                                        </div>
+                                        : ""}
+                                </div>
                                 <div className="mt-4 flex justify-between">
                                     <h1 className="font-bold">Valor do Convite: {eventData.ValorConviteEvento ? `R$${(eventData.ValorConviteEvento / 100).toFixed(2)}` : "Indisponível"}</h1>
                                     <Button className="bg-green-400 hover:bg-green-500"
@@ -467,133 +484,151 @@ export default function AddEventModal({ onClose, eventData, atualizarCalendario,
                     :
                     <>
                         <h2 className="text-2xl font-bold mb-4">Editar Evento</h2>
-                        <div>
-                            <label htmlFor="title" className="block mb-1 font-medium">
-                                Título do Evento
-                            </label>
-                            <Input
-                                id="title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                                placeholder="Digite o título do evento"
-                            />
-                        </div>
-                        <div className="mt-4">
-                            <label>
-                                Detalhes do Evento
-                            </label>
-                            <Textarea
-                                id="detalhes"
-                                value={detalhes}
-                                onChange={(e) => setDetalhes(e.target.value)}
-                                required
-                                placeholder="Digite detalhes sobre o evento"
-                                className=" resize-none "
-                            />
-                        </div>
-                        <div className="flex mt-4">
+                        <div className="flex">
                             <div>
-                                <label htmlFor="date" className="block mb-1 font-medium">
-                                    Data do Evento
-                                </label>
-                                {new Date(date) < new Date() ?
-                                    new Date(date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
-                                    :
-                                    <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-                                }
-
-                            </div>
-                            <div className="ml-9">
-                                <label htmlFor="date" className="block mb-1 font-medium">
-                                    Cor do evento
-                                </label>
                                 <div>
-                                    <Button className={`${color === "slate" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-slate-300 hover:bg-slate-400 rounded-none`}
-                                        onClick={() => setColor("slate")}>
-                                    </Button>
+                                    <label htmlFor="title" className="block mb-1 font-medium">
+                                        Título do Evento
+                                    </label>
+                                    <Input
+                                        id="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        required
+                                        placeholder="Digite o título do evento"
+                                    />
+                                </div>
+                                <div className="mt-4">
+                                    <label>
+                                        Detalhes do Evento
+                                    </label>
+                                    <Textarea
+                                        id="detalhes"
+                                        value={detalhes}
+                                        onChange={(e) => setDetalhes(e.target.value)}
+                                        required
+                                        placeholder="Digite detalhes sobre o evento"
+                                        className=" resize-none "
+                                    />
+                                </div>
+                                <div className="flex mt-4">
+                                    <div>
+                                        <label htmlFor="date" className="block mb-1 font-medium">
+                                            Data do Evento
+                                        </label>
+                                        {new Date(date) < new Date() ?
+                                            new Date(date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
+                                            :
+                                            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                                        }
 
-                                    <Button className={`${color === "green" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-green-500 hover:bg-green-600 rounded-none`}
-                                        onClick={() => setColor("green")}>
-                                    </Button>
+                                    </div>
+                                    <div className="ml-9">
+                                        <label htmlFor="date" className="block mb-1 font-medium">
+                                            Cor do evento
+                                        </label>
+                                        <div>
+                                            <Button className={`${color === "slate" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-slate-300 hover:bg-slate-400 rounded-none`}
+                                                onClick={() => setColor("slate")}>
+                                            </Button>
 
-                                    <Button className={`${color === "blue" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-blue-500 hover:bg-blue-600 rounded-none`}
-                                        onClick={() => setColor("blue")}>
-                                    </Button>
+                                            <Button className={`${color === "green" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-green-500 hover:bg-green-600 rounded-none`}
+                                                onClick={() => setColor("green")}>
+                                            </Button>
 
-                                    <Button className={`${color === "pink" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-pink-500 hover:bg-pink-600 rounded-none`}
-                                        onClick={() => setColor("pink")}>
-                                    </Button>
+                                            <Button className={`${color === "blue" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-blue-500 hover:bg-blue-600 rounded-none`}
+                                                onClick={() => setColor("blue")}>
+                                            </Button>
 
-                                    <Button className={`${color === "red" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-red-500 hover:bg-red-600 rounded-none`}
-                                        onClick={() => setColor("red")}>
-                                    </Button>
+                                            <Button className={`${color === "pink" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-pink-500 hover:bg-pink-600 rounded-none`}
+                                                onClick={() => setColor("pink")}>
+                                            </Button>
 
-                                    <Button className={`${color === "yellow" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-yellow-500 hover:bg-yellow-600 rounded-none`}
-                                        onClick={() => setColor("yellow")}>
-                                    </Button>
+                                            <Button className={`${color === "red" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-red-500 hover:bg-red-600 rounded-none`}
+                                                onClick={() => setColor("red")}>
+                                            </Button>
 
+                                            <Button className={`${color === "yellow" ? "border-2 border-black" : "border-2 border-transparent"} box-border w-[34px] h-[34px] bg-yellow-500 hover:bg-yellow-600 rounded-none`}
+                                                onClick={() => setColor("yellow")}>
+                                            </Button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="w-full mt-4 mb-6">
+                                    <h1 className="ml-auto mr-auto">Valor do Convite:</h1>
+                                    <Input
+                                        id="brReal-input"
+                                        type="text"
+                                        onChange={brRealHandleInputChange}
+                                        value={brRealInputValue}
+                                        placeholder="R$ 0,00"
+                                        className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
+                                    />
                                 </div>
                             </div>
-                        </div>
-                        <div className="w-full mt-4 mb-6">
-                            <h1 className="ml-auto mr-auto">Valor do Convite:</h1>
-                            <Input
-                                id="brReal-input"
-                                type="text"
-                                onChange={brRealHandleInputChange}
-                                value={brRealInputValue}
-                                placeholder="R$ 0,00"
-                                className="brReal-input w-[100px] px-3 py-1 text-right text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto mr-auto"
-                            />
-                        </div>
-                        {!alterandoImagem ?
-                            <div className="flex">
-                                <h1 className="mt-auto mb-auto text-lg">Imagem:</h1>
-                                <Image src={urlImagem} alt="Imagem do Evento" width={100} height={100} className="ml-3 rounded-lg mt-4"></Image>
-                                <Button className="mt-auto mb-auto ml-3 bg-slate-400 hover:bg-red-500"
-                                    onClick={() => {
-                                        setAlterandoImagem(true)
-                                    }}
-                                >Alterar Imagem</Button>
+                            <div className="h-full mr-4 ml-4 bg-slate-300 w-[2px]"></div>
+                            <div>
+                                <h2 className="font-bold text-xl mb-2">Para o Site</h2>
 
+                                <div className="mb-4">
+                                    <h2>Título do evento no site:</h2>
+                                    <Input placeholder="Título no Site" value={tituloSite} onChange={(e) => setTituloSite(e.target.value)}></Input>
+                                </div>
+                                <div className="mb-4">
+                                    <h2>Descrição do evento no site:</h2>
+                                    <Textarea className="resize-none" placeholder="Descrição no Site" value={detalhesSite} onChange={(e) => setDetalhesSite(e.target.value)}></Textarea>
+                                </div>
+                                {!alterandoImagem ?
+                                    <div className="flex">
+                                        <h1 className="mt-auto mb-auto text-lg">Imagem:</h1>
+                                        <Image src={urlImagem} alt="Imagem do Evento" width={100} height={100} className="ml-3 rounded-lg mt-4"></Image>
+                                        <Button className="mt-auto mb-auto ml-3 bg-slate-400 hover:bg-red-500"
+                                            onClick={() => {
+                                                setAlterandoImagem(true)
+                                            }}
+                                        >Alterar Imagem</Button>
+
+                                    </div>
+                                    :
+                                    <>
+                                        <h1>Imagem:</h1>
+                                        <Input
+                                            type="file"
+                                            id="file-input"
+                                            className="h-[50px] file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors pr-9"
+                                            onChange={(e) => {
+                                                const fileName = e.target.files[0]?.name || "";
+                                                document.getElementById("remove-btn").style.display = imagemEvento != "" ? "block" : "none";
+                                                setImagemEvento(e.target.files[0]);
+                                            }}
+                                        />
+                                        <button
+                                            id="remove-btn"
+                                            onClick={() => {
+                                                const fileInput = document.getElementById("file-input");
+                                                fileInput.value = "";
+                                                document.getElementById("remove-btn").style.display = "none";
+                                            }}
+                                            className=" mt-[7px] hidden absolute top-1 right-1 bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition-colors mr-2"
+                                            aria-label="Remover arquivo"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </>
+                                }
                             </div>
-                            :
-                            <>
-                                <h1>Imagem:</h1>
-                                <Input
-                                    type="file"
-                                    id="file-input"
-                                    className="h-[50px] file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors pr-9"
-                                    onChange={(e) => {
-                                        const fileName = e.target.files[0]?.name || "";
-                                        document.getElementById("remove-btn").style.display = imagemEvento != "" ? "block" : "none";
-                                        setImagemEvento(e.target.files[0]);
-                                    }}
-                                />
-                                <button
-                                    id="remove-btn"
-                                    onClick={() => {
-                                        const fileInput = document.getElementById("file-input");
-                                        fileInput.value = "";
-                                        document.getElementById("remove-btn").style.display = "none";
-                                    }}
-                                    className=" mt-[7px] hidden absolute top-1 right-1 bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition-colors mr-2"
-                                    aria-label="Remover arquivo"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </>
-                        }
+                        </div>
                         <div className="flex justify-end space-x-2 mt-4">
                             <Button type="button" variant="outline" onClick={onClose}>
                                 Cancelar
                             </Button>
                             <Button onClick={fetchEditarEvento}>Confirmar Edição</Button>
                         </div>
+
                     </>
                 }
             </div>

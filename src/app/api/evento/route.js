@@ -116,6 +116,8 @@ export async function PUT(req) {
             const Cor = formData.get("Cor") || "slate";
             const ValorConvite = parseInt(formData.get("ValorConvite"), 10) || null;
             const ImagemEvento = formData.get("ImagemEvento");
+            const TituloSite = formData.get("TituloSite");
+            const DetalhesSite = formData.get("DetalhesSite");
 
             if (!Titulo || !Data || !Id) {
                 return new Response(JSON.stringify({ error: 'Todos os campos são obrigatórios.' }), { status: 400 });
@@ -148,7 +150,9 @@ export async function PUT(req) {
                 DataEvento: new Date(Data),
                 CorEvento: Cor,
                 ValorConviteEvento: ValorConvite,
-                ...(imagemUrl && { URLImagemEvento: imagemUrl })
+                ...(imagemUrl && { URLImagemEvento: imagemUrl }),
+                TituloSiteEvento: TituloSite,
+                DescricaoSiteEvento: DetalhesSite
             };
 
             result = await prisma.evento.update({
