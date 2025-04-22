@@ -133,7 +133,10 @@ export async function POST(req, res) {
             Rua = null
             Bairro = null
         } else {
-            const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
+
+            // Remove any non-numeric characters from the CEP
+            const sanitizedCEP = CEP.replace(/\D/g, '');
+            const response = await fetch(`https://viacep.com.br/ws/${sanitizedCEP}/json/`)
             const data = await response.json();
 
             if (data.erro) {
@@ -189,10 +192,23 @@ export async function PUT(req) {
     const { IdDoador, CPFCNPJ, Nome, CEP, Sexo, DataAniversario, Numero, Complemento, ObservacaoDoador, OrigemDoador, Contato, Telefone, Email, IdContato } = await req.json()
 
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${CEP}/json/`)
-        const data = await response.json();
-        const Rua = data.logradouro
-        const Bairro = data.bairro
+        if (!CEP || CEP == null || CEP == "") {
+            Rua = null
+            Bairro = null
+        } else {
+
+            // Remove any non-numeric characters from the CEP
+            const sanitizedCEP = CEP.replace(/\D/g, '');
+            const response = await fetch(`https://viacep.com.br/ws/${sanitizedCEP}/json/`)
+            const data = await response.json();
+
+            if (data.erro) {
+                throw new Error("Erro ao buscar o CEP");
+            }
+
+            Rua = data.logradouro
+            Bairro = data.bairro
+        }
 
         const resultDoador = await prisma.doador.update({
             where: { IdDoador: IdDoador },
