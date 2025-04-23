@@ -58,32 +58,41 @@ export async function GET(req) {
 
         // Filtro de pesquisa
         if (searchBy && searchIn) {
-            let idsDoadores = [];
-            
-            if (searchBy === 'Nome') {
-                idsDoadores = await prisma.doador.findMany({
-                    where: { Nome: { contains: searchIn, mode: 'insensitive' } },
-                    select: { IdDoador: true },
-                }).then(d => d.map(({ IdDoador }) => IdDoador));
-            }
-            else if (searchBy === 'Telefone') {
-                idsDoadores = await prisma.contato.findMany({
-                    where: { Telefone: { contains: searchIn, mode: 'insensitive' } },
-                    select: { IdDoador: true },
-                }).then(c => c.map(({ IdDoador }) => IdDoador));
-            }
-            else if (searchBy === 'CPFCNPJ') {
-                idsDoadores = await prisma.doador.findMany({
-                    where: { CPFCNPJ: { contains: searchIn, mode: 'insensitive' } },
-                    select: { IdDoador: true },
-                }).then(d => d.map(({ IdDoador }) => IdDoador));
-            }
-
-            if (idsDoadores.length > 0) {
-                whereFilter.IdDoador = { in: idsDoadores };
+            if (searchBy === 'IdDoacao') {
+                const idDoacao = parseInt(searchIn, 10);
+                if (!isNaN(idDoacao)) {
+                    whereFilter.IdDoacao = idDoacao;
+                } else {
+                    return new Response(JSON.stringify([]), { status: 200 });
+                }
             } else {
-                // Retorna vazio se não encontrar na pesquisa
-                return new Response(JSON.stringify([]), { status: 200 });
+                let idsDoadores = [];
+                
+                if (searchBy === 'Nome') {
+                    idsDoadores = await prisma.doador.findMany({
+                        where: { Nome: { contains: searchIn, mode: 'insensitive' } },
+                        select: { IdDoador: true },
+                    }).then(d => d.map(({ IdDoador }) => IdDoador));
+                }
+                else if (searchBy === 'Telefone') {
+                    idsDoadores = await prisma.contato.findMany({
+                        where: { Telefone: { contains: searchIn, mode: 'insensitive' } },
+                        select: { IdDoador: true },
+                    }).then(c => c.map(({ IdDoador }) => IdDoador));
+                }
+                else if (searchBy === 'CPFCNPJ') {
+                    idsDoadores = await prisma.doador.findMany({
+                        where: { CPFCNPJ: { contains: searchIn, mode: 'insensitive' } },
+                        select: { IdDoador: true },
+                    }).then(d => d.map(({ IdDoador }) => IdDoador));
+                }
+
+                if (idsDoadores.length > 0) {
+                    whereFilter.IdDoador = { in: idsDoadores };
+                } else {
+                    // Retorna vazio se não encontrar na pesquisa
+                    return new Response(JSON.stringify([]), { status: 200 });
+                }
             }
         }
 
@@ -97,10 +106,10 @@ export async function GET(req) {
 
         if (whereFilter.IdDoador) {
             // Interseção entre IDs da pesquisa e IDs do tipo
-            const idsIntersecao = whereFilter.IdDoador.in.filter(id => 
-                idsPorTipo.includes(id)
-            );
-            whereFilter.IdDoador.in = idsIntersecao;
+            const idsIntersecao = whereFilter.IdDoador.in
+                ? whereFilter.IdDoador.in.filter(id => idsPorTipo.includes(id))
+                : idsPorTipo.includes(whereFilter.IdDoador) ? [whereFilter.IdDoador] : [];
+            whereFilter.IdDoador = { in: idsIntersecao };
         } else {
             whereFilter.IdDoador = { in: idsPorTipo };
         }

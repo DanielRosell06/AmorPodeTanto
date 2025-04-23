@@ -47,6 +47,11 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         backgroundColor: 'white'
     },
+    sectionDadosDoador: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
     title: {
         fontSize: 10,
         fontWeight: "bold",
@@ -175,14 +180,17 @@ const DonationSection = ({ donation, isCopy }) => (
             </View>
         </View>
 
-        {/* Informações do Doador */}
-        <View style={[styles.section, { marginTop: 8 }]}>
-            <Text style={styles.label}>DOADOR: {donation.doador.Nome}</Text>
-            <Text>Endereço: {donation.doador.Rua}, {donation.doador.Numero} - {donation.doador.Bairro}</Text>
-            <Text>Contato: {donation.contato.map(c => formatPhone(c.Telefone)).join(' | ')}</Text>
+        <View style={[styles.section, styles.sectionDadosDoador, { marginTop: 8 }]}>
+            <View>
+                <Text style={styles.label}>DOADOR: {donation.doador.Nome}</Text>
+                <Text>Endereço: {donation.doador.Rua}, {donation.doador.Numero} - {donation.doador.Bairro}</Text>
+                <Text>Contato: {donation.contato.map(c => formatPhone(c.Telefone)).join(' | ')}</Text>
+            </View>
+            {isCopy && (
+                <Text style={[styles.label, {textAlign: 'right'}]}>IDENTIFICADOR: {donation.IdDoacao}</Text>
+            )}
         </View>
 
-        {/* Tabela de Itens */}
         <View style={styles.table}>
             <View style={[styles.tableRow, styles.tableHeader]}>
                 <Text style={styles.tableCell}>#</Text>

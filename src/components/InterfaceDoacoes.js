@@ -324,6 +324,7 @@ export default function InterfaceDoacoes({ children }) {
                             <SelectItem value="Nome">Nome</SelectItem>
                             <SelectItem value="Telefone">Telefone</SelectItem>
                             <SelectItem value="CPFCNPJ">CPF / CNPJ</SelectItem>
+                            <SelectItem value="IdDoacao">Identificador</SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -404,8 +405,14 @@ export default function InterfaceDoacoes({ children }) {
                                                     {new Date(doacao.DataDoacao).toLocaleDateString("pt-BR") || "Não informado"}
                                                 </h1>
                                             </div>
+                                            <div className="flex justify-end">
+                                                <h1 className="text-lg text-slate-300">Identificador: </h1>
+                                                <h1 className="text-black text-lg ml-1">
+                                                    {doacao.IdDoacao}
+                                                </h1>
+                                            </div>
                                             <div className="text-left">
-                                                <h1 className="mt-[16px] font-bold text-lg">Endereço:</h1>
+                                                <h1 className="mt-[10px] font-bold text-lg">Endereço:</h1>
                                                 <h1 className="mt-[16px]">
                                                     {doacao.doador.Rua}, {doacao.doador.Numero}, {doacao.doador.Bairro}
                                                 </h1>
