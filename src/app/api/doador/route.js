@@ -1,21 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 let prisma = new PrismaClient()
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
 
 // Verificador de sessão
-async function checkSession(req) {
-    const session = await getServerSession(req, authOptions);
-    if (!session) {
-      throw new Error("Não autorizado");
-    }
-    return session;
-  }
-
 export async function GET(req) {
-
-    const session = await checkSession(req);
-
     const url = new URL(req.url);
     const searchParams = url.searchParams;
     const desativados = searchParams.get('desativados') || 0
