@@ -9,7 +9,9 @@ import Image from 'next/image';
 
 export default function Login() {
 
-    const [verSenha, setVerSenha] = useState(-1)
+    const [verSenha, setVerSenha] = useState(-1);
+
+    const [carregando, setCarregando] = useState(false)
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
@@ -23,10 +25,19 @@ export default function Login() {
             password: senha,
         });
 
+        setCarregando(false)
+
         if (result.error) {
             setErro("Email ou senha incorretos!");
         } else {
             router.push("/inicio");
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            handleLogin();
+            setCarregando(true)
         }
     };
 
@@ -42,7 +53,7 @@ export default function Login() {
                     quality={100}
                 />
                 <h1 className="text-3xl text-center mt-4">Login</h1>
-                <div>
+                <div onKeyDown={handleKeyDown}>
                     <h1 className="mt-4 mb-1 text-xl ml-2">Email:</h1>
                     <Input
                         placeholder="Email"
@@ -66,10 +77,14 @@ export default function Login() {
                             {verSenha != 1 ? <i className="fas fa-eye"></i> : <i className="fas fa-eye-slash"></i>}
                         </Button>
                     </div>
+                    {carregando && <p className="text-slate-500">Procurando...</p>}
                     {erro && <p className="text-red-500">{erro}</p>}
                     <Button
                         className="bg-green-400 hover:bg-green-500 mt-6 text-lg text-white w-full"
-                        onClick={handleLogin}
+                        onClick={() => {
+                            handleLogin;
+                            setCarregando(true);
+                        }}
                     >
                         Entrar
                     </Button>
