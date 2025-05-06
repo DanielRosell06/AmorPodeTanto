@@ -82,7 +82,7 @@ export default function Login() {
                     <Button
                         className="bg-green-400 hover:bg-green-500 mt-6 text-lg text-white w-full"
                         onClick={() => {
-                            handleLogin;
+                            handleLogin();
                             setCarregando(true);
                         }}
                     >
