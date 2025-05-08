@@ -138,6 +138,7 @@ export async function GET(req) {
         doacoes = await prisma.doacao.findMany({
             where: whereFilter,
             orderBy: orderByClause,
+            take: 50, // Limita a busca aos primeiros 50 resultados
         });
 
         // Popular dados relacionados

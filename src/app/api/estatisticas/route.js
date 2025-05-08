@@ -47,18 +47,6 @@ export async function GET(req) {
 
         // Se o número de produtos for maior que 9, vamos somar os outros produtos em uma categoria "Outros"
         let topProdutos = produtosOrdenados.slice(0, 9);
-        let outrosQuant = 0;
-
-        if (produtosOrdenados.length > 9) {
-            // Contabilizando a quantidade de produtos que não estão entre os 9 primeiros
-            for (let i = 9; i < produtosOrdenados.length; i++) {
-                outrosQuant += produtosOrdenados[i].quantidade;
-            }
-            topProdutos.push({
-                nome: 'Outros',
-                quantidade: outrosQuant,
-            });
-        }
 
         // Contando o total de produtos
         const totalProdutos = produtosOrdenados.reduce((acc, item) => acc + item.quantidade, 0);
@@ -92,7 +80,7 @@ export async function GET(req) {
         return new Response(
             JSON.stringify({
                 totalProdutos: totalProdutos.toString(), // Se totalProdutos for BigInt
-                topProdutos: produtosOrdenadosComStrings,
+                topProdutos: topProdutos,
                 ultimosTresMeses: ultimosTresMesesComStrings
             }),
             { status: 200 }
