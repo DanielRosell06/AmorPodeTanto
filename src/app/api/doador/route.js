@@ -79,12 +79,13 @@ export async function GET(req) {
         }
     }
 
+    orderBy = {
+        DataDoador: 'desc'
+    };
+
     if (ordenarPor) {
         switch (ordenarPor) {
             case "AdicionadoRecente":
-                orderBy = {
-                    DataDoador: 'desc'
-                };
                 doadoresList = await prisma.doador.findMany({ where: where, orderBy: orderBy, take: 50 });
                 break;
 
@@ -96,7 +97,7 @@ export async function GET(req) {
                 break;
         }
     } else {
-        doadoresList = await prisma.doador.findMany({ where: where, take: 50 });
+        doadoresList = await prisma.doador.findMany({ where: where, take: 50 , orderBy: orderBy});
     }
 
 

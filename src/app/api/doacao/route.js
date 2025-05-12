@@ -39,8 +39,8 @@ export async function GET(req) {
                     };
                     break;
                 case "agendadoSemana":
-                    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
-                    const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7));
+                    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + 1);
+                    const endOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + 7, 23, 59, 59, 999);
                     whereFilter.StatusDoacao = 0;
                     whereFilter.DataAgendada = {
                         gte: startOfWeek,
@@ -115,7 +115,7 @@ export async function GET(req) {
         }
 
         // Ordenação
-        let orderByClause = {};
+        let orderByClause = {DataDoacao: 'desc'};
         if (orderBy) {
             switch (orderBy) {
                 case "adicionadoRecente":
