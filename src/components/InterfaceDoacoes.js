@@ -476,52 +476,58 @@ export default function InterfaceDoacoes({ children }) {
                                         setObservacaoAtual(e.target.value)
                                     }}>
                                 </Textarea>
-
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-[48%] mt-4 justify-start text-left font-normal",
-                                                !dateAgenda && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {dateAgenda ? format(dateAgenda, "PPP", { locale: ptBR }) : <span>Alterar data agendada</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={dateAgenda}
-                                            onSelect={setDateAgenda}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                <Popover >
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-[48%] justify-start text-left font-normal ml-[4%] mt-4",
-                                                !dateRetirado && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {dateRetirado ? format(dateRetirado, "PPP", { locale: ptBR }) : <span>Alterar data de Retirada</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={dateRetirado}
-                                            onSelect={setDateRetirado}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-
+                                <div className="flex w-[100%]">
+                                    <div className="w-[50%]">
+                                        <p className="mt-4">Data agendada:</p>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        " mt-1 justify-start text-left font-normal w-[95%] ",
+                                                        !dateAgenda && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {dateAgenda ? format(dateAgenda, "PPP", { locale: ptBR }) : <span>Alterar data agendada</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateAgenda}
+                                                    onSelect={setDateAgenda}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    <div className="w-[50%] pl-3">
+                                        <p className="mt-4">Data doação retirada:</p>
+                                        <Popover >
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "justify-start text-left font-normal mt-1 w-[100%]",
+                                                        !dateRetirado && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {dateRetirado ? format(dateRetirado, "PPP", { locale: ptBR }) : <span>Alterar data de Retirada</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateRetirado}
+                                                    onSelect={setDateRetirado}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </div>
                                 <div className="flex">
                                     <Popover open={open} onOpenChange={setOpen}>
                                         <PopoverTrigger asChild>
