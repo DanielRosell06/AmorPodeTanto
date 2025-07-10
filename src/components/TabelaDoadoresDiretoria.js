@@ -798,8 +798,8 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                         <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setNovoDoador({ ...novoDoador, CPFCNPJ: e.target.value })} />
                                     </div>
                                     <div>
-                                        <h1 className="ml-2">Nome</h1>
-                                        <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })} />
+                                        <h1 className="ml-2">Nome Completo</h1>
+                                        <Input type="Name" placeholder="Nome Completo" className="w-[263px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Nome: e.target.value })} />
                                     </div>
                                 </div>
 
@@ -840,13 +840,15 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                                 const response = await fetch(`https://viacep.com.br/ws/${sanitizedCEP}/json/`)
                                                 const data = await response.json()
                                                 setEnderecoCEP(data);
+                                            } else {
+                                                setEnderecoCEP("")
                                             }
                                         }} />
                                     </div>
                                     <div className="ml-2 text-left">
                                         <h1>Endereço</h1>
                                         <div className="border rounded bg-gray-100 text-gray-400 text-sm  w-[260px] p-2">
-                                            <p>{enderecoCEP.logradouro}, {enderecoCEP.bairro} - {enderecoCEP.localidade}, {enderecoCEP.uf}</p>
+                                            <p>{enderecoCEP != "" ? (enderecoCEP.logradouro ? (`${enderecoCEP.logradouro}, ${enderecoCEP.bairro} - ${enderecoCEP.localidade}, ${enderecoCEP.uf}`):"Digite um CEP Válido") : "Digite um CEP"}</p>
                                         </div>
                                     </div>
                                 </div>
