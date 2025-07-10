@@ -280,16 +280,27 @@ export default function TabelaDoadoresDiretoria({ children }) {
 
         } catch (error) {
             console.error("Erro ao adicionar doador:", error);
+            setFlagDesativaBotaoAdicionar(false)
+            console.log("ERRO: " + error.message)
 
             if (error.message === "Erro ao buscar o CEP") {
                 toast("CEP digitado não encontrado", {
                     description: "Por favor, verifique o CEP e tente novamente",
                 });
-            } else {
-                toast("Erro ao processar solicitação", {
-                    description: error.message,
+                return
+            } 
+            
+            if (error.message === "Erro Nome sem sobrenome") {
+                toast("Nome sem Sobrenome", {
+                    description: "Por favor, digite o sobrenome do doador.",
                 });
+                return
             }
+            
+            toast("Erro ao processar solicitação", {
+                description: error.message,
+            });
+            return
         }
     };
 

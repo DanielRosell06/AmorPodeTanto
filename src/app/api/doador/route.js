@@ -97,7 +97,7 @@ export async function GET(req) {
                 break;
         }
     } else {
-        doadoresList = await prisma.doador.findMany({ where: where, take: 50 , orderBy: orderBy});
+        doadoresList = await prisma.doador.findMany({ where: where, take: 50, orderBy: orderBy });
     }
 
 
@@ -125,8 +125,13 @@ export async function POST(req, res) {
     const url = new URL(req.url);
     const searchParams = url.searchParams;
     const TipoDoador = parseInt(searchParams.get('tipoDoador'), 10) || 0
-
+    
     try {
+
+        if (Nome.trim().split(/\s+/).length < 2) {
+            throw new Error("Erro Nome sem sobrenome");
+        }
+        
         let Rua
         let Bairro
 
