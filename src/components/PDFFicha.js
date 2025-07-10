@@ -183,7 +183,7 @@ const DonationSection = ({ donation, isCopy }) => (
         <View style={[styles.section, styles.sectionDadosDoador, { marginTop: 8 }]}>
             <View>
                 <Text style={styles.label}>DOADOR: {donation.doador.Nome}</Text>
-                <Text>Endereço: {donation.doador.Rua}, {donation.doador.Numero} - {donation.doador.Bairro}</Text>
+            <Text>Endereço: {donation.doador.Rua}, {donation.doador.Numero}{donation.doador.Complemento!=null??","} {donation.doador.Complemento} - {donation.doador.Bairro}</Text>
                 <Text>Contato: {donation.contato.map(c => formatPhone(c.Telefone)).join(' | ')}</Text>
             </View>
             {isCopy && (

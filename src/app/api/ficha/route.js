@@ -42,6 +42,8 @@ export async function GET(req) {
             })
         );
 
+        console.log(listaCompleta)
+
         return new Response(
             JSON.stringify({ listaCompleta }),
             { status: 201 }

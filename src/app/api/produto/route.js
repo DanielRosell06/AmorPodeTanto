@@ -17,13 +17,18 @@ export async function GET(req) {
                     where: {
                         Nome:{
                             contains: NomeToSearch,
-                            mode: 'insensitive', // Torna a busca case-insensitive}
+                            mode: 'insensitive',
                         }
                     }
                 })
             }else{
                 produtos = await prisma.produto.findMany({})
             }
+
+            // ORDENAÇÃO ADICIONADA AQUI (apenas para listas de produtos)
+            produtos.sort((a, b) => 
+                a.Nome.localeCompare(b.Nome, 'pt-BR', { sensitivity: 'base' })
+            );
 
         }else{
             produtos = await prisma.produto.findUnique({

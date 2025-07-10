@@ -29,13 +29,16 @@ export async function GET(req) {
                         where: { IdProduto: Item.IdProduto },
                     });
 
-    
                     return {
                         ...Item,
                         produto,
                         doacao
                     };
                 })
+            );
+
+            ItensCompletos.sort((a, b) => 
+                a.produto.Nome.localeCompare(b.produto.Nome)
             );
         }
 

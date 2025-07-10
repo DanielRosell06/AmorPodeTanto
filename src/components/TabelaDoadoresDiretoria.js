@@ -137,6 +137,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
     const [pesquisaInput, setPesquisaInput] = useState('')
     const [observacao, setObservacao] = useState("")
     const [destino, setDestino] = useState("")
+    const [enderecoCEP, setEnderecoCEP] = useState("")
 
     //Lista
     const [doador, setDoador] = useState([]);
@@ -152,6 +153,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
     const [nomeDoadorAdicionarContato, setNomeDoadorAdicionarContato] = useState("")
     const [verMaisContatosInformacoes, setVerMaisContatosInformacoes] = useState(-1)
     const [adicionarDinheiro, setAdicionarDinheiro] = useState(false)
+    const [flagDesativaBotaoAdicionar, setFlagDesativaBotaoAdicionar] = useState(false)
 
     //Ids
     const [IdDoadorDoando, setIdDoadorDoando] = useState(0);
@@ -250,13 +252,13 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 },
                 body: JSON.stringify(novoDoador)
             });
-    
+
             const data = await response.json(); // Extrai os dados em ambos os casos (sucesso/erro)
-    
+
             if (!response.ok) {
                 throw new Error(data.error || "Erro ao adicionar doador");
             }
-    
+
             // Se chegou aqui foi sucesso
             setPopupAdicionarDoador(false);
             atualizarLista();
@@ -274,10 +276,11 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 Telefone: "",
                 Email: ""
             })
-    
+            setFlagDesativaBotaoAdicionar(false)
+
         } catch (error) {
             console.error("Erro ao adicionar doador:", error);
-            
+
             if (error.message === "Erro ao buscar o CEP") {
                 toast("CEP digitado não encontrado", {
                     description: "Por favor, verifique o CEP e tente novamente",
@@ -309,6 +312,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 Telefone: "",
                 Email: ""
             })
+            setFlagDesativaBotaoAdicionar(false)
         } catch (error) {
             console.error('Erro ao adicionar contato:', error)
         }
@@ -354,6 +358,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 Telefone: " ",
                 Email: " "
             })
+            setFlagDesativaBotaoAdicionar(false)
 
             setVerMaisContatosInformacoes(-1)
             setIdDoadorContato(-1)
@@ -381,6 +386,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                 UN: ""
             })
             atualizarLista()
+            setFlagDesativaBotaoAdicionar(false)
         } catch (error) {
             console.error('Erro ao adicionar produto:', error)
         }
@@ -418,6 +424,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
             setAdicionarDinheiro(false)
             setValorFinalDoacaoDinheiro("")
             setBrRealInputValue("")
+            setFlagDesativaBotaoAdicionar(false)
 
         } catch (error) {
             console.error('Erro ao adicionar doacao:', error)
@@ -826,15 +833,33 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                 <div className="flex mt-4">
                                     <div>
                                         <h1 className="text-left">CEP</h1>
-                                        <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setNovoDoador({ ...novoDoador, CEP: e.target.value })} />
+                                        <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={async (e) => {
+                                            setNovoDoador({ ...novoDoador, CEP: e.target.value })
+                                            const sanitizedCEP = e.target.value.replace(/\D/g, '');
+                                            if (sanitizedCEP.length == 8) {
+                                                const response = await fetch(`https://viacep.com.br/ws/${sanitizedCEP}/json/`)
+                                                const data = await response.json()
+                                                setEnderecoCEP(data);
+                                            }
+                                        }} />
                                     </div>
-                                    <div>
-                                        <h1 className="ml-2 text-left">Número</h1>
-                                        <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setNovoDoador({ ...novoDoador, Numero: e.target.value })} />
+                                    <div className="ml-2 text-left">
+                                        <h1>Endereço</h1>
+                                        <div className="border rounded bg-gray-100 text-gray-400 text-sm  w-[260px] p-2">
+                                            <p>{enderecoCEP.logradouro}, {enderecoCEP.bairro} - {enderecoCEP.localidade}, {enderecoCEP.uf}</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <h1 className="mt-5 text-left">Complemento</h1>
-                                <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setNovoDoador({ ...novoDoador, Complemento: e.target.value })} />
+                                <div className="flex mt-4">
+                                    <div>
+                                        <h1 className=" text-left">Número</h1>
+                                        <Input type="Numero" placeholder="Número" className="w-[90px]" onChange={(e) => setNovoDoador({ ...novoDoador, Numero: e.target.value })} />
+                                    </div>
+                                    <div className="ml-2">
+                                        <h1 className=" text-left">Complemento</h1>
+                                        <Input type="Complemento" placeholder="Complemento" className="w-[270px]" onChange={(e) => setNovoDoador({ ...novoDoador, Complemento: e.target.value })} />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="w-[1px] h-auto bg-slate-200 ml-5 mr-5"></div>
@@ -880,7 +905,12 @@ export default function TabelaDoadoresDiretoria({ children }) {
                         <div className="flex justify-end mt-3">
                             <Button
                                 className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                                onClick={fetchAdicionarDoador}
+                                onClick={() => {
+                                    if (!flagDesativaBotaoAdicionar) {
+                                        fetchAdicionarDoador()
+                                        setFlagDesativaBotaoAdicionar(true)
+                                    }
+                                }}
                             >
                                 Confirmar
                             </Button>
@@ -893,176 +923,178 @@ export default function TabelaDoadoresDiretoria({ children }) {
                             </Button>
                         </div>
                     </div>
-                </div>
-            )}
+                </div >
+            )
+            }
 
-            {popupEditarDoador && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 flex">
-                        {verMaisContatosInformacoes == 1 && contatos.length > 0 ?
-                            <div className="flex">
-                                <div>
-                                    <h1 className="w-[200px] mb-5 font-bold">Todos os Contatos</h1>
-                                    {contatos.map((contato, index) => (
-                                        <div key={index} className="flex flex-col">
-                                            <Button className=" mt-1 w-[180px] text-left justify-start bg-white hover:bg-slate-100 text-slate-500 border-none shadow-none"
-                                                onClick={() => {
-                                                    setDoadorEditado({
-                                                        ...doadorEditado,
-                                                        IdContato: contato.IdContato,
-                                                        Contato: contato.Contato,
-                                                        Telefone: contato.Telefone,
-                                                        Email: contato.Email
-                                                    });
-                                                }}
-                                            >{contato.Contato}</Button>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="w-[1px] h-full bg-slate-300 mr-8" />
-                            </div>
-                            : ""
-                        }
-                        <div>
-                            <h1 className="text-xl font-bold mb-4">Editar Doador</h1>
-
-                            <div className="flex">
-                                <div>
-                                    <div className="flex text-left">
-                                        <div>
-                                            <h1>CPF/CNPJ</h1>
-                                            <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CPFCNPJ: e.target.value })} value={doadorEditado.CPFCNPJ || ''} />
-                                        </div>
-                                        <div>
-                                            <h1 className="ml-2">Nome</h1>
-                                            <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Nome: e.target.value })} value={doadorEditado.Nome || ''} />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex text-left mt-1">
-                                        <div>
-                                            <h1>Sexo</h1>
-                                            <Select
-                                                onValueChange={(value) => {
-                                                    setDoadorEditado({ ...doadorEditado, Sexo: parseInt(value, 10) });
-                                                }}
-                                                value={String(doadorEditado?.Sexo ?? "")}
-                                            >
-                                                <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
-                                                    <i className="fas fa-sort"></i>
-                                                    <SelectValue placeholder="Sexo" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="0">Masculino</SelectItem>
-                                                    <SelectItem value="1">Feminino</SelectItem>
-                                                    <SelectItem value="2">Outro</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="ml-2">
-                                            <h1>Data de aniversário</h1>
-                                            <CustomDateInput onChange={handleEditarDateChange} initialValue={doadorEditado.DataAniversario != " " && doadorEditado.DataAniversario} />
-                                        </div>
-                                    </div>
-
-                                    <hr className="mt-4 mb-4"></hr>
-
-                                    <div className="flex mt-4">
-                                        <div>
-                                            <h1 className="text-left">CEP</h1>
-                                            <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CEP: e.target.value })} value={doadorEditado.CEP || ''} />
-                                        </div>
-                                        <div>
-                                            <h1 className="ml-2 text-left">Número</h1>
-                                            <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Numero: e.target.value })} value={doadorEditado.Numero || ''} />
-                                        </div>
-                                    </div>
-                                    <h1 className="mt-5 text-left">Complemento</h1>
-                                    <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Complemento: e.target.value })} value={doadorEditado.Complemento || ''} />
-                                </div>
-
-                                <div className="w-[1px] ml-6 mr-6 bg-slate-300"></div>
-
-                                <div>
+            {
+                popupEditarDoador && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="bg-white rounded-lg shadow-lg p-6 flex">
+                            {verMaisContatosInformacoes == 1 && contatos.length > 0 ?
+                                <div className="flex">
                                     <div>
+                                        <h1 className="w-[200px] mb-5 font-bold">Todos os Contatos</h1>
+                                        {contatos.map((contato, index) => (
+                                            <div key={index} className="flex flex-col">
+                                                <Button className=" mt-1 w-[180px] text-left justify-start bg-white hover:bg-slate-100 text-slate-500 border-none shadow-none"
+                                                    onClick={() => {
+                                                        setDoadorEditado({
+                                                            ...doadorEditado,
+                                                            IdContato: contato.IdContato,
+                                                            Contato: contato.Contato,
+                                                            Telefone: contato.Telefone,
+                                                            Email: contato.Email
+                                                        });
+                                                    }}
+                                                >{contato.Contato}</Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="w-[1px] h-full bg-slate-300 mr-8" />
+                                </div>
+                                : ""
+                            }
+                            <div>
+                                <h1 className="text-xl font-bold mb-4">Editar Doador</h1>
+
+                                <div className="flex">
+                                    <div>
+                                        <div className="flex text-left">
+                                            <div>
+                                                <h1>CPF/CNPJ</h1>
+                                                <Input type="CPF/CNPJ" placeholder="CPF/CNPJ" className="w-[130px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CPFCNPJ: e.target.value })} value={doadorEditado.CPFCNPJ || ''} />
+                                            </div>
+                                            <div>
+                                                <h1 className="ml-2">Nome</h1>
+                                                <Input type="Name" placeholder="Nome" className="w-[263px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Nome: e.target.value })} value={doadorEditado.Nome || ''} />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex text-left mt-1">
+                                            <div>
+                                                <h1>Sexo</h1>
+                                                <Select
+                                                    onValueChange={(value) => {
+                                                        setDoadorEditado({ ...doadorEditado, Sexo: parseInt(value, 10) });
+                                                    }}
+                                                    value={String(doadorEditado?.Sexo ?? "")}
+                                                >
+                                                    <SelectTrigger className="bg-slate-50 hover:bg-slate-300 text-black w-[160px]">
+                                                        <i className="fas fa-sort"></i>
+                                                        <SelectValue placeholder="Sexo" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="0">Masculino</SelectItem>
+                                                        <SelectItem value="1">Feminino</SelectItem>
+                                                        <SelectItem value="2">Outro</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="ml-2">
+                                                <h1>Data de aniversário</h1>
+                                                <CustomDateInput onChange={handleEditarDateChange} initialValue={doadorEditado.DataAniversario != " " && doadorEditado.DataAniversario} />
+                                            </div>
+                                        </div>
+
+                                        <hr className="mt-4 mb-4"></hr>
+
                                         <div className="flex mt-4">
                                             <div>
-                                                <h1 className="text-left">Nome do Contato</h1>
-                                                <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Contato: e.target.value })} value={doadorEditado.Contato || ''} />
+                                                <h1 className="text-left">CEP</h1>
+                                                <Input type="CEP" placeholder="CEP" className="w-[110px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, CEP: e.target.value })} value={doadorEditado.CEP || ''} />
                                             </div>
-                                            <div className="ml-5">
-                                                <h1 className="ml-2 text-left">Telefone</h1>
-                                                <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Telefone: e.target.value })} value={doadorEditado.Telefone || ''} />
+                                            <div>
+                                                <h1 className="ml-2 text-left">Número</h1>
+                                                <Input type="Numero" placeholder="Número" className="w-[90px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Numero: e.target.value })} value={doadorEditado.Numero || ''} />
                                             </div>
                                         </div>
-                                        <h1 className="mt-5 text-left">E-mail</h1>
-                                        <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Email: e.target.value })} value={doadorEditado.Email || ''} />
+                                        <h1 className="mt-5 text-left">Complemento</h1>
+                                        <Input type="Complemento" placeholder="Complemento" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Complemento: e.target.value })} value={doadorEditado.Complemento || ''} />
                                     </div>
 
-                                    <hr className="mt-4 mb-4"></hr>
+                                    <div className="w-[1px] ml-6 mr-6 bg-slate-300"></div>
 
                                     <div>
                                         <div>
-                                            <h1 className="text-left">Obsercações</h1>
-                                            <Textarea type="Nome do Contato" placeholder="Observações do Doador" className="w-[400px] h-[30px] resize-none" onChange={(e) => setDoadorEditado({ ...doadorEditado, ObservacaoDoador: e.target.value })} value={doadorEditado.ObservacaoDoador || ''} />
+                                            <div className="flex mt-4">
+                                                <div>
+                                                    <h1 className="text-left">Nome do Contato</h1>
+                                                    <Input type="Nome do Contato" placeholder="Nome do Contato" className="w-[220px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Contato: e.target.value })} value={doadorEditado.Contato || ''} />
+                                                </div>
+                                                <div className="ml-5">
+                                                    <h1 className="ml-2 text-left">Telefone</h1>
+                                                    <Input type="Telefone" placeholder="Telefone" className="w-[150px] ml-2" onChange={(e) => setDoadorEditado({ ...doadorEditado, Telefone: e.target.value })} value={doadorEditado.Telefone || ''} />
+                                                </div>
+                                            </div>
+                                            <h1 className="mt-5 text-left">E-mail</h1>
+                                            <Input type="email" placeholder="E-mail" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, Email: e.target.value })} value={doadorEditado.Email || ''} />
                                         </div>
-                                        <div className="mt-4">
-                                            <h1 className="text-left">Origem</h1>
-                                            <Input type="Nome do Contato" placeholder="Origem do Doador" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, OrigemDoador: e.target.value })} value={doadorEditado.OrigemDoador || ''} />
+
+                                        <hr className="mt-4 mb-4"></hr>
+
+                                        <div>
+                                            <div>
+                                                <h1 className="text-left">Obsercações</h1>
+                                                <Textarea type="Nome do Contato" placeholder="Observações do Doador" className="w-[400px] h-[30px] resize-none" onChange={(e) => setDoadorEditado({ ...doadorEditado, ObservacaoDoador: e.target.value })} value={doadorEditado.ObservacaoDoador || ''} />
+                                            </div>
+                                            <div className="mt-4">
+                                                <h1 className="text-left">Origem</h1>
+                                                <Input type="Nome do Contato" placeholder="Origem do Doador" className="w-[400px]" onChange={(e) => setDoadorEditado({ ...doadorEditado, OrigemDoador: e.target.value })} value={doadorEditado.OrigemDoador || ''} />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="flex justify-between mt-6">
-                                <Button
-                                    className={verMaisContatosInformacoes == 1 ? "bg-slate-500 hover:bg-slate-600" : "bg-slate-400 hover:bg-slate-500"}
-                                    onClick={() => {
-                                        setVerMaisContatosInformacoes(verMaisContatosInformacoes * -1);
-                                        fetchPegarContatos()
-                                    }}
-                                >
-                                    Mostrar Outros Contatos
-                                </Button>
-                                <div>
+                                <div className="flex justify-between mt-6">
                                     <Button
-                                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                                        onClick={fetchEditarDoador}
-                                    >
-                                        Confirmar
-                                    </Button>
-
-                                    <Button
-                                        className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                                        className={verMaisContatosInformacoes == 1 ? "bg-slate-500 hover:bg-slate-600" : "bg-slate-400 hover:bg-slate-500"}
                                         onClick={() => {
-                                            setPopupEditarDoador(false)
-                                            setDoadorEditado({
-                                                IdDoador: " ",
-                                                CPFCNPJ: " ",
-                                                Nome: " ",
-                                                CEP: " ",
-                                                Numero: " ",
-                                                Complemento: " ",
-                                                ObservacaoDoador: " ",
-                                                OrigemDoador: " ",
-                                                IdContato: " ",
-                                                Contato: " ",
-                                                Telefone: " ",
-                                                Email: " "
-                                            })
-                                            setVerMaisContatosInformacoes(-1)
-                                            setIdDoadorContato(-1)
-                                            setContatos([])
+                                            setVerMaisContatosInformacoes(verMaisContatosInformacoes * -1);
+                                            fetchPegarContatos()
                                         }}
                                     >
-                                        Cancelar
+                                        Mostrar Outros Contatos
                                     </Button>
+                                    <div>
+                                        <Button
+                                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
+                                            onClick={fetchEditarDoador}
+                                        >
+                                            Confirmar
+                                        </Button>
+
+                                        <Button
+                                            className="px-4 py-2 bg-slate-400 text-white rounded hover:bg-red-700 transition"
+                                            onClick={() => {
+                                                setPopupEditarDoador(false)
+                                                setDoadorEditado({
+                                                    IdDoador: " ",
+                                                    CPFCNPJ: " ",
+                                                    Nome: " ",
+                                                    CEP: " ",
+                                                    Numero: " ",
+                                                    Complemento: " ",
+                                                    ObservacaoDoador: " ",
+                                                    OrigemDoador: " ",
+                                                    IdContato: " ",
+                                                    Contato: " ",
+                                                    Telefone: " ",
+                                                    Email: " "
+                                                })
+                                                setVerMaisContatosInformacoes(-1)
+                                                setIdDoadorContato(-1)
+                                                setContatos([])
+                                            }}
+                                        >
+                                            Cancelar
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div >
-            )
+                    </div >
+                )
             }
 
 
@@ -1090,7 +1122,12 @@ export default function TabelaDoadoresDiretoria({ children }) {
                             <div className="flex justify-end mt-3">
                                 <Button
                                     className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                                    onClick={fetchAdicionarContato}
+                                    onClick={() => {
+                                        if (!flagDesativaBotaoAdicionar) {
+                                            fetchAdicionarContato()
+                                            setFlagDesativaBotaoAdicionar(true)
+                                        }
+                                    }}
                                 >
                                     Confirmar
                                 </Button>
@@ -1304,7 +1341,10 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                     <Input placeholder="Unidade" onChange={(e) => setNovoProduto({ ...novoProduto, UN: e.target.value })}></Input>
                                     <Button className="pl-11 pr-11 bg-green-400 hover:bg-green-500 text-white mt-10"
                                         onClick={() => {
-                                            fetchAdicionarProduto()
+                                            if (!flagDesativaBotaoAdicionar) {
+                                                fetchAdicionarProduto()
+                                                setFlagDesativaBotaoAdicionar(true)
+                                            }
                                         }}
                                     >Adicionar Produto</Button>
                                 </div>
@@ -1514,7 +1554,12 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                 <div className="flex justify-end mt-3">
                                     <Button
                                         className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition mr-4"
-                                        onClick={fetchAdicionarDoacao}
+                                        onClick={() => {
+                                            if (!flagDesativaBotaoAdicionar) {
+                                                fetchAdicionarDoacao()
+                                                setFlagDesativaBotaoAdicionar(true)
+                                            }
+                                        }}
                                     >
                                         Confirmar
                                     </Button>
