@@ -130,6 +130,8 @@ export async function POST(req, res) {
 
         if (Nome.trim().split(/\s+/).length < 2) {
             throw new Error("Erro Nome sem sobrenome");
+        } else if (Nome.trim().split(/\s+/)[1].length < 3 || !/^[a-zA-Z\s-]+$/.test(Nome.trim().split(/\s+/)[1])) {
+            throw new Error("Erro Nome sem sobrenome");
         }
         
         let Rua
