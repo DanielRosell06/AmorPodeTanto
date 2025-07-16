@@ -143,6 +143,8 @@ export default function TabelaDoadoresDiretoria({ children }) {
     const [doador, setDoador] = useState([]);
     const [Produtos, setProdutos] = useState([])
     const [Itens, setItens] = useState([])
+    const [editandoId, setEditandoId] = useState(null); // Armazena o ID do item sendo editado
+    const [novaQuantidade, setNovaQuantidade] = useState(''); // Armazena o valor do input de edição
     const [contatos, setContatos] = useState([])
 
     //Variaveis simples
@@ -288,15 +290,15 @@ export default function TabelaDoadoresDiretoria({ children }) {
                     description: "Por favor, verifique o CEP e tente novamente",
                 });
                 return
-            } 
-            
+            }
+
             if (error.message === "Erro Nome sem sobrenome") {
                 toast("Nome sem Sobrenome", {
                     description: "Por favor, digite o sobrenome do doador.",
                 });
                 return
             }
-            
+
             toast("Erro ao processar solicitação", {
                 description: error.message,
             });
@@ -859,7 +861,7 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                     <div className="ml-2 text-left">
                                         <h1>Endereço</h1>
                                         <div className="border rounded bg-gray-100 text-gray-400 text-sm  w-[260px] p-2">
-                                            <p>{enderecoCEP != "" ? (enderecoCEP.logradouro ? (`${enderecoCEP.logradouro}, ${enderecoCEP.bairro} - ${enderecoCEP.localidade}, ${enderecoCEP.uf}`):"Digite um CEP Válido") : "Digite um CEP"}</p>
+                                            <p>{enderecoCEP != "" ? (enderecoCEP.logradouro ? (`${enderecoCEP.logradouro}, ${enderecoCEP.bairro} - ${enderecoCEP.localidade}, ${enderecoCEP.uf}`) : "Digite um CEP Válido") : "Digite um CEP"}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1484,16 +1486,102 @@ export default function TabelaDoadoresDiretoria({ children }) {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead className="w-[100px] text-center">Nome</TableHead>
-                                                        <TableHead className="w-[75px] text-center">Quantidade</TableHead>
+                                                        <TableHead className="w-[90px] text-center">Quantidade</TableHead>
                                                         <TableHead className="w-[75px] text-center">Unidade</TableHead>
+                                                        <TableHead className="w-[40px] text-center"></TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
                                                     {Itens.map((item) => (
                                                         <TableRow key={item.IdProduto}>
                                                             <TableCell>{item.Nome}</TableCell>
-                                                            <TableCell className="text-center">{item.Quantidade}</TableCell>
+                                                            <TableCell className="text-center flex justify-between">
+                                                                {/* Condicionalmente renderiza o input ou o texto */}
+                                                                {editandoId === item.IdProduto ? (
+                                                                    <input
+                                                                        type="number"
+                                                                        value={novaQuantidade}
+                                                                        onChange={(e) => setNovaQuantidade(e.target.value)}
+                                                                        className="mt-auto mb-auto w-full h-[24px] text-center p-1 rounded border-2 border-stone-200" // Adapte as classes conforme sua UI
+                                                                    />
+                                                                ) : (
+                                                                    <p className="w-full mt-auto mb-auto">{item.Quantidade}</p>
+                                                                )}
+                                                                {editandoId === item.IdProduto ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            // Lógica para salvar a nova quantidade
+                                                                            const quantidadeNumerica = parseFloat(novaQuantidade);
+                                                                            if (!isNaN(quantidadeNumerica) && quantidadeNumerica >= 0) { // Validação simples
+                                                                                setItens(Itens.map(i =>
+                                                                                    i.IdProduto === item.IdProduto
+                                                                                        ? { ...i, Quantidade: quantidadeNumerica }
+                                                                                        : i
+                                                                                ));
+                                                                                setEditandoId(null); // Sai do modo de edição
+                                                                                setNovaQuantidade(''); // Limpa o valor temporário
+                                                                            } else {
+                                                                                alert('Por favor, insira uma quantidade válida.');
+                                                                            }
+                                                                        }}
+                                                                        className="float-right rounded-full w-[27px] h-[27px] flex items-center justify-center text-slate-700 bg-slate-300 hover:bg-slate-400" // Classes para o botão Salvar
+                                                                    >
+                                                                        <svg
+                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                            viewBox="0 0 24 24"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="2"
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            className="w-3 h-3" // Mantém o mesmo tamanho do lápis
+                                                                        >
+                                                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                                                        </svg>
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setEditandoId(item.IdProduto); // Entra no modo de edição para este item
+                                                                            setNovaQuantidade(item.Quantidade.toString()); // Preenche o input com a quantidade atual
+                                                                        }}
+                                                                        className="float-right hover:bg-slate-200 rounded-full w-[27px] h-[27px] flex items-center justify-center text-slate-400" // Classes para o botão Lápis
+                                                                    >
+                                                                        <svg
+                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                            viewBox="0 0 24 24"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="2"
+                                                                            className="w-3 h-3"
+                                                                        >
+                                                                            <path d="M12 20h9M16.5 3.5l4 4L7.5 20.5H3v-4L16.5 3.5z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                )}
+                                                            </TableCell>
                                                             <TableCell className="text-center">{item.UNItem}</TableCell>
+                                                            <TableCell className="text-center">
+                                                                {/* Botão de Lixo (Remover) */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => { setItens(Itens.filter(tempItem => tempItem.IdProduto !== item.IdProduto)) }}
+                                                                    className="text-gray-600 hover:text-white rounded-full  bg-slate-300 hover:bg-red-500 w-[27px] h-[27px] flex items-center justify-center" // Adicionei mr-2 para espaçamento
+                                                                >
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="2"
+                                                                        className="w-3 h-3"
+                                                                    >
+                                                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                    </svg>
+                                                                </button>
+                                                            </TableCell>
                                                         </TableRow>
                                                     ))}
                                                 </TableBody>
